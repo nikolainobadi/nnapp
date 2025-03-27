@@ -5,8 +5,6 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import Files
-import SwiftPicker
 import ArgumentParser
 
 extension Nnapp {
@@ -80,44 +78,9 @@ extension Nnapp.Add {
         
         func run() throws {
             let context = try makeContext()
-            let path = try path ?? picker.getRequiredInput("Enter the path to your project.")
-            let folder = try Folder(path: path)
-            // TODO: - need to verify that project name is available
-            let group = try getGroup(named: group, context: context)
-            // TODO: - need to verify that project shortcut is available
-            let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut to launch this project.")
-            let projectType = try getProjectType(folder: folder)
-            let remote = getRemote(folder: folder)
-            let otherLinks = getOtherLinks()
-            let project = LaunchProject(name: folder.name, shortcut: shortcut, type: projectType, remote: remote, links: otherLinks)
+            let handler = ProjectHandler(picker: picker, context: context)
             
-            try context.saveProject(project, in: group)
+            try handler.addProject(path: path, group: group, shortcut: shortcut)
         }
-    }
-}
-
-private extension Nnapp.Add.Project {
-    func getProjectType(folder: Folder) throws -> ProjectType {
-        return .package // TODO: -
-    }
-    
-    func getRemote(folder: Folder) -> ProjectLink? {
-        return nil // TODO: -
-    }
-    
-    func getOtherLinks() -> [ProjectLink] {
-        return [] // TODO: -
-    }
-    
-    func getGroup(named name: String?, context: CodeLaunchContext) throws -> LaunchGroup {
-        // TODO: - for now only handle existing categories
-        let name = try name ?? picker.getRequiredInput("Enter the name of the group for this project.")
-        let groups = try context.loadGroups()
-        
-        if let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
-            return group
-        }
-        
-        throw NnappError.missingGroup
     }
 }

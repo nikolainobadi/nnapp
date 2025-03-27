@@ -64,7 +64,7 @@ extension CategoryHandler {
             try picker.requiredPermission("Could not find a category named \(name.yellow). Would you like to add it?")
         }
         
-        switch try picker.requiredSingleSelection("How would you like to assign a category to your group?", items: AssignCategoryType.allCases) {
+        switch try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases) {
         case .select:
             return try picker.requiredSingleSelection("Select a Category", items: categories)
         case .create:

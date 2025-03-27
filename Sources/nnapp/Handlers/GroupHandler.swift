@@ -51,3 +51,47 @@ extension GroupHandler {
         return group
     }
 }
+
+
+// MARK: -
+extension GroupHandler {
+    func getGroup(named name: String?) throws -> LaunchGroup {
+        let groups = try context.loadGroups()
+        
+        if let name {
+            if let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
+                return group
+            }
+            
+            try picker.requiredPermission("Could not find a group named \(name.yellow). Would you like to add it?")
+        }
+        
+        switch try picker.requiredSingleSelection("How would you like to assign a Group to your Project?", items: AssignCategoryType.allCases) {
+        case .select:
+            return try picker.requiredSingleSelection("Select a Group", items: groups)
+        case .create:
+            return try createGroup(name: name, category: nil)
+        case .import:
+            return try importGroup(path: nil, category: nil)
+        }
+    }
+}
+
+
+// MARK: - Dependencies
+enum AssignGroupType: CaseIterable {
+    case select, create, `import`
+}
+
+extension AssignGroupType: DisplayablePickerItem {
+    var displayName: String {
+        switch self {
+        case .select:
+            return "Select an existing Group"
+        case .create:
+            return "Create new Group and folder"
+        case .import:
+            return "Import existing folder to create new Group"
+        }
+    }
+}
