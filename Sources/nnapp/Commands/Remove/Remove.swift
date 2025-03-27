@@ -10,7 +10,8 @@ import ArgumentParser
 extension Nnapp {
     struct Remove: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "",
+            subcommands: [Category.self, Group.self, Project.self]
         )
     }
 }
