@@ -31,12 +31,9 @@ extension Nnapp.Add {
         
         func run() throws {
             let context = try makeContext()
-            let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
-            let folder = try Folder(path: path)
-            // TODO: - need to verify that category name is available
-            let category = LaunchCategory(name: folder.name, path: folder.path)
+            let handler = CategoryHandler(picker: picker, context: context)
             
-            try context.saveCatgory(category)
+            try handler.importCategory(path: path)
         }
     }
 }

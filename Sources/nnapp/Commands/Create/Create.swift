@@ -29,19 +29,13 @@ extension Nnapp.Create {
         var name: String?
         
         @Option(name: .shortAndLong, help: "")
-        var path: String?
+        var parentPath: String?
         
         func run() throws {
             let context = try makeContext()
-            // TODO: - need to verify that name is available
-            let name = try name ?? picker.getRequiredInput("Enter the name of your new category.")
-            let path = try path ?? picker.getRequiredInput("Enter the path to the folder where \(name.yellow) should be created.")
-            let parentFolder = try Folder(path: path)
-            let category = LaunchCategory(name: name, path: path)
+            let handler = CategoryHandler(picker: picker, context: context)
             
-            // TODO: - maybe verify that another folder doesn't already have that name in parentFolder?
-            try parentFolder.createSubfolder(named: name)
-            try context.saveCatgory(category)
+            try handler.createCategory(name: name, parentPath: parentPath)
         }
     }
 }
