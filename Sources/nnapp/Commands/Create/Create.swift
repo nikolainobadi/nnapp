@@ -56,30 +56,9 @@ extension Nnapp.Create {
         
         func run() throws {
             let context = try makeContext()
-            // TODO: - need to verify that name is available
-            let name = try name ?? picker.getRequiredInput("Enter the name of your new group.")
-            let category = try getCategory(named: category, context: context)
-            let categoryFolder = try Folder(path: category.path)
-            let group = LaunchGroup(name: name)
+            let handler = GroupHandler(picker: picker, context: context)
             
-            // TODO: - maybe verify that another folder doesn't already have that name in categoryFolder?
-            try categoryFolder.createSubfolder(named: name)
-            try context.saveGroup(group, in: category)
+            try handler.createGroup(name: name, category: category)
         }
-    }
-}
-
-// TODO: - need to encapsulate to reduce code duplication
-private extension Nnapp.Create.Group {
-    func getCategory(named name: String?, context: CodeLaunchContext) throws -> LaunchCategory {
-        // TODO: - for now only handle existing categories
-        let name = try name ?? picker.getRequiredInput("Enter the name of the category for this new group.")
-        let categories = try context.loadCategories()
-        
-        if let category = categories.first(where: { $0.name.lowercased() == name.lowercased() }) {
-            return category
-        }
-        
-        throw NnappError.missingCategory
     }
 }

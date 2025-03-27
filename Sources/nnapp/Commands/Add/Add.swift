@@ -54,29 +54,10 @@ extension Nnapp.Add {
         
         func run() throws {
             let context = try makeContext()
-            let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
-            let folder = try Folder(path: path)
-            // TODO: - need to verify that group name is available
-            let category = try getCategory(named: category, context: context)
-            let group = LaunchGroup(name: folder.name)
+            let handler = GroupHandler(picker: picker, context: context)
             
-            try context.saveGroup(group, in: category)
+            try handler.importGroup(path: path, category: category)
         }
-    }
-}
-
-// TODO: - need to encapsulate to reduce code duplication
-private extension Nnapp.Add.Group {
-    func getCategory(named name: String?, context: CodeLaunchContext) throws -> LaunchCategory {
-        // TODO: - for now only handle existing categories
-        let name = try name ?? picker.getRequiredInput("Enter the name of the category for this new group.")
-        let categories = try context.loadCategories()
-        
-        if let category = categories.first(where: { $0.name.lowercased() == name.lowercased() }) {
-            return category
-        }
-        
-        throw NnappError.missingCategory
     }
 }
 
