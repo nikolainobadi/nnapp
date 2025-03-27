@@ -21,7 +21,7 @@ struct GroupHandler {
 }
 
 
-// MARK: -
+// MARK: - Add
 extension GroupHandler {
     @discardableResult
     func importGroup(path: String?, category: String?) throws -> LaunchGroup {
@@ -74,6 +74,27 @@ extension GroupHandler {
         case .import:
             return try importGroup(path: nil, category: nil)
         }
+    }
+}
+
+
+// MARK: - Remove
+extension GroupHandler {
+    func removeGroup(name: String?) throws {
+        let groups = try context.loadGroups()
+        
+        var groupToDelete: LaunchGroup
+        
+        if let name, let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
+            groupToDelete = group
+        } else {
+            groupToDelete = try picker.requiredSingleSelection("Select a group to delete", items: groups)
+        }
+        
+        // TODO: - maybe display project count
+        try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
+        
+        try context.deleteGroup(groupToDelete)
     }
 }
 

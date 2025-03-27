@@ -19,7 +19,7 @@ struct CategoryHandler {
 }
 
 
-// MARK: -
+// MARK: - Add
 extension CategoryHandler {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
@@ -47,6 +47,27 @@ extension CategoryHandler {
         try context.saveCatgory(category)
         
         return category
+    }
+}
+
+
+// MARK: - Remove
+extension CategoryHandler {
+    func removeCategory(name: String?) throws {
+        let categories = try context.loadCategories()
+        
+        var categoryToDelete: LaunchCategory
+        
+        if let name, let category = categories.first(where: { $0.name.lowercased() == name.lowercased() }) {
+            categoryToDelete = category
+        } else {
+            categoryToDelete = try picker.requiredSingleSelection("Select a category to remove", items: categories)
+        }
+        
+        // TODO: - maybe display group count with project count
+        try picker.requiredPermission("Are you sure want to remove \(categoryToDelete.name.yellow)?")
+        
+        try context.deleteCategory(categoryToDelete)
     }
 }
 

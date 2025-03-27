@@ -21,7 +21,7 @@ struct ProjectHandler {
 }
 
 
-// MARK: -
+// MARK: - Add
 extension ProjectHandler {
     func addProject(path: String?, group: String?, shortcut: String?) throws {
         let path = try path ?? picker.getRequiredInput("Enter the path to your project.")
@@ -40,6 +40,28 @@ extension ProjectHandler {
 }
 
 
+// MARK: - Remove
+extension ProjectHandler {
+    func removeProject(name: String?, shortcut: String?) throws {
+        let projects = try context.loadProjects()
+        
+        var projectToDelete: LaunchProject
+        
+        if let name, let project = projects.first(where: { $0.name.lowercased() == name.lowercased() }) {
+            projectToDelete = project
+        } else if let project = getProject(shortcut: shortcut, projects: projects) {
+            projectToDelete = project
+        } else {
+            projectToDelete = try picker.requiredSingleSelection("Select a Project to remove", items: projects)
+        }
+        
+        // TODO: - maybe indicate that this is different from evicting?
+        try picker.requiredPermission("Are you sure want to remove \(projectToDelete.name.yellow)?")
+        try context.deleteProject(projectToDelete)
+    }
+}
+
+
 // MARK: - Private Methods
 private extension ProjectHandler {
     func getProjectType(folder: Folder) throws -> ProjectType {
@@ -52,5 +74,19 @@ private extension ProjectHandler {
     
     func getOtherLinks() -> [ProjectLink] {
         return [] // TODO: -
+    }
+    
+    func getProject(shortcut: String?, projects: [LaunchProject]) -> LaunchProject? {
+        guard let shortcut else {
+            return nil
+        }
+        
+        return projects.first { project in
+            guard let projectShortcut = project.shortcut else {
+                return false
+            }
+            
+            return projectShortcut.lowercased() == shortcut.lowercased()
+        }
     }
 }
