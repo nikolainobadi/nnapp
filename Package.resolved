@@ -1,5 +1,5 @@
 {
-  "originHash" : "5c4fd230d0f987ac6d1b9876dc19316bcfda3d81844b418947710ba531583128",
+  "originHash" : "6adac6bbe701c9453af5962ba76687a0f958827c00999040f81e180706fe69eb",
   "pins" : [
     {
       "identity" : "ansiterminalmodified",
@@ -44,6 +44,15 @@
       "state" : {
         "branch" : "picker-protocol",
         "revision" : "05002d39eb6e49313a254a5e5136b73e14ea57c6"
+      }
+    },
+    {
+      "identity" : "swiftshell",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kareman/SwiftShell",
+      "state" : {
+        "revision" : "99680b2efc7c7dbcace1da0b3979d266f02e213c",
+        "version" : "5.1.0"
       }
     }
   ],

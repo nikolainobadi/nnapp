@@ -21,6 +21,10 @@ struct Nnapp: ParsableCommand {
 
 // MARK: - Factory Methods
 extension ParsableCommand {
+    var shell: Shell {
+        return Nnapp.contextFactory.makeShell()
+    }
+    
     var picker: Picker {
         return Nnapp.contextFactory.makePicker()
     }
@@ -32,11 +36,16 @@ extension ParsableCommand {
 
 
 protocol ContextFactory {
+    func makeShell() -> Shell
     func makePicker() -> Picker
     func makeContext() throws -> CodeLaunchContext
 }
 
 final class DefaultContextFactory: ContextFactory {
+    func makeShell() -> Shell {
+        return DefaultShell()
+    }
+    
     func makePicker() -> Picker {
         return SwiftPicker()
     }

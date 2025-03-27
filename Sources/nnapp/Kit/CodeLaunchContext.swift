@@ -151,8 +151,51 @@ public final class LaunchProject {
     }
 }
 
+public extension LaunchProject {
+    var fileName: String {
+        return "\(name).\(type.fileExtension)"
+    }
+    
+    var groupPath: String? {
+        guard let group, let category = group.category else {
+            return nil
+        }
+        
+        return category.path.appendingPathComponent(group.name)
+    }
+    
+    var folderPath: String? {
+        guard let groupPath else {
+            return nil
+        }
+        
+        return groupPath.appendingPathComponent(name)
+    }
+    
+    var filePath: String? {
+        guard let folderPath else {
+            return nil
+        }
+        
+        return folderPath.appendingPathComponent(fileName)
+    }
+}
+
 public enum ProjectType: Codable {
     case project, package, workspace
+}
+
+public extension ProjectType {
+    var fileExtension: String {
+        switch self {
+        case .project:
+            return "xcodeproj"
+        case .package:
+            return "swift"
+        case .workspace:
+            return "xcworkspace"
+        }
+    }
 }
 
 public struct ProjectLink: Codable, Equatable {
@@ -162,5 +205,21 @@ public struct ProjectLink: Codable, Equatable {
     public init(name: String, urlString: String) {
         self.name = name
         self.urlString = urlString
+    }
+}
+
+
+public extension String {
+    func appendingPathComponent(_ path: String) -> String {
+        let selfHasSlash = self.hasSuffix("/")
+        let pathHasSlash = path.hasPrefix("/")
+        
+        if selfHasSlash && pathHasSlash {
+            return self + String(path.dropFirst())
+        } else if !selfHasSlash && !pathHasSlash {
+            return self + "/" + path
+        } else {
+            return self + path
+        }
     }
 }
