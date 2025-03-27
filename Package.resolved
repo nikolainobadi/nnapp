@@ -1,4 +1,5 @@
 {
+  "originHash" : "5c4fd230d0f987ac6d1b9876dc19316bcfda3d81844b418947710ba531583128",
   "pins" : [
     {
       "identity" : "ansiterminalmodified",
@@ -7,6 +8,24 @@
       "state" : {
         "revision" : "fd1443a5369693ddac5c8ef8dc6128af4011ff42",
         "version" : "0.6.0"
+      }
+    },
+    {
+      "identity" : "files",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/JohnSundell/Files",
+      "state" : {
+        "revision" : "d273b5b7025d386feef79ef6bad7de762e106eaf",
+        "version" : "4.2.0"
+      }
+    },
+    {
+      "identity" : "nnswiftdatakit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nikolainobadi/NnSwiftDataKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "bc2aac114b8c708ef9446f2aa77e4c74014ff4ad"
       }
     },
     {
@@ -23,10 +42,10 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nikolainobadi/SwiftPicker.git",
       "state" : {
-        "revision" : "55dd99122cda2eb593e1a3ad42b02ea9db22381b",
-        "version" : "0.8.0"
+        "branch" : "picker-protocol",
+        "revision" : "05002d39eb6e49313a254a5e5136b73e14ea57c6"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
