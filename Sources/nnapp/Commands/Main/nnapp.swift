@@ -20,15 +20,16 @@ struct Nnapp: ParsableCommand {
 
 
 // MARK: - Factory Methods
-extension Nnapp {
-    static func makePicker() -> Picker {
-        return contextFactory.makePicker()
+extension ParsableCommand {
+    var picker: Picker {
+        return Nnapp.contextFactory.makePicker()
     }
     
-    static func makeContext() throws -> CodeLaunchContext {
-        return try contextFactory.makeContext()
+    func makeContext() throws -> CodeLaunchContext {
+        return try Nnapp.contextFactory.makeContext()
     }
 }
+
 
 protocol ContextFactory {
     func makePicker() -> Picker

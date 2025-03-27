@@ -30,9 +30,10 @@ extension Nnapp.Add {
         var path: String?
         
         func run() throws {
-            let context = try Nnapp.makeContext()
-            let path = try path ?? Nnapp.makePicker().getRequiredInput("Enter the path to the folder you want to use.")
+            let context = try makeContext()
+            let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
             let folder = try Folder(path: path)
+            // TODO: - need to verify that category name is available
             let category = LaunchCategory(name: folder.name, path: folder.path)
             
             try context.saveCatgory(category)
@@ -55,9 +56,10 @@ extension Nnapp.Add {
         var category: String?
         
         func run() throws {
-            let context = try Nnapp.makeContext()
-            let path = try path ?? Nnapp.makePicker().getRequiredInput("Enter the path to the folder you want to use.")
+            let context = try makeContext()
+            let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
             let folder = try Folder(path: path)
+            // TODO: - need to verify that group name is available
             let category = try getCategory(named: category, context: context)
             let group = LaunchGroup(name: folder.name)
             
@@ -66,11 +68,8 @@ extension Nnapp.Add {
     }
 }
 
+// TODO: - need to encapsulate to reduce code duplication
 private extension Nnapp.Add.Group {
-    var picker: Picker {
-        return Nnapp.makePicker()
-    }
-    
     func getCategory(named name: String?, context: CodeLaunchContext) throws -> LaunchCategory {
         // TODO: - for now only handle existing categories
         let name = try name ?? picker.getRequiredInput("Enter the name of the category for this new group.")
@@ -102,10 +101,12 @@ extension Nnapp.Add {
         var shortcut: String?
         
         func run() throws {
-            let context = try Nnapp.makeContext()
+            let context = try makeContext()
             let path = try path ?? picker.getRequiredInput("Enter the path to your project.")
             let folder = try Folder(path: path)
+            // TODO: - need to verify that project name is available
             let group = try getGroup(named: group, context: context)
+            // TODO: - need to verify that project shortcut is available
             let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut to launch this project.")
             let projectType = try getProjectType(folder: folder)
             let remote = getRemote(folder: folder)
@@ -118,10 +119,6 @@ extension Nnapp.Add {
 }
 
 private extension Nnapp.Add.Project {
-    var picker: Picker {
-        return Nnapp.makePicker()
-    }
-    
     func getProjectType(folder: Folder) throws -> ProjectType {
         return .package // TODO: -
     }
