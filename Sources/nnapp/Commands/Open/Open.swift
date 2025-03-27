@@ -6,6 +6,7 @@
 //
 
 import Files
+import GitShellKit
 import SwiftPicker
 import ArgumentParser
 
@@ -84,11 +85,29 @@ private extension Nnapp.Open {
     }
     
     func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
-        // TODO: -
+        do {
+            // check if folder already exists
+            let _ = try Folder(path: folderPath)
+        } catch {
+            guard let remote = project.remote, let groupPath = project.groupPath, !groupPath.isEmpty else {
+                fatalError() // TODO: -
+            }
+            
+            try picker.requiredPermission(prompt: "Unable to locate \(project.fileName.green) at path \(filePath.yellow)\nWould you like to fetch it from \(remote.name.green) - \(remote.urlString.yellow)?")
+            
+            let cloneCommand = makeGitCommand(.clone(remote.urlString), path: groupPath)
+            
+            try shell.runAndPrint(cloneCommand)
+        }
     }
     
     func openDirectoryInTerminalIfNecessary(folderPath: String) {
-        // TODO: -
+        guard let openPaths = try? shell.getITermSessionPaths(), openPaths.contains(folderPath) else {
+            return
+        }
+        
+        // TODO: - should check for 'global' launch script and 'project' launch scripts
+        // then open new terminal (try without AppleScript for now)
     }
 }
 
@@ -120,5 +139,29 @@ extension String {
         }
         
         return self.lowercased() == value.lowercased()
+    }
+}
+
+extension Shell {
+    func getITermSessionPaths() throws -> [String] {
+        let script = """
+        tell application "iTerm"
+            set sessionPaths to {}
+            repeat with aWindow in windows
+                repeat with aTab in tabs of aWindow
+                    repeat with aSession in sessions of aTab
+                        set sessionPath to (variable aSession named "path")
+                        if sessionPath is not missing value then
+                            set end of sessionPaths to sessionPath
+                        end if
+                    end repeat
+                end repeat
+            end repeat
+            return sessionPaths
+        end tell
+        """
+        
+        /// this needs to run in terminal in order to work for some reason
+        return try run("osascript -e \(script)").components(separatedBy: ", ")
     }
 }
