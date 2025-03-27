@@ -23,6 +23,8 @@ public final class CodeLaunchContext {
     }
 }
 
+
+// MARK: - Load
 extension CodeLaunchContext {
     func loadCategories() throws -> [LaunchCategory] {
         return try load()
@@ -31,8 +33,14 @@ extension CodeLaunchContext {
     func loadGroups() throws -> [LaunchGroup] {
         return try load()
     }
+    
+    func loadProjects() throws -> [LaunchProject] {
+        return try load()
+    }
 }
 
+
+// MARK: - Save
 extension CodeLaunchContext {
     func saveCatgory(_ category: LaunchCategory) throws {
         context.insert(category)
@@ -53,6 +61,39 @@ extension CodeLaunchContext {
         group.projects.append(project)
         
         try context.save()
+    }
+}
+
+
+// MARK: - Delete
+extension CodeLaunchContext {
+    func deleteCategory(_ category: LaunchCategory) throws {
+        for group in category.groups {
+            try deleteGroup(group, skipSave: true)
+        }
+        
+        context.delete(category)
+        try context.save()
+    }
+    
+    func deleteGroup(_ group: LaunchGroup, skipSave: Bool = false) throws {
+        for project in group.projects {
+            try deleteProject(project, skipSave: true)
+        }
+        
+        context.delete(group)
+        
+        if !skipSave {
+            try context.save()
+        }
+    }
+    
+    func deleteProject(_ project: LaunchProject, skipSave: Bool = false) throws {
+        context.delete(project)
+        
+        if !skipSave {
+            try context.save()
+        }
     }
 }
 
