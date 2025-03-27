@@ -10,6 +10,8 @@ import Foundation
 import NnSwiftDataKit
 
 public final class CodeLaunchContext {
+    private let launchScriptKey = "launchScriptKey"
+    
     let context: ModelContext
     let defaults: UserDefaults
     
@@ -36,6 +38,14 @@ extension CodeLaunchContext {
     
     func loadProjects() throws -> [LaunchProject] {
         return try load()
+    }
+    
+    func loadLaunchScript() -> String? {
+        guard let script = defaults.string(forKey: launchScriptKey), !script.isEmpty else {
+            return nil
+        }
+        
+        return script
     }
 }
 
@@ -129,6 +139,16 @@ public final class LaunchGroup {
     
     public init(name: String) {
         self.name = name
+    }
+}
+
+public extension LaunchGroup {
+    var path: String? {
+        guard let category else {
+            return nil
+        }
+        
+        return category.path.appendingPathComponent(name)
     }
 }
 

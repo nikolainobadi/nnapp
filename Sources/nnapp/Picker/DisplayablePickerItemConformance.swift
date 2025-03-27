@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import Files
 import SwiftPicker
 
 extension LaunchCategory: DisplayablePickerItem {
@@ -21,6 +22,18 @@ extension LaunchGroup: DisplayablePickerItem {
 
 extension LaunchProject: DisplayablePickerItem {
     public var displayName: String {
+        return name
+    }
+}
+
+extension Folder: @retroactive DisplayablePickerItem {
+    public var displayName: String {
+        return name
+    }
+}
+
+extension ProjectFolder: DisplayablePickerItem {
+    var displayName: String {
         return name
     }
 }

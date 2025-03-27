@@ -23,19 +23,21 @@ struct ProjectHandler {
 
 // MARK: - Add
 extension ProjectHandler {
-    func addProject(path: String?, group: String?, shortcut: String?) throws {
-        let path = try path ?? picker.getRequiredInput("Enter the path to your project.")
-        let folder = try Folder(path: path)
-        // TODO: - need to verify that project name is available
-        let group = try store.getGroup(named: group)
+    func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool) throws {
+        let selectedGroup = try store.getGroup(named: group)
+        let projectFolder = try selectProjectFolder(path: path, group: selectedGroup)
+        
         // TODO: - need to verify that project shortcut is available
         let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut to launch this project.")
-        let projectType = try getProjectType(folder: folder)
-        let remote = getRemote(folder: folder)
+        let remote = getRemote(folder: projectFolder.folder)
         let otherLinks = getOtherLinks()
-        let project = LaunchProject(name: folder.name, shortcut: shortcut, type: projectType, remote: remote, links: otherLinks)
+        let project = LaunchProject(name: projectFolder.name, shortcut: shortcut, type: projectFolder.type, remote: remote, links: otherLinks)
         
-        try context.saveProject(project, in: group)
+        if isMainProject || (selectedGroup.shortcut == nil && picker.getPermission("Is this the main project of \(selectedGroup.name)?")) {
+            selectedGroup.shortcut = shortcut
+        }
+        
+        try context.saveProject(project, in: selectedGroup)
     }
 }
 
@@ -64,6 +66,42 @@ extension ProjectHandler {
 
 // MARK: - Private Methods
 private extension ProjectHandler {
+    // TODO: - need to verify that project name is available
+    func selectProjectFolder(path: String?, group: LaunchGroup) throws -> ProjectFolder {
+        if let path, let folder = try? Folder(path: path) {
+            let projectType = try getProjectType(folder: folder)
+            
+            return .init(folder: folder, type: projectType)
+        }
+        
+        guard let groupPath = group.path else {
+            fatalError() // TODO: -
+        }
+        
+        let groupFolder = try Folder(path: groupPath)
+        let availableFolders = getAvailableSubfolders(group: group, folder: groupFolder)
+        
+        if !availableFolders.isEmpty, picker.getPermission("Would you like to select a project from the \(groupFolder.name) folder?") {
+            return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
+        }
+        
+        let path = try picker.getRequiredInput("Enter the path to the folder you want to use.")
+        let folder = try Folder(path: path)
+        let projectType = try getProjectType(folder: folder)
+        
+        return .init(folder: folder, type: projectType)
+    }
+    
+    func getAvailableSubfolders(group: LaunchGroup, folder: Folder) -> [ProjectFolder] {
+        return folder.subfolders.compactMap { subFolder in
+            guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()), let projectType = try? getProjectType(folder: subFolder) else {
+                return nil
+            }
+            
+            return .init(folder: subFolder, type: projectType)
+        }
+    }
+    
     func getProjectType(folder: Folder) throws -> ProjectType {
         return .package // TODO: -
     }
@@ -88,5 +126,16 @@ private extension ProjectHandler {
             
             return projectShortcut.lowercased() == shortcut.lowercased()
         }
+    }
+}
+
+
+// MARK: - Dependencies
+struct ProjectFolder {
+    let folder: Folder
+    let type: ProjectType
+    
+    var name: String {
+        return folder.name
     }
 }

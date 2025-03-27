@@ -25,14 +25,12 @@ struct GroupHandler {
 extension GroupHandler {
     @discardableResult
     func importGroup(path: String?, category: String?) throws -> LaunchGroup {
-        let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
+        let selectedCategory = try store.getCategory(named: category)
+        // TODO: - maybe verify that another group doesn't already exist with that name?
+        let selectedGroupFolder = try selectGroupFolderToImport(path: path, category: selectedCategory)
+        let group = LaunchGroup(name: selectedGroupFolder.name)
         
-        // TODO: - need to verify that group name is available
-        let folder = try Folder(path: path)
-        let category = try store.getCategory(named: category)
-        let group = LaunchGroup(name: folder.name)
-        
-        try context.saveGroup(group, in: category)
+        try context.saveGroup(group, in: selectedCategory)
         
         return group
     }
@@ -66,7 +64,7 @@ extension GroupHandler {
             try picker.requiredPermission("Could not find a group named \(name.yellow). Would you like to add it?")
         }
         
-        switch try picker.requiredSingleSelection("How would you like to assign a Group to your Project?", items: AssignCategoryType.allCases) {
+        switch try picker.requiredSingleSelection("How would you like to assign a Group to your Project?", items: AssignGroupType.allCases) {
         case .select:
             return try picker.requiredSingleSelection("Select a Group", items: groups)
         case .create:
@@ -95,6 +93,29 @@ extension GroupHandler {
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
         
         try context.deleteGroup(groupToDelete)
+    }
+}
+
+
+// MARK: - Private Methods
+private extension GroupHandler {
+    func selectGroupFolderToImport(path: String?, category: LaunchCategory) throws -> Folder {
+        if let path {
+            return try Folder(path: path)
+        }
+        
+        let categoryFolder = try Folder(path: category.path)
+        let availableFolders = categoryFolder.subfolders.filter { folder in
+            return !category.groups.map({ $0.name.lowercased() }).contains(folder.name.lowercased())
+        }
+        
+        if !availableFolders.isEmpty, picker.getPermission("Would you like to select a subfolder of \(categoryFolder.name)?") {
+            return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
+        }
+        
+        let path = try picker.getRequiredInput("Enter the path to the folder you want to use.")
+        
+        return try Folder(path: path)
     }
 }
 

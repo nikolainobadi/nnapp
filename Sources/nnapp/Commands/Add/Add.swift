@@ -76,11 +76,14 @@ extension Nnapp.Add {
         @Option(name: .shortAndLong, help: "")
         var shortcut: String?
         
+        @Flag(name: .customLong("main-project"), help: "Syncs the new Project shortcut with the Group shortcut")
+        var isMainProject: Bool = false
+        
         func run() throws {
             let context = try makeContext()
             let handler = ProjectHandler(picker: picker, context: context)
             
-            try handler.addProject(path: path, group: group, shortcut: shortcut)
+            try handler.addProject(path: path, group: group, shortcut: shortcut, isMainProject: isMainProject)
         }
     }
 }

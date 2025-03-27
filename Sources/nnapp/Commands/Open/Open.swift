@@ -106,8 +106,13 @@ private extension Nnapp.Open {
             return
         }
         
-        // TODO: - should check for 'global' launch script and 'project' launch scripts
-        // then open new terminal (try without AppleScript for now)
+        let command = "cd \(folderPath)"
+            
+        if let launchScript = try? makeContext().loadLaunchScript() {
+            try? shell.runAndPrint("\(command) && \(launchScript) && clear")
+        } else {
+            try? shell.runAndPrint("\(command) && clear")
+        }
     }
 }
 
