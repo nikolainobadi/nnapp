@@ -72,7 +72,7 @@ extension CategoryHandler {
 }
 
 
-// MARK: -
+// MARK: - Helper
 extension CategoryHandler {
     func getCategory(named name: String?) throws -> LaunchCategory {
         let categories = try context.loadCategories()

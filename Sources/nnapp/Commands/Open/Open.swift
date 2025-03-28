@@ -23,6 +23,7 @@ extension Nnapp {
         @Flag(help: "Open the project in an IDE (-x for xcode, -v for VSCode) or open a link (-r for remote repository, -l for other links)")
         var launchType: LaunchType = .xcode
         
+        // TODO: - might want to change the flag name
         @Flag(name: .customShort("o"), help: "Opens the list of projects within the group associated with the shortcut provided")
         var useGroupShortcut: Bool = false
 
@@ -91,7 +92,8 @@ private extension Nnapp.Open {
             let _ = try Folder(path: folderPath)
         } catch {
             guard let remote = project.remote, let groupPath = project.groupPath, !groupPath.isEmpty else {
-                fatalError() // TODO: -
+                print("cannot locate project \(project.name) and not remote repository exists")
+                throw CodeLaunchError.noRemoteRepository
             }
             
             try picker.requiredPermission(prompt: "Unable to locate \(project.fileName.green) at path \(filePath.yellow)\nWould you like to fetch it from \(remote.name.green) - \(remote.urlString.yellow)?")
@@ -106,7 +108,6 @@ private extension Nnapp.Open {
         guard let openPaths = try? shell.getITermSessionPaths(), !openPaths.contains(folderPath) else {
             return
         }
-        
 
         print("preparing to open project in new terminal window")
         var script = "cd \(folderPath)"

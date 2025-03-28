@@ -10,4 +10,6 @@ enum CodeLaunchError: Error {
     case missingProject
     case missingCategory
     case noProjectInFolder
+    case noRemoteRepository
+    case missingGitRepository
 }

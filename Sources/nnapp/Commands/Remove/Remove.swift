@@ -21,10 +21,10 @@ extension Nnapp {
 extension Nnapp.Remove {
     struct Category: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Unregisters a Category (and all of its Groups and Projects) from the database"
         )
         
-        @Argument(help: "")
+        @Argument(help: "The name of the Category to remove.")
         var name: String?
         
         func run() throws {
@@ -40,10 +40,10 @@ extension Nnapp.Remove {
 extension Nnapp.Remove {
     struct Group: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Unregisters a Group (and all of its Projects) from the database"
         )
         
-        @Argument(help: "")
+        @Argument(help: "The name of the Group to remove.")
         var name: String?
         
         func run() throws {
@@ -59,13 +59,13 @@ extension Nnapp.Remove {
 extension Nnapp.Remove {
     struct Project: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Unregisters a Project from the database"
         )
         
-        @Argument(help: "")
+        @Argument(help: "The name of the Project to remove.")
         var name: String?
         
-        @Option(name: .shortAndLong, help: "")
+        @Option(name: .shortAndLong, help: "The shortcut of the Project to remove.")
         var shortcut: String?
         
         func run() throws {

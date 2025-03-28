@@ -6,6 +6,7 @@
 //
 
 import Files
+import Foundation
 import SwiftPicker
 import GitShellKit
 
@@ -14,11 +15,13 @@ struct ProjectHandler {
     private let picker: Picker
     private let store: GroupHandler
     private let context: CodeLaunchContext
+    private let gitShell: GitShellAdapter
     
     init(shell: Shell, picker: Picker, context: CodeLaunchContext) {
         self.shell = shell
         self.picker = picker
         self.context = context
+        self.gitShell = .init(shell: shell)
         self.store = GroupHandler(picker: picker, context: context)
     }
 }
@@ -46,21 +49,26 @@ extension ProjectHandler {
 // MARK: - Remove
 extension ProjectHandler {
     func removeProject(name: String?, shortcut: String?) throws {
-        let projects = try context.loadProjects()
-        
-        var projectToDelete: LaunchProject
-        
-        if let name, let project = projects.first(where: { $0.name.lowercased() == name.lowercased() }) {
-            projectToDelete = project
-        } else if let project = getProject(shortcut: shortcut, projects: projects) {
-            projectToDelete = project
-        } else {
-            projectToDelete = try picker.requiredSingleSelection("Select a Project to remove", items: projects)
-        }
+        let projectToDelete = try getProject(name: name, shortcut: shortcut, selectionPrompt: "Select the Project you would like to remove")
         
         // TODO: - maybe indicate that this is different from evicting?
         try picker.requiredPermission("Are you sure want to remove \(projectToDelete.name.yellow)?")
         try context.deleteProject(projectToDelete)
+    }
+}
+
+
+// MARK: - Evict
+extension ProjectHandler {
+    func evictProject(name: String?, shortcut: String?) throws {
+        let projectToEvict = try getProject(name: name, shortcut: shortcut, selectionPrompt: "Select the Project you would like to evict")
+        
+        guard let folderPath = projectToEvict.folderPath, let folder = try? Folder(path: folderPath) else {
+            print("Unable to locate the folder folder for \(projectToEvict.name).")
+            throw CodeLaunchError.missingProject
+        }
+        
+        try trashFolder(folder)
     }
 }
 
@@ -76,7 +84,8 @@ private extension ProjectHandler {
         }
         
         guard let groupPath = group.path else {
-            fatalError() // TODO: -
+            print("unable to resolve local path for \(group.name)")
+            throw CodeLaunchError.missingGroup
         }
         
         let groupFolder = try Folder(path: groupPath)
@@ -134,7 +143,7 @@ private extension ProjectHandler {
     }
     
     func getRemote(folder: Folder) -> ProjectLink? {
-        guard let githubURL = try? GitShellAdapter(shell: shell).getGitHubURL(at: folder.path) else {
+        guard let githubURL = try? GitShellAdapter(shell: shell).getGitHubURL(at: folder.path), picker.getPermission("Is this the correct remote url: \(githubURL)?") else {
             return nil
         }
         
@@ -146,18 +155,24 @@ private extension ProjectHandler {
         return [] // TODO: -
     }
     
-    func getProject(shortcut: String?, projects: [LaunchProject]) -> LaunchProject? {
-        guard let shortcut else {
-            return nil
-        }
+    func getProject(name: String?, shortcut: String?, selectionPrompt: String) throws -> LaunchProject {
+        let projects = try context.loadProjects()
         
-        return projects.first { project in
-            guard let projectShortcut = project.shortcut else {
-                return false
+        if let name {
+            if let project = projects.first(where: { $0.name.contains(name) }) {
+                return project
             }
             
-            return projectShortcut.lowercased() == shortcut.lowercased()
+            print("Cannot find project named \(name)")
+        } else if let shortcut {
+            if let project = projects.first(where: { shortcut.matches($0.shortcut) }) {
+                return project
+            }
+            
+            print("Cannot find project with shortcut \(shortcut)")
         }
+        
+        return try picker.requiredSingleSelection(selectionPrompt, items: projects)
     }
 }
 
@@ -170,4 +185,101 @@ struct ProjectFolder {
     var name: String {
         return folder.name
     }
+}
+
+
+// MARK: - Trash
+private extension ProjectHandler {
+    func trashFolder(_ folder: Folder) throws {
+        let branches = try loadLocalBranches(folder: folder)
+        
+        // check for main branch
+        if let currentBranch = branches.first(where: { $0.isCurrent }), !currentBranch.isMain {
+            // TODO: -
+            print("not on main branch")
+        }
+        
+        // check for unmerged branches
+        let unmergedBranches = branches.filter({ !$0.isMerged && !$0.isMain })
+        if !unmergedBranches.isEmpty {
+            print("unmerged branches")
+            // TODO: -
+//            errors.append(.unmergedBranches(unmergedBranches))
+        }
+        
+        // checkfor branches ahead of remote
+        let branchesWithUnsavedChanges = branches.filter({ $0.isAheadOfRemote })
+        if !branchesWithUnsavedChanges.isEmpty {
+            print("unsaved branches")
+            // TODO: -
+//            errors.append(.branchesWithUnsavedChanges(branchesWithUnsavedChanges))
+        }
+        
+        // TODO: - delete project folder
+        print("should delete \(folder.name) from \(folder.path)")
+    }
+    
+    func loadLocalBranches(folder: Folder) throws -> [BranchInfo] {
+        guard try gitShell.localGitExists(at: folder.path), try gitShell.remoteExists(path: folder.path) else {
+            // TODO: -
+            print("\(folder.name) has not been backed up with git and/or a remote repostory. If you want to evict it, do it yourself.")
+            throw CodeLaunchError.missingGitRepository
+        }
+        
+        let branchNames = try shell.run(makeGitCommand(.listLocalBranches, path: folder.path))
+            .split(separator: "\n")
+            .map({ $0.trimmingCharacters(in: .whitespaces) })
+        
+        let mergedOutput = try shell.run(makeGitCommand(.listMergedBranches, path: folder.path))
+        let mergedBranches = Set(mergedOutput.split(separator: "\n").map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) }))
+        
+        return try branchNames.map { branchName in
+            let isCurrentBranch = branchName.hasPrefix("*")
+            let cleanBranchName = isCurrentBranch ? String(branchName.dropFirst(2)) : branchName
+            let isMerged = cleanBranchName == "main" ? true : mergedBranches.contains(cleanBranchName)
+            let syncStatus = try getSyncStatus(for: cleanBranchName, at: folder.path)
+            
+            return .init(name: cleanBranchName, isMerged: isMerged, isCurrent: isCurrentBranch, isAheadOfRemote: syncStatus == .ahead)
+        }
+    }
+    
+    func getSyncStatus(for branch: String, comparingBranch: String? = nil, at path: String) throws -> BranchSyncStatus {
+        let remoteBranch = "origin/\(comparingBranch ?? branch)"
+        let comparisonResult = try shell.run(makeGitCommand(.compareBranchAndRemote(local: branch, remote: remoteBranch), path: path)).trimmingCharacters(in: .whitespacesAndNewlines)
+        let changes = comparisonResult.split(separator: "\t").map(String.init)
+        
+        guard changes.count == 2 else {
+            return .undetermined
+        }
+        
+        let ahead = changes[0]
+        let behind = changes[1]
+        
+        if ahead == "0" && behind == "0" {
+            return .nsync
+        } else if ahead != "0" && behind == "0" {
+            return .ahead
+        } else if ahead == "0" && behind != "0" {
+            return .behind
+        } else {
+            return .diverged
+        }
+    }
+}
+
+
+// MARK: - Dependencies
+struct BranchInfo {
+    let name: String
+    let isMerged: Bool
+    let isCurrent: Bool
+    let isAheadOfRemote: Bool
+    
+    var isMain: Bool {
+        return name == "main"
+    }
+}
+
+enum BranchSyncStatus: String, CaseIterable {
+    case behind, ahead, nsync, diverged, undetermined, noRemoteBranch
 }

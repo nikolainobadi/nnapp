@@ -51,7 +51,7 @@ extension GroupHandler {
 }
 
 
-// MARK: -
+// MARK: - Helper
 extension GroupHandler {
     func getGroup(named name: String?) throws -> LaunchGroup {
         let groups = try context.loadGroups()
