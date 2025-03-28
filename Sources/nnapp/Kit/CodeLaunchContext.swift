@@ -211,6 +211,17 @@ public enum ProjectType: Codable {
 }
 
 public extension ProjectType {
+    var name: String {
+        switch self {
+        case .project:
+            return "Xcode Project"
+        case .package:
+            return "Swift Package"
+        case .workspace:
+            return "XCWorkspace"
+        }
+    }
+    
     var fileExtension: String {
         switch self {
         case .project:
