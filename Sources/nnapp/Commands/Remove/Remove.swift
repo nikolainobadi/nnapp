@@ -10,7 +10,7 @@ import ArgumentParser
 extension Nnapp {
     struct Remove: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: "",
+            abstract: "Unregister a Category, Group, or Project from the database.",
             subcommands: [Category.self, Group.self, Project.self]
         )
     }

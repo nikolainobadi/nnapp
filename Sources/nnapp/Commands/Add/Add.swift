@@ -10,7 +10,7 @@ import ArgumentParser
 extension Nnapp {
     struct Add: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: "",
+            abstract: "Register a Category, Group, or Project from an existing folder on your computer.",
             subcommands: [Category.self, Group.self, Project.self]
         )
     }
@@ -21,7 +21,7 @@ extension Nnapp {
 extension Nnapp.Add {
     struct Category: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Register a new Category by importing an existing folder from your computer."
         )
         
         @Argument(help: "The path to an existing Category folder.")
@@ -41,7 +41,7 @@ extension Nnapp.Add {
 extension Nnapp.Add {
     struct Group: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Register a new Group by importing an existing folder from your computer."
         )
         
         @Argument(help: "The path to an existing Group folder.")
@@ -64,7 +64,7 @@ extension Nnapp.Add {
 extension Nnapp.Add {
     struct Project: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Register a new Project by importing an existing folder from your computer."
         )
         
         @Argument(help: "The path to an existing Project folder.")

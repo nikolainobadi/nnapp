@@ -11,7 +11,7 @@ import ArgumentParser
 extension Nnapp {
     struct Create: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: "",
+            abstract: "Create a new folder for a Category or Group and register it in the database.",
             subcommands: [Category.self, Group.self]
         )
     }
@@ -22,13 +22,13 @@ extension Nnapp {
 extension Nnapp.Create {
     struct Category: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Create a new Category folder and register it in the database."
         )
         
-        @Argument(help: "")
+        @Argument(help: "The name of your new Category")
         var name: String?
         
-        @Option(name: .shortAndLong, help: "")
+        @Option(name: .shortAndLong, help: "The path to the parent folder where your new Category folder should be created.")
         var parentPath: String?
         
         func run() throws {
@@ -45,13 +45,13 @@ extension Nnapp.Create {
 extension Nnapp.Create {
     struct Group: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Create a new Group folder and register it in the database."
         )
         
-        @Argument(help: "")
+        @Argument(help: "The name of your new Group")
         var name: String?
         
-        @Option(name: .shortAndLong, help: "")
+        @Option(name: .shortAndLong, help: "The name of the Category to assign to the new Group.")
         var category: String?
         
         func run() throws {

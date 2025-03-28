@@ -14,7 +14,7 @@ import ArgumentParser
 extension Nnapp {
     struct Open: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Open a Project in Xcode/VSCode, open a Project's remote repository, or open a website linked with a Project"
         )
     
         @Argument(help: "The project shortcut.")

@@ -10,7 +10,7 @@ import ArgumentParser
 extension Nnapp {
     struct List: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: ""
+            abstract: "Display a list of all Categories, Groups, and Projects registered with CodeLaunch"
         )
         
         func run() throws {

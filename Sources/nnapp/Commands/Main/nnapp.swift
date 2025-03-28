@@ -35,6 +35,7 @@ extension ParsableCommand {
 }
 
 
+// MARK: - Dependencies
 protocol ContextFactory {
     func makeShell() -> Shell
     func makePicker() -> Picker
