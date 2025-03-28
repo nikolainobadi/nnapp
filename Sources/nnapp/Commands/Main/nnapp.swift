@@ -12,7 +12,7 @@ import ArgumentParser
 struct Nnapp: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Utility to manage Xcode Projects and Swift Packages for quick launching with command-line.",
-        subcommands: [Add.self, Create.self, List.self, Open.self, Remove.self, Evict.self]
+        subcommands: [Add.self, Create.self, List.self, Open.self, Remove.self, Evict.self, Finder.self]
     )
     
     nonisolated(unsafe) static var contextFactory: ContextFactory = DefaultContextFactory()
