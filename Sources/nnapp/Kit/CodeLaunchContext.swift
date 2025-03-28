@@ -11,6 +11,7 @@ import NnSwiftDataKit
 
 public final class CodeLaunchContext {
     private let launchScriptKey = "launchScriptKey"
+    private let projectLinkNameListKey = "projectLinkNameListKey"
     
     let context: ModelContext
     let defaults: UserDefaults
@@ -38,6 +39,10 @@ extension CodeLaunchContext {
     
     func loadProjects() throws -> [LaunchProject] {
         return try load()
+    }
+    
+    func loadProjectLinkNames() -> [String] {
+        return defaults.array(forKey: projectLinkNameListKey) as? [String] ?? []
     }
     
     func loadLaunchScript() -> String? {

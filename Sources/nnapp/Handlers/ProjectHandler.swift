@@ -152,7 +152,9 @@ private extension ProjectHandler {
     }
     
     func getOtherLinks() -> [ProjectLink] {
-        return [] // TODO: -
+        let handler = ProjectLinkHandler(picker: picker, linkOptions: [])
+        
+        return handler.getOtherLinks()
     }
     
     func getProject(name: String?, shortcut: String?, selectionPrompt: String) throws -> LaunchProject {
