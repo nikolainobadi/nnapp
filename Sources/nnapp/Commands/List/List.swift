@@ -11,7 +11,7 @@ extension Nnapp {
     struct List: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Display a list of all Categories, Groups, and Projects registered with CodeLaunch",
-            subcommands: [Category.self]
+            subcommands: [Category.self, Group.self, Project.self, Link.self]
         )
         
         func run() throws {
@@ -73,7 +73,7 @@ extension Nnapp.List {
                 selectedCategory = try picker.requiredSingleSelection("Select a Category", items: categories)
             }
             
-            print("\n---------- \(selectedCategory.name.bold.underline) ----------", terminator: "\n\n")
+            printHeader(selectedCategory.name)
             
             print("path: \(selectedCategory.path)")
             print("group Count: \(selectedCategory.groups.count)", terminator: "\n\n")
@@ -122,7 +122,7 @@ extension Nnapp.List {
                 selectedGroup = try picker.requiredSingleSelection("Select a Group", items: groups)
             }
             
-            print("\n---------- \(selectedGroup.name.bold.underline) ----------", terminator: "\n\n")
+            printHeader(selectedGroup.name)
             
             print("category: \(selectedGroup.category?.name ?? "NOT ASSIGNED")")
             print("group path: \(selectedGroup.path ?? "NOT ASSIGNED")")
@@ -164,7 +164,7 @@ extension Nnapp.List {
                 selectedProject = try picker.requiredSingleSelection("Select a Project", items: projects)
             }
             
-            print("\n---------- \(selectedProject.name.bold.underline) ----------", terminator: "\n\n")
+            printHeader(selectedProject.name)
             
             print("group: \(selectedProject.group?.name ?? "NOT ASSIGNED")")
             print("shortcut: \(selectedProject.shortcut ?? "NOT ASSIGNED")")
@@ -182,6 +182,33 @@ extension Nnapp.List {
 }
 
 
+// MARK: - Link
+extension Nnapp.List {
+    struct Link: ParsableCommand {
+        static let configuration = CommandConfiguration(
+            abstract: "Displays the list of saved Project Link names."
+        )
+        
+        func run() throws {
+            let context = try Nnapp.makeContext()
+            let existingNames = context.loadProjectLinkNames()
+            
+            if existingNames.isEmpty {
+                print("No saved Project Link names")
+            } else {
+                printHeader("Project Link Names")
+                
+                for name in existingNames {
+                    print(name)
+                }
+                
+                print("")
+            }
+        }
+    }
+}
+
+
 // MARK: - Extension Dependencies
 fileprivate extension String {
     func addingShortcut(_ shortcut: String?) -> String {
@@ -191,4 +218,10 @@ fileprivate extension String {
         
         return "\(self), shortcut: \(shortcut)"
     }
+}
+
+
+// MARK: - Helpers Print Methods
+fileprivate func printHeader(_ title: String) {
+    print("\n---------- \(title.bold.underline) ----------", terminator: "\n\n")
 }

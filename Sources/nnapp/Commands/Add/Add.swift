@@ -11,7 +11,7 @@ extension Nnapp {
     struct Add: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Register a Category, Group, or Project from an existing folder on your computer.",
-            subcommands: [Category.self, Group.self, Project.self]
+            subcommands: [Category.self, Group.self, Project.self, Link.self]
         )
     }
 }
@@ -88,6 +88,31 @@ extension Nnapp.Add {
             let handler = ProjectHandler(shell: shell, picker: picker, context: context)
             
             try handler.addProject(path: path, group: group, shortcut: shortcut, isMainProject: isMainProject)
+        }
+    }
+}
+
+
+extension Nnapp.Add {
+    struct Link: ParsableCommand {
+        static let configuration = CommandConfiguration(
+            abstract: "Add a new Project Link option to your saved list"
+        )
+        
+        @Argument(help: "The name of the new link option")
+        var name: String?
+        
+        func run() throws {
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
+            let existingList = context.loadProjectLinkNames()
+            let name = try name ?? picker.getRequiredInput("Enter the name of your new Project Link option.")
+            
+            if existingList.contains(where: { $0.matches(name) }) {
+                throw CodeLaunchError.projectLinkNameTaken
+            }
+            
+            context.saveProjectLinkNames(existingList + [name])
         }
     }
 }

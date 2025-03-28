@@ -12,4 +12,5 @@ enum CodeLaunchError: Error {
     case noProjectInFolder
     case noRemoteRepository
     case missingGitRepository
+    case projectLinkNameTaken
 }

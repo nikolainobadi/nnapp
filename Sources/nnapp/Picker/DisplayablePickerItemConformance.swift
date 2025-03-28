@@ -37,3 +37,9 @@ extension ProjectFolder: DisplayablePickerItem {
         return name
     }
 }
+
+extension ProjectLink: DisplayablePickerItem {
+    public var displayName: String {
+        return "\(name.bold) - \(urlString)"
+    }
+}

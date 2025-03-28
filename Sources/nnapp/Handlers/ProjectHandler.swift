@@ -152,7 +152,8 @@ private extension ProjectHandler {
     }
     
     func getOtherLinks() -> [ProjectLink] {
-        let handler = ProjectLinkHandler(picker: picker, linkOptions: [])
+        let linkOptions = context.loadProjectLinkNames()
+        let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions)
         
         return handler.getOtherLinks()
     }

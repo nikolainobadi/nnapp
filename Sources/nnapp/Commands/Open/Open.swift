@@ -28,7 +28,6 @@ extension Nnapp {
         var useGroupShortcut: Bool = false
 
         func run() throws {
-            let shell = Nnapp.makeShell()
             let context = try Nnapp.makeContext()
             let project = try selectProject(shortcut: shortcut, useGroupShortcut: useGroupShortcut, context: context)
             
@@ -36,19 +35,10 @@ extension Nnapp {
             case .xcode, .vscode:
                 try openInIDE(project, isXcode: launchType == .xcode, context: context)
             case .remote:
-                guard let remote = project.remote else {
-                    print("\(project.name) doesn't have a remote repository registered")
-                    return
-                }
-                
-                print("opening \(remote.name), url: \(remote.urlString)")
-                try shell.runAndPrint("open \(remote.urlString)")
+                try openRemoteURL(for: project)
             case .link:
-                // TODO: - 
-                break
+                try openProjectLink(for: project)
             }
-            
-            print("Should open \(project.name)")
         }
     }
 }
@@ -84,7 +74,11 @@ private extension Nnapp.Open {
             return project
         }
     }
-    
+}
+
+
+// MARK: - Launch
+private extension Nnapp.Open {
     func openInIDE(_ project: LaunchProject, isXcode: Bool, context: CodeLaunchContext) throws {
         guard let folderPath = project.folderPath, let filePath = project.filePath else {
             throw CodeLaunchError.missingProject
@@ -128,6 +122,42 @@ private extension Nnapp.Open {
         script.append(" && clear")
         
         shell.runScriptInNewTerminalWindow(script: script)
+    }
+}
+
+
+// MARK: - Open URL
+private extension Nnapp.Open {
+    func openRemoteURL(for project: LaunchProject) throws {
+        guard let remote = project.remote else {
+            print("\(project.name) doesn't have a remote repository registered")
+            return
+        }
+        
+        print("opening \(remote.name), url: \(remote.urlString)")
+        try shell.runAndPrint("open \(remote.urlString)")
+    }
+    
+    func openProjectLink(for project: LaunchProject) throws {
+        let links = project.links
+        
+        var selection: ProjectLink?
+        
+        switch links.count {
+        case 0:
+            break
+        case 1:
+            selection = links.first!
+            try shell.runAndPrint("open \(links.first!.urlString)")
+        default:
+            selection = try picker.requiredSingleSelection("Select a link to open", items: links)
+        }
+        
+        if let selection {
+            try shell.runAndPrint("open \(selection.urlString)")
+        } else {
+            print("\(project.name) doesn't have any links")
+        }
     }
 }
 

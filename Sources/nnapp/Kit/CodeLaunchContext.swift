@@ -89,6 +89,10 @@ extension CodeLaunchContext {
         
         try context.save()
     }
+    
+    func saveProjectLinkNames(_ names: [String]) {
+        defaults.set(names, forKey: projectLinkNameListKey)
+    }
 }
 
 

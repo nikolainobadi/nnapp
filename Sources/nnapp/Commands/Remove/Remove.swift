@@ -11,7 +11,7 @@ extension Nnapp {
     struct Remove: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Unregister a Category, Group, or Project from the database.",
-            subcommands: [Category.self, Group.self, Project.self]
+            subcommands: [Category.self, Group.self, Project.self, Link.self]
         )
     }
 }
@@ -57,6 +57,7 @@ extension Nnapp.Remove {
     }
 }
 
+
 // MARK: - Project
 extension Nnapp.Remove {
     struct Project: ParsableCommand {
@@ -77,6 +78,34 @@ extension Nnapp.Remove {
             let handler = ProjectHandler(shell: shell, picker: picker, context: context)
             
             try handler.removeProject(name: name, shortcut: shortcut)
+        }
+    }
+}
+
+
+// MARK: - Link
+extension Nnapp.Remove {
+    struct Link: ParsableCommand {
+        static let configuration = CommandConfiguration(
+            abstract: "Remote a saved Project Link"
+        )
+        
+        @Argument(help: "The name of the Project Link to remove.")
+        var name: String?
+        
+        func run() throws {
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
+            let existingNames = context.loadProjectLinkNames()
+            
+            if existingNames.isEmpty {
+                print("No Project Links to remove")
+            } else {
+                let selection = try picker.requiredSingleSelection("Select a Project Link name to remove.", items: existingNames)
+                let updatedNames = existingNames.filter({ $0 != selection })
+                
+                context.saveProjectLinkNames(updatedNames)
+            }
         }
     }
 }
