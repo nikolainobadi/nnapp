@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  GitShellAdapter.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/27/25.
