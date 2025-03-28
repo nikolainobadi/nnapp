@@ -28,7 +28,8 @@ extension Nnapp.Remove {
         var name: String?
         
         func run() throws {
-            let context = try makeContext()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let handler = CategoryHandler(picker: picker, context: context)
             
             try handler.removeCategory(name: name)
@@ -47,7 +48,8 @@ extension Nnapp.Remove {
         var name: String?
         
         func run() throws {
-            let context = try makeContext()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let handler = GroupHandler(picker: picker, context: context)
             
             try handler.removeGroup(name: name)
@@ -69,7 +71,9 @@ extension Nnapp.Remove {
         var shortcut: String?
         
         func run() throws {
-            let context = try makeContext()
+            let shell = Nnapp.makeShell()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let handler = ProjectHandler(shell: shell, picker: picker, context: context)
             
             try handler.removeProject(name: name, shortcut: shortcut)

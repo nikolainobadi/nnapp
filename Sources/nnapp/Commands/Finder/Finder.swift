@@ -20,6 +20,7 @@ extension Nnapp {
         var folderType: LaunchFolderType = .project
         
         func run() throws {
+            let shell = Nnapp.makeShell()
             let folderPath = try getFolderPath(name: name, folderType: folderType)
             
             try shell.runAndPrint("open -a Finder \(folderPath)")
@@ -31,7 +32,8 @@ extension Nnapp {
 // MARK: - Private Methods
 private extension Nnapp.Finder {
     func getFolderPath(name: String?, folderType: LaunchFolderType) throws -> String {
-        let context = try makeContext()
+        let picker = Nnapp.makePicker()
+        let context = try Nnapp.makeContext()
         
         switch folderType {
         case .category:

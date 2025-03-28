@@ -20,7 +20,9 @@ extension Nnapp {
         var shortcut: String?
     
         func run() throws {
-            let context = try makeContext()
+            let shell = Nnapp.makeShell()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let handler = ProjectHandler(shell: shell, picker: picker, context: context)
             
             try handler.evictProject(name: name, shortcut: shortcut)

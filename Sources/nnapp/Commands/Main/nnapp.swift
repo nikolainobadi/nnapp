@@ -18,19 +18,17 @@ struct Nnapp: ParsableCommand {
     nonisolated(unsafe) static var contextFactory: ContextFactory = DefaultContextFactory()
 }
 
-
-// MARK: - Factory Methods
-extension ParsableCommand {
-    var shell: Shell {
-        return Nnapp.contextFactory.makeShell()
+extension Nnapp {
+    static func makeShell() -> Shell {
+        return contextFactory.makeShell()
     }
     
-    var picker: Picker {
-        return Nnapp.contextFactory.makePicker()
+    static func makePicker() -> Picker {
+        return contextFactory.makePicker()
     }
     
-    func makeContext() throws -> CodeLaunchContext {
-        return try Nnapp.contextFactory.makeContext()
+    static func makeContext() throws -> CodeLaunchContext {
+        return try contextFactory.makeContext()
     }
 }
 

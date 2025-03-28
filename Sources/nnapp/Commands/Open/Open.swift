@@ -28,11 +28,13 @@ extension Nnapp {
         var useGroupShortcut: Bool = false
 
         func run() throws {
-            let project = try selectProject(shortcut: shortcut, useGroupShortcut: useGroupShortcut)
+            let shell = Nnapp.makeShell()
+            let context = try Nnapp.makeContext()
+            let project = try selectProject(shortcut: shortcut, useGroupShortcut: useGroupShortcut, context: context)
             
             switch launchType {
             case .xcode, .vscode:
-                try openInIDE(project, isXcode: launchType == .xcode)
+                try openInIDE(project, isXcode: launchType == .xcode, context: context)
             case .remote:
                 guard let remote = project.remote else {
                     print("\(project.name) doesn't have a remote repository registered")
@@ -54,8 +56,15 @@ extension Nnapp {
 
 // MARK: - Private Methods
 private extension Nnapp.Open {
-    func selectProject(shortcut: String?, useGroupShortcut: Bool) throws -> LaunchProject {
-        let context = try makeContext()
+    var shell: Shell {
+        return Nnapp.makeShell()
+    }
+    
+    var picker: Picker {
+        return Nnapp.makePicker()
+    }
+    
+    func selectProject(shortcut: String?, useGroupShortcut: Bool, context: CodeLaunchContext) throws -> LaunchProject {
         let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut of the app you would like to open")
         
         if useGroupShortcut {
@@ -76,13 +85,13 @@ private extension Nnapp.Open {
         }
     }
     
-    func openInIDE(_ project: LaunchProject, isXcode: Bool) throws {
+    func openInIDE(_ project: LaunchProject, isXcode: Bool, context: CodeLaunchContext) throws {
         guard let folderPath = project.folderPath, let filePath = project.filePath else {
             throw CodeLaunchError.missingProject
         }
         
         try cloneProjectIfNecessary(project, folderPath: folderPath, filePath: filePath)
-        openDirectoryInTerminalIfNecessary(folderPath: folderPath)
+        openDirectoryInTerminalIfNecessary(folderPath: folderPath, context: context)
         try shell.runAndPrint("\(isXcode ? "open" : "code") \(filePath)")
     }
     
@@ -104,7 +113,7 @@ private extension Nnapp.Open {
         }
     }
     
-    func openDirectoryInTerminalIfNecessary(folderPath: String) {
+    func openDirectoryInTerminalIfNecessary(folderPath: String, context: CodeLaunchContext) {
         guard let openPaths = try? shell.getITermSessionPaths(), !openPaths.contains(folderPath) else {
             return
         }
@@ -112,7 +121,7 @@ private extension Nnapp.Open {
         print("preparing to open project in new terminal window")
         var script = "cd \(folderPath)"
             
-        if let extraCommand = try? makeContext().loadLaunchScript() {
+        if let extraCommand = context.loadLaunchScript() {
             script.append(" && \(extraCommand)")
         }
         

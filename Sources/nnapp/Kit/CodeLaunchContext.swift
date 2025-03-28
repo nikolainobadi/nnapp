@@ -16,12 +16,24 @@ public final class CodeLaunchContext {
     let context: ModelContext
     let defaults: UserDefaults
     
-    public init() throws {
+    public init(config: ModelConfiguration? = nil, defaults: UserDefaults? = nil) throws {
         let appGroupId = "R8SJ24LQF3.com.nobadi.codelaunch"
-        let (config, defaults) = try configureSwiftDataContainer(appGroupId: appGroupId)
-        let container = try ModelContainer(for: LaunchCategory.self, configurations: config)
+        var userDefaults: UserDefaults
+        var configuration: ModelConfiguration
         
-        self.defaults = defaults
+        if let config, let defaults {
+            configuration = config
+            userDefaults = defaults
+        } else {
+            let (config, defaults) = try configureSwiftDataContainer(appGroupId: appGroupId)
+            
+            configuration = config
+            userDefaults = defaults
+        }
+        
+        let container = try ModelContainer(for: LaunchCategory.self, configurations: configuration)
+        
+        self.defaults = userDefaults
         self.context = .init(container)
     }
 }

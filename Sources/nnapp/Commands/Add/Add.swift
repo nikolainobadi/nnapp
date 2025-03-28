@@ -28,7 +28,8 @@ extension Nnapp.Add {
         var path: String?
         
         func run() throws {
-            let context = try makeContext()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let handler = CategoryHandler(picker: picker, context: context)
             
             try handler.importCategory(path: path)
@@ -51,7 +52,8 @@ extension Nnapp.Add {
         var category: String?
         
         func run() throws {
-            let context = try makeContext()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let handler = GroupHandler(picker: picker, context: context)
             
             try handler.importGroup(path: path, category: category)
@@ -80,7 +82,9 @@ extension Nnapp.Add {
         var isMainProject: Bool = false
         
         func run() throws {
-            let context = try makeContext()
+            let shell = Nnapp.makeShell()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let handler = ProjectHandler(shell: shell, picker: picker, context: context)
             
             try handler.addProject(path: path, group: group, shortcut: shortcut, isMainProject: isMainProject)

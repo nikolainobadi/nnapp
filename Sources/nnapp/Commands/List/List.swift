@@ -62,7 +62,8 @@ extension Nnapp.List {
         var name: String?
         
         func run() throws {
-            let context = try makeContext()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let categories = try context.loadCategories()
             var selectedCategory: LaunchCategory
             
@@ -110,7 +111,8 @@ extension Nnapp.List {
         var name: String?
         
         func run() throws {
-            let context = try makeContext()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let groups = try context.loadGroups()
             var selectedGroup: LaunchGroup
             
@@ -151,7 +153,8 @@ extension Nnapp.List {
         var name: String?
         
         func run() throws {
-            let context = try makeContext()
+            let picker = Nnapp.makePicker()
+            let context = try Nnapp.makeContext()
             let projects = try context.loadProjects()
             var selectedProject: LaunchProject
             
