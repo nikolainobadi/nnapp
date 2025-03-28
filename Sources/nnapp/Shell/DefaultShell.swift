@@ -36,5 +36,9 @@ extension DefaultShell: Shell {
 
         return output.stdout.trimmingCharacters(in: .whitespaces)
     }
+    
+    public func runAppleScript(script: String) throws -> String {
+        return SwiftShell.run("osascript", ["-e", script]).stdout
+    }
 }
 

@@ -5,7 +5,9 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-enum NnappError: Error {
+enum CodeLaunchError: Error {
     case missingGroup
+    case missingProject
     case missingCategory
+    case noProjectInFolder
 }

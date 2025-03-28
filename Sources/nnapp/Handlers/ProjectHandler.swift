@@ -7,13 +7,16 @@
 
 import Files
 import SwiftPicker
+import GitShellKit
 
 struct ProjectHandler {
+    private let shell: Shell
     private let picker: Picker
     private let store: GroupHandler
     private let context: CodeLaunchContext
     
-    init(picker: Picker, context: CodeLaunchContext) {
+    init(shell: Shell, picker: Picker, context: CodeLaunchContext) {
+        self.shell = shell
         self.picker = picker
         self.context = context
         self.store = GroupHandler(picker: picker, context: context)
@@ -26,9 +29,7 @@ extension ProjectHandler {
     func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool) throws {
         let selectedGroup = try store.getGroup(named: group)
         let projectFolder = try selectProjectFolder(path: path, group: selectedGroup)
-        
-        // TODO: - need to verify that project shortcut is available
-        let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut to launch this project.")
+        let shortcut = try getShortcut(shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
         let remote = getRemote(folder: projectFolder.folder)
         let otherLinks = getOtherLinks()
         let project = LaunchProject(name: projectFolder.name, shortcut: shortcut, type: projectFolder.type, remote: remote, links: otherLinks)
@@ -92,6 +93,23 @@ private extension ProjectHandler {
         return .init(folder: folder, type: projectType)
     }
     
+    // TODO: - need to verify that project shortcut is available
+    func getShortcut(shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> String? {
+        if let shortcut {
+            return shortcut
+        }
+        
+        let prompt = "Enter the shortcut to launch this project."
+        
+        if group.shortcut != nil && !isMainProject {
+            guard picker.getPermission("Would you like to add a quick-launch shortcut for this project?") else {
+                return nil
+            }
+        }
+        
+        return try picker.getRequiredInput(prompt)
+    }
+    
     func getAvailableSubfolders(group: LaunchGroup, folder: Folder) -> [ProjectFolder] {
         return folder.subfolders.compactMap { subFolder in
             guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()), let projectType = try? getProjectType(folder: subFolder) else {
@@ -103,11 +121,25 @@ private extension ProjectHandler {
     }
     
     func getProjectType(folder: Folder) throws -> ProjectType {
-        return .package // TODO: -
+        if folder.containsFile(named: "Package.swift") {
+            return .package
+        }
+        
+        if folder.subfolders.contains(where: { $0.extension == "xcodeproj" }) {
+            return .project
+        }
+        
+        // TODO: - will need to also check for a workspace, then ask the user to choose which to use
+        throw CodeLaunchError.noProjectInFolder
     }
     
     func getRemote(folder: Folder) -> ProjectLink? {
-        return nil // TODO: -
+        guard let githubURL = try? GitShellAdapter(shell: shell).getGitHubURL(at: folder.path) else {
+            return nil
+        }
+        
+        // TODO: - will need to expand support for other websites
+        return .init(name: "GitHub", urlString: githubURL)
     }
     
     func getOtherLinks() -> [ProjectLink] {

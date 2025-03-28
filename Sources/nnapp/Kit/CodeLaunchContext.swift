@@ -173,7 +173,12 @@ public final class LaunchProject {
 
 public extension LaunchProject {
     var fileName: String {
-        return "\(name).\(type.fileExtension)"
+        switch type {
+        case .package:
+            return "Package.swift"
+        default:
+            return "\(name).\(type.fileExtension)"
+        }
     }
     
     var groupPath: String? {

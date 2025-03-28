@@ -6,6 +6,7 @@
 //
 
 import Files
+import Foundation
 import GitShellKit
 import SwiftPicker
 import ArgumentParser
@@ -59,7 +60,7 @@ private extension Nnapp.Open {
         if useGroupShortcut {
             let groups = try context.loadGroups()
             guard let group = groups.first(where: { shortcut.matches($0.shortcut) }) else {
-                fatalError() // TODO: -
+                throw CodeLaunchError.missingGroup
             }
             
             return try picker.requiredSingleSelection("Select a project", items: group.projects)
@@ -67,7 +68,7 @@ private extension Nnapp.Open {
             let projects = try context.loadProjects()
             
             guard let project = projects.first(where: { shortcut.matches($0.shortcut) }) else {
-                fatalError() // TODO: -
+                throw CodeLaunchError.missingProject
             }
             
             return project
@@ -76,7 +77,7 @@ private extension Nnapp.Open {
     
     func openInIDE(_ project: LaunchProject, isXcode: Bool) throws {
         guard let folderPath = project.folderPath, let filePath = project.filePath else {
-            fatalError() // TODO: -
+            throw CodeLaunchError.missingProject
         }
         
         try cloneProjectIfNecessary(project, folderPath: folderPath, filePath: filePath)
@@ -102,17 +103,21 @@ private extension Nnapp.Open {
     }
     
     func openDirectoryInTerminalIfNecessary(folderPath: String) {
-        guard let openPaths = try? shell.getITermSessionPaths(), openPaths.contains(folderPath) else {
+        guard let openPaths = try? shell.getITermSessionPaths(), !openPaths.contains(folderPath) else {
             return
         }
         
-        let command = "cd \(folderPath)"
+
+        print("preparing to open project in new terminal window")
+        var script = "cd \(folderPath)"
             
-        if let launchScript = try? makeContext().loadLaunchScript() {
-            try? shell.runAndPrint("\(command) && \(launchScript) && clear")
-        } else {
-            try? shell.runAndPrint("\(command) && clear")
+        if let extraCommand = try? makeContext().loadLaunchScript() {
+            script.append(" && \(extraCommand)")
         }
+        
+        script.append(" && clear")
+        
+        shell.runScriptInNewTerminalWindow(script: script)
     }
 }
 
@@ -122,6 +127,8 @@ public enum LaunchType: String, CaseIterable {
     case xcode, vscode, remote, link
 }
 
+
+// MARK: - Extension Dependencies
 extension LaunchType: EnumerableFlag {
     public static func name(for value: LaunchType) -> NameSpecification {
         switch value {
@@ -147,7 +154,23 @@ extension String {
     }
 }
 
-extension Shell {
+fileprivate extension Shell {
+    func runScriptInNewTerminalWindow(script: String) {
+        if let termProgram = ProcessInfo.processInfo.environment["TERM_PROGRAM"], termProgram == "iTerm.app" {
+            let appleScript = """
+                tell application "iTerm"
+                    activate
+                    tell current window
+                        create tab with default profile
+                        tell current session of current tab to write text "\(script)"
+                    end tell
+                end tell
+                """
+            
+            let _ = try? runAppleScript(script: appleScript)
+        }
+    }
+    
     func getITermSessionPaths() throws -> [String] {
         let script = """
         tell application "iTerm"
@@ -166,7 +189,6 @@ extension Shell {
         end tell
         """
         
-        /// this needs to run in terminal in order to work for some reason
-        return try run("osascript -e \(script)").components(separatedBy: ", ")
+        return try runAppleScript(script: script).components(separatedBy: ", ")
     }
 }

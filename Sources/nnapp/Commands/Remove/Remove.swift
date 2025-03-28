@@ -70,7 +70,7 @@ extension Nnapp.Remove {
         
         func run() throws {
             let context = try makeContext()
-            let handler = ProjectHandler(picker: picker, context: context)
+            let handler = ProjectHandler(shell: shell, picker: picker, context: context)
             
             try handler.removeProject(name: name, shortcut: shortcut)
         }

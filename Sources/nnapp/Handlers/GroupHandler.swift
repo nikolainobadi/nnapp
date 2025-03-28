@@ -113,7 +113,7 @@ private extension GroupHandler {
             return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
         }
         
-        let path = try picker.getRequiredInput("Enter the path to the folder you want to use.")
+        let path = try picker.getRequiredInput("Enter the path to your folder for your new Group.")
         
         return try Folder(path: path)
     }

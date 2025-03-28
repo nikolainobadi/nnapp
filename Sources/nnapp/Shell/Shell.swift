@@ -17,4 +17,6 @@ public protocol Shell {
     /// - Parameter command: The shell command to execute.
     /// - Throws: An error if the command fails.
     func runAndPrint(_ command: String) throws
+    
+    func runAppleScript(script: String) throws -> String
 }
