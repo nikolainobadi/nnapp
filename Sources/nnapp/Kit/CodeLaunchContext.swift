@@ -158,8 +158,9 @@ public final class LaunchGroup {
     public var shortcut: String?
     public var category: LaunchCategory?
     
-    public init(name: String) {
+    public init(name: String, shortcut: String? = nil) {
         self.name = name
+        self.shortcut = shortcut
     }
 }
 
