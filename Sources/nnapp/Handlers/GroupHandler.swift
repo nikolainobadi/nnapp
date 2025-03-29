@@ -26,10 +26,11 @@ extension GroupHandler {
     @discardableResult
     func importGroup(path: String?, category: String?) throws -> LaunchGroup {
         let selectedCategory = try store.getCategory(named: category)
-        // TODO: - maybe verify that another group doesn't already exist with that name?
         let selectedGroupFolder = try selectGroupFolderToImport(path: path, category: selectedCategory)
         let group = LaunchGroup(name: selectedGroupFolder.name)
         
+        try validateName(group.name, groups: selectedCategory.groups)
+        try moveFolderIfNecessary(selectedGroupFolder, category: selectedCategory)
         try context.saveGroup(group, in: selectedCategory)
         
         return group
@@ -99,6 +100,27 @@ extension GroupHandler {
 
 // MARK: - Private Methods
 private extension GroupHandler {
+    func validateName(_ name: String, groups: [LaunchGroup]) throws {
+        if groups.contains(where: { $0.name.matches(name) }) {
+            throw CodeLaunchError.groupNameTaken
+        }
+    }
+    
+    func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
+        let categoryFolder = try Folder(path: category.path)
+        
+        if folder.path.contains(categoryFolder.path) {
+            print("Group Folder is already in the \(categoryFolder.name) folder")
+            return
+        }
+        
+        if categoryFolder.subfolders.map({ $0.name }).contains(where: { $0.matches(folder.name) }) {
+            throw CodeLaunchError.groupFolderAlreadyExists
+        }
+        
+        try folder.move(to: categoryFolder)
+    }
+    
     func selectGroupFolderToImport(path: String?, category: LaunchCategory) throws -> Folder {
         if let path {
             return try Folder(path: path)

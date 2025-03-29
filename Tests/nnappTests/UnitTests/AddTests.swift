@@ -33,6 +33,41 @@ extension AddTests {
 }
 
 
+// MARK: - Group Tests
+extension AddTests {
+    @Test("Throws an error when Group name already exists in Category")
+    func throwsErrorWhenGroupNameIsTaken() {
+        // TODO: -
+    }
+    
+    @Test("Throws an error when Group folder name already exists in Category Folder")
+    func throwsErrorWhenGroupFolderNameIsTaken() {
+        // TODO: -
+    }
+    
+    @Test("Moves imported Group folder to Category Folder")
+    func movesGroupFolderToCategoryFolder() async throws {
+        // TODO: -
+    }
+    
+    @Test("Does not move imported Group folder to Category Folder when it is already there")
+    func doesNotMoveGroupFolderToCategoryFolderWhenAlreadyThere() async throws {
+        // TODO: -
+    }
+    
+    @Test("Saves new Group to Category")
+    func savesNewGroupToCategory() async throws {
+        // TODO: -
+    }
+}
+
+
+// MARK: - Project Tests
+extension AddTests {
+    
+}
+
+
 // MARK: - RunCommand
 private extension AddTests {
     func runCommand(_ factory: MockContextFactory, argType: ArgType) throws {

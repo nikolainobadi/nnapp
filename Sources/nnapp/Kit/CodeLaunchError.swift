@@ -13,6 +13,8 @@ enum CodeLaunchError: Error {
     case noRemoteRepository
     case missingGitRepository
     case projectLinkNameTaken
+    case groupNameTaken
     case categoryNameTaken
     case categoryPathTaken
+    case groupFolderAlreadyExists
 }
