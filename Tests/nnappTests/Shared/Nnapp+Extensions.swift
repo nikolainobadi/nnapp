@@ -12,7 +12,6 @@ import ArgumentParser
 extension Nnapp {
     @discardableResult
     static func testRun(contextFactory: MockContextFactory? = nil, args: [String]?) throws -> String {
-//        self.contextFactory = MockContextFactory()
         self.contextFactory = contextFactory ?? MockContextFactory()
         
         return try captureOutput(factory: contextFactory, args: args)

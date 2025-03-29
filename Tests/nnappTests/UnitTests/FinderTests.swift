@@ -5,12 +5,11 @@
 //  Created by Nikolai Nobadi on 3/28/25.
 //
 
-import Files
 import Testing
 @testable import nnapp
 
 @MainActor
-final class FinderTests {
+struct FinderTests {
     @Test("Starting values are empty")
     func emptyStartingValues() {
         let shell = MockShell()
@@ -18,109 +17,51 @@ final class FinderTests {
         #expect(shell.printedCommands.isEmpty)
     }
     
-    @Test("Opens Category folder when only -c is passed as arg")
-    func opensCategoryFolder() throws {
+    @Test("Opens Category folder when only -c is passed as arg", arguments: [nil, "categoryName"])
+    func opensCategoryFolder(name: String?) throws {
         let (factory, shell) = makeTestObjects()
         let context = try factory.makeContext()
-        let category = makeCategory()
+        let categoryName = name ?? "categoryName"
+        let category = makeCategory(name: categoryName)
         
         try context.saveCatgory(category)
-        try runCommand(factory, folderType: .category)
+        try runCommand(factory, name: name, folderType: .category)
         try assertShell(shell, contains: category.path)
     }
     
-    @Test("Opens Category folder when both name and -c are passed as args")
-    func opensCategoryFolderWithNameArg() throws {
+    @Test("Opens Group folder when -g is passed as arg", arguments: [
+        GroupAndProjectTestInfo(),
+        GroupAndProjectTestInfo(name: "groupName"),
+        GroupAndProjectTestInfo(name: "groupName", shortcut: "groupShortcut", useShortcut: true),
+    ])
+    func opensGroupFolder(info: GroupAndProjectTestInfo) throws {
         let (factory, shell) = makeTestObjects()
         let context = try factory.makeContext()
         let category = makeCategory()
+        let group = makeGroup(name: info.name ?? "groupName", shortcut: info.shortcut)
         
         try context.saveCatgory(category)
-        try runCommand(factory, name: category.name, folderType: .category)
-        try assertShell(shell, contains: category.path)
+        try context.saveGroup(group, in: category)
+        try runCommand(factory, name: info.nameArg, folderType: .group)
+        try assertShell(shell, contains: group.path)
     }
     
-    @Test("Opens Group folder when -g is passed as arg")
-    func opensGroupFolder() throws {
+    @Test("Opens Project folder when -p is passed as arg", arguments: [
+        GroupAndProjectTestInfo(),
+        GroupAndProjectTestInfo(name: "projectName"),
+        GroupAndProjectTestInfo(name: "projectName", shortcut: "projectShortcut", useShortcut: true),
+    ])
+    func opensProjectFolder(info: GroupAndProjectTestInfo) throws {
         let (factory, shell) = makeTestObjects()
         let context = try factory.makeContext()
         let category = makeCategory()
         let group = makeGroup()
-        
-        try context.saveCatgory(category)
-        try context.saveGroup(group, in: category)
-        try runCommand(factory, folderType: .group)
-        try assertShell(shell, contains: group.path)
-    }
-    
-    @Test("Opens Group folder when both name and -g are passed as args")
-    func opensGroupFolderWithNameArg() throws {
-        let (factory, shell) = makeTestObjects()
-        let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup()
-        
-        try context.saveCatgory(category)
-        try context.saveGroup(group, in: category)
-        try runCommand(factory, name: group.name, folderType: .group)
-        try assertShell(shell, contains: group.path)
-    }
-    
-    @Test("Opens Group folder when both shortcut (as name) and -g are passed as args")
-    func opensGroupFolderWithShortcutArg() throws {
-        let (factory, shell) = makeTestObjects()
-        let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup(shortcut: "shortcut")
-        
-        try context.saveCatgory(category)
-        try context.saveGroup(group, in: category)
-        try runCommand(factory, name: group.shortcut, folderType: .group)
-        try assertShell(shell, contains: group.path)
-    }
-    
-    @Test("Opens Project folder when -p is passed as arg")
-    func opensProjectFolder() throws {
-        let (factory, shell) = makeTestObjects()
-        let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup()
-        let project = makeProject()
+        let project = makeProject(name: info.name ?? "projectName", shorcut: info.shortcut)
         
         try context.saveCatgory(category)
         try context.saveGroup(group, in: category)
         try context.saveProject(project, in: group)
-        try runCommand(factory, folderType: .project)
-        try assertShell(shell, contains: group.path)
-    }
-    
-    @Test("Opens Project folder when both name and -p are passed as args")
-    func opensProjectFolderWithNameArg() throws {
-        let (factory, shell) = makeTestObjects()
-        let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup()
-        let project = makeProject()
-        
-        try context.saveCatgory(category)
-        try context.saveGroup(group, in: category)
-        try context.saveProject(project, in: group)
-        try runCommand(factory, name: project.name, folderType: .project)
-        try assertShell(shell, contains: group.path)
-    }
-    
-    @Test("Opens Project folder when both shortcut (as name) and -p are passed as args")
-    func opensProjectFolderWithShortcutArg() throws {
-        let (factory, shell) = makeTestObjects()
-        let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup(shortcut: "shortcut")
-        let project = makeProject(shorcut: group.shortcut)
-        
-        try context.saveCatgory(category)
-        try context.saveGroup(group, in: category)
-        try context.saveProject(project, in: group)
-        try runCommand(factory, name: project.shortcut, folderType: .project)
+        try runCommand(factory, name: info.nameArg, folderType: .project)
         try assertShell(shell, contains: group.path)
     }
 }
@@ -172,6 +113,24 @@ private extension FinderTests {
         
         #expect(shell.printedCommands.count == 1)
         #expect(shell.printedCommands.contains(where: { $0.contains(path) }))
+    }
+}
+
+
+// MARK: - Dependencies
+struct GroupAndProjectTestInfo {
+    let name: String?
+    let shortcut: String?
+    let useShortcut: Bool
+    
+    var nameArg: String? {
+        return useShortcut ? shortcut : name
+    }
+    
+    init(name: String? = nil, shortcut: String? = nil, useShortcut: Bool = false) {
+        self.name = name
+        self.shortcut = shortcut
+        self.useShortcut = useShortcut
     }
 }
 
