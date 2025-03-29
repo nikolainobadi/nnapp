@@ -36,14 +36,15 @@ extension CategoryHandler {
     
     @discardableResult
     func createCategory(name: String?, parentPath: String?) throws -> LaunchCategory {
-        // TODO: - need to verify that name is available
+        let categories = try context.loadCategories()
         let name = try name ?? picker.getRequiredInput("Enter the name of your new category.")
+        try validateName(name, categories: categories)
         let path = try parentPath ?? picker.getRequiredInput("Enter the path to the folder where \(name.yellow) should be created.")
         let parentFolder = try Folder(path: path)
+        try validateParentFolder(parentFolder, categoryName: name)
         let categoryFolder = try parentFolder.createSubfolder(named: name)
         let category = LaunchCategory(name: name, path: categoryFolder.path)
         
-        // TODO: - maybe verify that another folder doesn't already have that name in parentFolder?
         try context.saveCatgory(category)
         
         return category
@@ -92,6 +93,22 @@ extension CategoryHandler {
             return try createCategory(name: name, parentPath: nil)
         case .import:
             return try importCategory(path: nil)
+        }
+    }
+}
+
+
+// MARK: - Private Methods
+private extension CategoryHandler {
+    func validateName(_ name: String, categories: [LaunchCategory]) throws {
+        if categories.contains(where: { $0.name.matches(name) })  {
+            throw CodeLaunchError.categoryNameTaken
+        }
+    }
+    
+    func validateParentFolder(_ folder: Folder, categoryName: String) throws {
+        if folder.subfolders.contains(where: { $0.name.matches(categoryName) }) {
+            throw CodeLaunchError.categoryPathTaken
         }
     }
 }

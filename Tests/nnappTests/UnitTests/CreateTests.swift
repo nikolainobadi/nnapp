@@ -26,6 +26,16 @@ final class CreateTests {
 
 // MARK: - Category Test
 extension CreateTests {
+    @Test("Throws an error when a folder already exists in the parent directory with same name")
+    func throwsErrorWhenFolderAlreadyExists() {
+        // TODO: -
+    }
+    
+    @Test("Throws an error when the name is taken by an existing Category")
+    func throwsErrorWhenCategoryNameAlreadyExists() {
+        // TODO: -
+    }
+    
     @Test("Creates a new folder for the new category", arguments: TestInfo.testOptions)
     func createCategoryFolder(info: TestInfo) throws {
         let parentPath = categoryListFolder.path
