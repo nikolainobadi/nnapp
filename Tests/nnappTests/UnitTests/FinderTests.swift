@@ -118,22 +118,23 @@ private extension FinderTests {
 
 
 // MARK: - Dependencies
-struct GroupAndProjectTestInfo {
-    let name: String?
-    let shortcut: String?
-    let useShortcut: Bool
-    
-    var nameArg: String? {
-        return useShortcut ? shortcut : name
-    }
-    
-    init(name: String? = nil, shortcut: String? = nil, useShortcut: Bool = false) {
-        self.name = name
-        self.shortcut = shortcut
-        self.useShortcut = useShortcut
+extension FinderTests {
+    struct GroupAndProjectTestInfo {
+        let name: String?
+        let shortcut: String?
+        let useShortcut: Bool
+        
+        var nameArg: String? {
+            return useShortcut ? shortcut : name
+        }
+        
+        init(name: String? = nil, shortcut: String? = nil, useShortcut: Bool = false) {
+            self.name = name
+            self.shortcut = shortcut
+            self.useShortcut = useShortcut
+        }
     }
 }
-
 
 // MARK: - Extension Dependencies
 fileprivate extension LaunchFolderType {

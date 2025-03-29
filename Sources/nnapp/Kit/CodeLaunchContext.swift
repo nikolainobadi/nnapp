@@ -272,12 +272,15 @@ public extension String {
         let selfHasSlash = self.hasSuffix("/")
         let pathHasSlash = path.hasPrefix("/")
         
+        let combinedPath: String
         if selfHasSlash && pathHasSlash {
-            return self + String(path.dropFirst())
+            combinedPath = self + String(path.dropFirst())
         } else if !selfHasSlash && !pathHasSlash {
-            return self + "/" + path
+            combinedPath = self + "/" + path
         } else {
-            return self + path
+            combinedPath = self + path
         }
+        
+        return combinedPath.hasSuffix("/") ? combinedPath : combinedPath + "/"
     }
 }

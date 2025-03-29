@@ -26,28 +26,88 @@ final class CreateTests {
 
 // MARK: - Category Test
 extension CreateTests {
-    @Test("Creates a new folder for the new category", .disabled())
-    func createCategoryFolder() throws {
-        let requiredInputs = [categoryName, categoryListFolder.path]
-        let picker = MockPicker(requiredInputResponses: requiredInputs)
+    @Test("Creates a new folder for the new category", arguments: TestInfo.testOptions)
+    func createCategoryFolder(info: TestInfo) throws {
+        let parentPath = categoryListFolder.path
+        let picker = MockPicker(requiredInputResponses: makeCategoryInputs(info: info))
         let factory = MockContextFactory(picker: picker)
         
-        try runCommand(factory, argType: .category(name: nil, parentPath: nil))
+        try runCommand(
+            factory,
+            argType: .category(
+                name: info.name == .arg ? .categoryName : nil,
+                parentPath: info.otherArg == .arg ? parentPath : nil
+            )
+        )
         
-        let updatedFolder = try #require(try Folder(path: categoryListFolder.path))
-        let _ = try #require(updatedFolder.containsSubfolder(named: categoryName))
+        let updatedFolder = try #require(try Folder(path: parentPath))
+        let _ = try #require(updatedFolder.containsSubfolder(named: .categoryName))
     }
     
-    @Test("Creates a new folder for the new category with name from arg", .disabled())
-    func createCategoryFolderWithNameArg() throws {
-        let requiredInputs = [categoryListFolder.path]
-        let picker = MockPicker(requiredInputResponses: requiredInputs)
+    @Test("Saves the new category", arguments: TestInfo.testOptions)
+    func savesNewCategory(info: TestInfo) throws {
+        let parentPath = categoryListFolder.path
+        let picker = MockPicker(requiredInputResponses: makeCategoryInputs(info: info))
         let factory = MockContextFactory(picker: picker)
         
-        try runCommand(factory, argType: .category(name: categoryName, parentPath: nil))
+        try runCommand(
+            factory,
+            argType: .category(
+                name: info.name == .arg ? .categoryName : nil,
+                parentPath: info.otherArg == .arg ? parentPath : nil
+            )
+        )
         
-        let updatedFolder = try #require(try Folder(path: categoryListFolder.path))
-        let _ = try #require(updatedFolder.containsSubfolder(named: categoryName))
+        let categories = try factory.makeContext().loadCategories()
+        let savedCategory = try #require(categories.first)
+        
+        #expect(categories.count == 1)
+        #expect(savedCategory.groups.isEmpty)
+        #expect(savedCategory.name == .categoryName)
+        
+        #expect(savedCategory.path == parentPath.appendingPathComponent(.categoryName))
+    }
+}
+
+
+// MARK: - Group Tests
+extension CreateTests {
+    @Test("Creates a new Group folder in an existing Category folder")
+    func createsNewGroupFolderInExistingCategoryFolder() throws {
+        // TODO: -
+    }
+    
+    @Test("Saves a new Group in an existing Category")
+    func savesNewGroupInExistingCategory() throws {
+        // TODO: -
+    }
+    
+    @Test("Creates a new Group folder in a newly created Category folder.")
+    func createsNewGroupFolderInNewCategoryFolder() throws {
+        // TODO: -
+    }
+    
+    @Test("Saves a new Group in a newly created category.")
+    func savesNewGroupInNewCategory() throws {
+        // TODO: -
+    }
+}
+
+
+// MARK: - Factory
+private extension CreateTests {
+    func makeCategoryInputs(info: TestInfo) -> [String] {
+        var inputs = [String]()
+        
+        if info.name == .input {
+            inputs.append(.categoryName)
+        }
+        
+        if info.otherArg == .input {
+            inputs.append(categoryListFolder.path)
+        }
+        
+        return inputs
     }
 }
 
@@ -89,7 +149,37 @@ private extension CreateTests {
 
 
 // MARK: - Dependencies
+extension CreateTests {
+    struct TestInfo {
+        let name: ArgOrInput
+        let otherArg: ArgOrInput
+        
+        enum ArgOrInput {
+            case arg, input
+        }
+        
+        static var testOptions: [TestInfo] {
+            return [
+                TestInfo(name: .input, otherArg: .input),
+//                TestInfo(name: .arg, otherArg: .input),
+//                TestInfo(name: .arg, otherArg: .arg),
+//                TestInfo(name: .input, otherArg: .arg)
+            ]
+        }
+    }
+}
+
 fileprivate enum CreateArgs {
     case category(name: String?, parentPath: String?)
     case group(name: String?, category: String?)
+}
+
+fileprivate extension String {
+    static var categoryName: String {
+        return "categoryName"
+    }
+    
+    static var parentPath: String {
+        return "path/to/parent"
+    }
 }
