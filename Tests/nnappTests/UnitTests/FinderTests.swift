@@ -75,18 +75,6 @@ extension FinderTests {
         
         return (factory, shell)
     }
-    
-    func makeCategory(name: String = "iOSApps", path: String = "path/to/category") -> LaunchCategory {
-        return .init(name: name, path: path)
-    }
-    
-    func makeGroup(name: String = "MyGroup", shortcut: String? = nil) -> LaunchGroup {
-        return .init(name: name, shortcut: shortcut)
-    }
-    
-    func makeProject(name: String = "MyProject", shorcut: String? = nil) -> LaunchProject {
-        return .init(name: name, shortcut: shorcut, type: .package, remote: nil, links: [])
-    }
 }
 
 

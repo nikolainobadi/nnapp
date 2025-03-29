@@ -6,6 +6,7 @@
 //
 
 enum CodeLaunchError: Error {
+    case invalidInput
     case missingGroup
     case missingProject
     case missingCategory

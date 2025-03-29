@@ -26,9 +26,38 @@ final class AddTests {
 
 // MARK: - Category Tests
 extension AddTests {
-    @Test("Throws an error when the name of imported folder already exists in a Category")
-    func throwsErrorWhenFolderNameIsTaken() {
-        // TODO: -
+    @Test("Throws an error when the name of imported folder name is taken by an existing Category")
+    func throwsErrorWhenFolderNameIsTaken() throws {
+        let existingName = "existingCategory"
+        let factory = MockContextFactory()
+        let context = try factory.makeContext()
+        let existingCategory = makeCategory(name: existingName, path: categoryListFolder.path.appendingPathComponent(existingName))
+        let otherFolder = try #require(try categoryListFolder.createSubfolder(named: "OtherFolder"))
+        let categoryFolderToImport = try #require(try otherFolder.createSubfolder(named: existingName))
+        
+        try context.saveCatgory(existingCategory)
+        
+        #expect(throws: CodeLaunchError.categoryNameTaken) {
+            try runCommand(factory, argType: .category(path: categoryFolderToImport.path))
+        }
+    }
+    
+    @Test("Saves new Category", arguments: [false, true])
+    func savesNewCategory(useArg: Bool) throws {
+        let categoryFolderToImport = try #require(try categoryListFolder.createSubfolder(named: "newCategory"))
+        let path = categoryFolderToImport.path
+        let picker = MockPicker(requiredInputResponses: useArg ? [] : [path])
+        let factory = MockContextFactory(picker: picker)
+        let context = try factory.makeContext()
+        
+        try runCommand(factory, argType: .category(path: useArg ? path : nil))
+        
+        let categories = try #require(try context.loadCategories())
+        let savedCategory = try #require(categories.first)
+        
+        #expect(categories.count == 1)
+        #expect(savedCategory.name.matches(categoryFolderToImport.name))
+        #expect(savedCategory.path.matches(categoryFolderToImport.path))
     }
 }
 
@@ -108,11 +137,13 @@ extension AddTests {
 
 // MARK: - RunCommand
 private extension AddTests {
-    func runCommand(_ factory: MockContextFactory, argType: ArgType) throws {
+    func runCommand(_ factory: MockContextFactory? = nil, argType: ArgType) throws {
         var args = ["add"]
         
         switch argType {
         case .category(let path):
+            args.append("category")
+            
             if let path {
                 args.append(path)
             }
