@@ -32,7 +32,9 @@ extension ProjectHandler {
     func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool) throws {
         let selectedGroup = try store.getGroup(named: group)
         let projectFolder = try selectProjectFolder(path: path, group: selectedGroup)
+        try validateName(projectFolder.name)
         let shortcut = try getShortcut(shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
+        try validateShortcut(shortcut)
         let remote = getRemote(folder: projectFolder.folder)
         let otherLinks = getOtherLinks()
         let project = LaunchProject(name: projectFolder.name, shortcut: shortcut, type: projectFolder.type, remote: remote, links: otherLinks)
@@ -41,6 +43,11 @@ extension ProjectHandler {
             selectedGroup.shortcut = shortcut
         }
         
+        guard let groupFolderPath = selectedGroup.path else {
+            throw CodeLaunchError.missingGroup
+        }
+        
+        try moveFolderIfNecessary(projectFolder.folder, parentPath: groupFolderPath)
         try context.saveProject(project, in: selectedGroup)
     }
 }
@@ -49,7 +56,7 @@ extension ProjectHandler {
 // MARK: - Remove
 extension ProjectHandler {
     func removeProject(name: String?, shortcut: String?) throws {
-        let projectToDelete = try getProject(name: name, shortcut: shortcut, selectionPrompt: "Select the Project you would like to remove")
+        let projectToDelete = try getProject(name: name, shortcut: shortcut, selectionPrompt: "Select the Project you would like to remove. (Note: this will unregister the project from quick-launch. If you want to remove the project and keep it available for quick launch, use \("evict".bold)")
         
         // TODO: - maybe indicate that this is different from evicting?
         try picker.requiredPermission("Are you sure want to remove \(projectToDelete.name.yellow)?")
@@ -75,7 +82,26 @@ extension ProjectHandler {
 
 // MARK: - Private Methods
 private extension ProjectHandler {
-    // TODO: - need to verify that project name is available
+    func validateName(_ name: String) throws {
+        let projects = try context.loadProjects()
+        
+        if projects.contains(where: { $0.name.matches(name) }) {
+            throw CodeLaunchError.projectNameTaken
+        }
+    }
+    
+    func validateShortcut(_ shortcut: String?) throws {
+        if let shortcut {
+            let groups = try context.loadGroups()
+            let projects = groups.flatMap({ $0.projects })
+            let allShortcuts = groups.compactMap({ $0.shortcut }) + projects.compactMap({ $0.shortcut })
+            
+            if allShortcuts.contains(where: { $0.matches(shortcut) }) {
+                throw CodeLaunchError.shortcutTaken
+            }
+        }
+    }
+    
     func selectProjectFolder(path: String?, group: LaunchGroup) throws -> ProjectFolder {
         if let path, let folder = try? Folder(path: path) {
             let projectType = try getProjectType(folder: folder)
@@ -176,6 +202,21 @@ private extension ProjectHandler {
         }
         
         return try picker.requiredSingleSelection(selectionPrompt, items: projects)
+    }
+    
+    func moveFolderIfNecessary(_ folder: Folder, parentPath: String) throws {
+        let parentFolder = try Folder(path: parentPath)
+        
+        if let existingSubfolder = try? parentFolder.subfolder(named: folder.name) {
+            if existingSubfolder.path != folder.path  {
+                throw CodeLaunchError.folderNameTaken
+            }
+            
+            print("Folder is already in correct location")
+            return
+        }
+        
+        try folder.move(to: parentFolder)
     }
 }
 
