@@ -23,10 +23,10 @@ struct CategoryHandler {
 extension CategoryHandler {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
+        let categories = try context.loadCategories()
         let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
         let folder = try Folder(path: path)
-        
-        // TODO: - need to verify that category name is available
+        try validateName(folder.name, categories: categories)
         let category = LaunchCategory(name: folder.name, path: folder.path)
         
         try context.saveCatgory(category)
