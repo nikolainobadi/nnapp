@@ -74,7 +74,7 @@ extension CategoryHandler {
 
 
 // MARK: - Helper
-extension CategoryHandler {
+extension CategoryHandler: GroupCategorySelector {
     func getCategory(named name: String?) throws -> LaunchCategory {
         let categories = try context.loadCategories()
         

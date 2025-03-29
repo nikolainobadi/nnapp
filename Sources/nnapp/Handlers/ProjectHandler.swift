@@ -18,11 +18,12 @@ struct ProjectHandler {
     private let gitShell: GitShellAdapter
     
     init(shell: Shell, picker: Picker, context: CodeLaunchContext) {
-        self.shell = shell
-        self.picker = picker
-        self.context = context
-        self.gitShell = .init(shell: shell)
-        self.store = GroupHandler(picker: picker, context: context)
+        fatalError()
+//        self.shell = shell
+//        self.picker = picker
+//        self.context = context
+//        self.gitShell = .init(shell: shell)
+//        self.store = GroupHandler(picker: picker, context: context)
     }
 }
 

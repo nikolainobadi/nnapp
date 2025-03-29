@@ -7,12 +7,17 @@
 
 import Files
 
-public func deleteFolderContents(_ folder: Folder) {
+public func deleteFolderContents(_ folder: Folder, retries: Int = 0) {
     for file in folder.files {
         do {
             try file.delete()
         } catch {
             print("could not delete file at path", file.path)
+            if retries < 3 {
+                deleteFolderContents(folder, retries: retries + 1)
+            } else {
+                fatalError()
+            }
         }
     }
     
@@ -23,6 +28,12 @@ public func deleteFolderContents(_ folder: Folder) {
             try subfolder.delete()
         } catch {
             print("could not delete file at path", subfolder.path)
+            
+            if retries < 3 {
+                deleteFolderContents(subfolder, retries: retries + 1)
+            } else {
+                fatalError()
+            }
         }
     }
 }

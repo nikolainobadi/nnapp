@@ -28,11 +28,7 @@ extension Nnapp.Add {
         var path: String?
         
         func run() throws {
-            let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
-            let handler = CategoryHandler(picker: picker, context: context)
-            
-            try handler.importCategory(path: path)
+            try Nnapp.makeCategoryHandler().importCategory(path: path)
         }
     }
 }
@@ -52,11 +48,7 @@ extension Nnapp.Add {
         var category: String?
         
         func run() throws {
-            let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
-            let handler = GroupHandler(picker: picker, context: context)
-            
-            try handler.importGroup(path: path, category: category)
+            try Nnapp.makeGroupHandler().importGroup(path: path, category: category)
         }
     }
 }

@@ -30,6 +30,25 @@ extension Nnapp {
     static func makeContext() throws -> CodeLaunchContext {
         return try contextFactory.makeContext()
     }
+    
+    static func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
+        return contextFactory.makeGroupCategorySelector(picker: picker, context: context)
+    }
+    
+    static func makeCategoryHandler() throws -> CategoryHandler {
+        let picker = makePicker()
+        let context = try makeContext()
+        
+        return .init(picker: picker, context: context)
+    }
+    
+    static func makeGroupHandler() throws -> GroupHandler {
+        let picker = makePicker()
+        let context = try makeContext()
+        let categorySelector = makeGroupCategorySelector(picker: picker, context: context)
+        
+        return .init(picker: picker, context: context, categorySelector: categorySelector)
+    }
 }
 
 
@@ -38,6 +57,7 @@ protocol ContextFactory {
     func makeShell() -> Shell
     func makePicker() -> Picker
     func makeContext() throws -> CodeLaunchContext
+    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector
 }
 
 final class DefaultContextFactory: ContextFactory {
@@ -51,5 +71,9 @@ final class DefaultContextFactory: ContextFactory {
     
     func makeContext() throws -> CodeLaunchContext {
         return try CodeLaunchContext()
+    }
+    
+    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
+        return CategoryHandler(picker: picker, context: context)
     }
 }

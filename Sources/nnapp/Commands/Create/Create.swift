@@ -32,11 +32,7 @@ extension Nnapp.Create {
         var parentPath: String?
         
         func run() throws {
-            let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
-            let handler = CategoryHandler(picker: picker, context: context)
-            
-            try handler.createCategory(name: name, parentPath: parentPath)
+            try Nnapp.makeCategoryHandler().createCategory(name: name, parentPath: parentPath)
         }
     }
 }
@@ -56,11 +52,7 @@ extension Nnapp.Create {
         var category: String?
         
         func run() throws {
-            let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
-            let handler = GroupHandler(picker: picker, context: context)
-            
-            try handler.createGroup(name: name, category: category)
+            try Nnapp.makeGroupHandler().createGroup(name: name, category: category)
         }
     }
 }

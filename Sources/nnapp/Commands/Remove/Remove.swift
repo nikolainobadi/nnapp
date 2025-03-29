@@ -48,11 +48,7 @@ extension Nnapp.Remove {
         var name: String?
         
         func run() throws {
-            let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
-            let handler = GroupHandler(picker: picker, context: context)
-            
-            try handler.removeGroup(name: name)
+            try Nnapp.makeGroupHandler().removeGroup(name: name)
         }
     }
 }

@@ -10,13 +10,13 @@ import SwiftPicker
 
 struct GroupHandler {
     private let picker: Picker
-    private let store: CategoryHandler
     private let context: CodeLaunchContext
+    private let categorySelector: GroupCategorySelector
     
-    init(picker: Picker, context: CodeLaunchContext) {
+    init(picker: Picker, context: CodeLaunchContext, categorySelector: GroupCategorySelector) {
         self.picker = picker
         self.context = context
-        self.store = CategoryHandler(picker: picker, context: context)
+        self.categorySelector = categorySelector
     }
 }
 
@@ -25,7 +25,7 @@ struct GroupHandler {
 extension GroupHandler {
     @discardableResult
     func importGroup(path: String?, category: String?) throws -> LaunchGroup {
-        let selectedCategory = try store.getCategory(named: category)
+        let selectedCategory = try categorySelector.getCategory(named: category)
         let selectedGroupFolder = try selectGroupFolderToImport(path: path, category: selectedCategory)
         let group = LaunchGroup(name: selectedGroupFolder.name)
         
@@ -39,7 +39,7 @@ extension GroupHandler {
     @discardableResult
     func createGroup(name: String?, category: String?) throws -> LaunchGroup {
         let name = try name ?? picker.getRequiredInput("Enter the name of your new group.")
-        let category = try store.getCategory(named: category)
+        let category = try categorySelector.getCategory(named: category)
         let categoryFolder = try Folder(path: category.path)
         let group = LaunchGroup(name: name)
         
@@ -107,15 +107,16 @@ private extension GroupHandler {
     }
     
     func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
+        let categoryPath = category.path
         let categoryFolder = try Folder(path: category.path)
         
-        if folder.path.contains(categoryFolder.path) {
-            print("Group Folder is already in the \(categoryFolder.name) folder")
+        if let existingFolder = try? categoryFolder.subfolder(named: folder.name) {
+            if existingFolder.path != folder.path {
+                throw CodeLaunchError.groupFolderAlreadyExists
+            }
+            
+            print("folder is already in the correct location")
             return
-        }
-        
-        if categoryFolder.subfolders.map({ $0.name }).contains(where: { $0.matches(folder.name) }) {
-            throw CodeLaunchError.groupFolderAlreadyExists
         }
         
         try folder.move(to: categoryFolder)
@@ -143,6 +144,10 @@ private extension GroupHandler {
 
 
 // MARK: - Dependencies
+protocol GroupCategorySelector {
+    func getCategory(named name: String?) throws -> LaunchCategory
+}
+
 enum AssignGroupType: CaseIterable {
     case select, create, `import`
 }
