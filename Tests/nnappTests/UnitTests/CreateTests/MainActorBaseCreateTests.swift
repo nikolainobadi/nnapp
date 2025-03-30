@@ -33,7 +33,7 @@ class MainActorBaseCreateTests: MainActorTempFolderDatasource {
         }
     }
     
-    func runCommand(_ factory: MockContextFactory, argType: ArgType?) throws {
+    func runCommand(_ factory: MockContextFactory?, argType: ArgType?) throws {
         var args = ["create"]
         
         if let argType {
