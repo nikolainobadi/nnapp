@@ -15,6 +15,6 @@ func makeGroup(name: String = "MyGroup", shortcut: String? = nil) -> LaunchGroup
     return .init(name: name, shortcut: shortcut)
 }
 
-func makeProject(name: String = "MyProject", shorcut: String? = nil) -> LaunchProject {
-    return .init(name: name, shortcut: shorcut, type: .package, remote: nil, links: [])
+func makeProject(name: String = "MyProject", shortcut: String? = nil, remote: ProjectLink? = nil, links: [ProjectLink] = []) -> LaunchProject {
+    return .init(name: name, shortcut: shortcut, type: .package, remote: remote, links: links)
 }

@@ -63,7 +63,7 @@ extension AddProjectTests {
         let factory = try #require(try makeFactory())
         let context = try factory.makeContext()
         let group = try #require(context.loadGroups().first)
-        let existing = makeProject(name: "OtherProject", shorcut: "dup")
+        let existing = makeProject(name: "OtherProject", shortcut: "dup")
         try context.saveProject(existing, in: group)
 
         let tempProjectFolder = try #require(try tempFolder.createSubfolder(named: "MyProject"))

@@ -131,7 +131,7 @@ private extension Nnapp.Open {
     func openRemoteURL(for project: LaunchProject) throws {
         guard let remote = project.remote else {
             print("\(project.name) doesn't have a remote repository registered")
-            return
+            throw CodeLaunchError.missingGitRepository
         }
         
         print("opening \(remote.name), url: \(remote.urlString)")
@@ -157,6 +157,7 @@ private extension Nnapp.Open {
             try shell.runAndPrint("open \(selection.urlString)")
         } else {
             print("\(project.name) doesn't have any links")
+            throw CodeLaunchError.missingProjectLink
         }
     }
 }

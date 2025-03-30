@@ -18,7 +18,7 @@ final class CreateGroupTests: MainActorBaseCreateTests {
         let testGroupFolder = TestFolder(name: existingGroupName, subFolders: [])
         let testCategoryFolder = TestFolder(name: existingCategoryName, subFolders: [testGroupFolder])
         
-        try super.init(testFolder: .init(name: "addGroupCategoryList", subFolders: [testCategoryFolder]))
+        try super.init(testFolder: .init(name: "createGroupCategoryList", subFolders: [testCategoryFolder]))
     }
 }
 

@@ -56,7 +56,7 @@ struct FinderTests {
         let context = try factory.makeContext()
         let category = makeCategory()
         let group = makeGroup()
-        let project = makeProject(name: info.name ?? "projectName", shorcut: info.shortcut)
+        let project = makeProject(name: info.name ?? "projectName", shortcut: info.shortcut)
         
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)

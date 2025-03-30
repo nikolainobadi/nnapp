@@ -103,7 +103,7 @@ extension RemoveTests {
         let context = try factory.makeContext()
         let category = makeCategory()
         let group = makeGroup()
-        let project = makeProject(name: "P", shorcut: "pshort")
+        let project = makeProject(name: "P", shortcut: "pshort")
 
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
