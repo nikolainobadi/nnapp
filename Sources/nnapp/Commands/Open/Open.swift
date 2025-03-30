@@ -24,7 +24,7 @@ extension Nnapp {
         var launchType: LaunchType = .xcode
         
         // TODO: - might want to change the flag name
-        @Flag(name: .customShort("o"), help: "Opens the list of projects within the group associated with the shortcut provided")
+        @Flag(name: .customShort("g"), help: "Opens the list of projects within the group associated with the shortcut provided")
         var useGroupShortcut: Bool = false
 
         func run() throws {
@@ -165,22 +165,26 @@ private extension Nnapp.Open {
 // MARK: - Dependencies
 public enum LaunchType: String, CaseIterable {
     case xcode, vscode, remote, link
+    
+    var argChar: Character {
+        switch self {
+        case .xcode:
+            return "x"
+        case .vscode:
+            return "v"
+        case .remote:
+            return "r"
+        case .link:
+            return "l"
+        }
+    }
 }
 
 
 // MARK: - Extension Dependencies
 extension LaunchType: EnumerableFlag {
     public static func name(for value: LaunchType) -> NameSpecification {
-        switch value {
-        case .xcode:
-            return .customShort("x")
-        case .vscode:
-            return .customShort("v")
-        case .remote:
-            return .customShort("r")
-        case .link:
-            return .customShort("l")
-        }
+        return .customShort(value.argChar)
     }
 }
 
