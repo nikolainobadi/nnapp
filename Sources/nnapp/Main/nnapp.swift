@@ -12,12 +12,22 @@ import ArgumentParser
 struct Nnapp: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Utility to manage Xcode Projects and Swift Packages for quick launching with command-line.",
-        subcommands: [Add.self, Create.self, List.self, Open.self, Remove.self, Evict.self, Finder.self]
+        subcommands: [
+            Add.self,
+            Create.self,
+            Remove.self,
+            Evict.self,
+            List.self,
+            Open.self,
+            Finder.self
+        ]
     )
     
     nonisolated(unsafe) static var contextFactory: ContextFactory = DefaultContextFactory()
 }
 
+
+// MARK: - Essential Factory Methods
 extension Nnapp {
     static func makeShell() -> Shell {
         return contextFactory.makeShell()
@@ -35,6 +45,14 @@ extension Nnapp {
         return contextFactory.makeGroupCategorySelector(picker: picker, context: context)
     }
     
+    static func makeProjectGroupSelector(picker: Picker, context: CodeLaunchContext) -> ProjectGroupSelector {
+        return contextFactory.makeProjectGroupSelector(picker: picker, context: context)
+    }
+}
+
+
+// MARK: - Convenience Factory Methods
+extension Nnapp {
     static func makeCategoryHandler() throws -> CategoryHandler {
         let picker = makePicker()
         let context = try makeContext()
@@ -49,6 +67,15 @@ extension Nnapp {
         
         return .init(picker: picker, context: context, categorySelector: categorySelector)
     }
+    
+    static func makeProjectHandler() throws -> ProjectHandler {
+        let shell = Nnapp.makeShell()
+        let picker = Nnapp.makePicker()
+        let context = try Nnapp.makeContext()
+        let groupSelector = makeProjectGroupSelector(picker: picker, context: context)
+        
+        return .init(shell: shell, picker: picker, context: context, groupSelector: groupSelector)
+    }
 }
 
 
@@ -58,22 +85,5 @@ protocol ContextFactory {
     func makePicker() -> Picker
     func makeContext() throws -> CodeLaunchContext
     func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector
-}
-
-final class DefaultContextFactory: ContextFactory {
-    func makeShell() -> Shell {
-        return DefaultShell()
-    }
-    
-    func makePicker() -> Picker {
-        return SwiftPicker()
-    }
-    
-    func makeContext() throws -> CodeLaunchContext {
-        return try CodeLaunchContext()
-    }
-    
-    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
-        return CategoryHandler(picker: picker, context: context)
-    }
+    func makeProjectGroupSelector(picker: Picker, context: CodeLaunchContext) -> ProjectGroupSelector
 }

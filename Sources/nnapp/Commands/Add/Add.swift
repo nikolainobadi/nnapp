@@ -74,12 +74,7 @@ extension Nnapp.Add {
         var isMainProject: Bool = false
         
         func run() throws {
-            let shell = Nnapp.makeShell()
-            let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
-            let handler = ProjectHandler(shell: shell, picker: picker, context: context)
-            
-            try handler.addProject(path: path, group: group, shortcut: shortcut, isMainProject: isMainProject)
+            try Nnapp.makeProjectHandler().addProject(path: path, group: group, shortcut: shortcut, isMainProject: isMainProject)
         }
     }
 }

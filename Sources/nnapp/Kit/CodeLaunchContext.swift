@@ -69,7 +69,7 @@ extension CodeLaunchContext {
 
 // MARK: - Save
 extension CodeLaunchContext {
-    func saveCatgory(_ category: LaunchCategory) throws {
+    func saveCategory(_ category: LaunchCategory) throws {
         context.insert(category)
         try context.save()
     }

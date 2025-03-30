@@ -12,6 +12,7 @@ class MainActorBaseAddTests: MainActorTempFolderDatasource {
     enum ArgType {
         case category(path: String?)
         case group(path: String?, category: String?)
+        case project(path: String?, group: String?, shortcut: String?, isMainProject: Bool)
     }
     
     func runCommand(_ factory: MockContextFactory? = nil, argType: ArgType) throws {
@@ -33,6 +34,24 @@ class MainActorBaseAddTests: MainActorTempFolderDatasource {
             
             if let category {
                 args.append(contentsOf: ["-c", category])
+            }
+        case .project(let path, let group, let shortcut, let isMain):
+            args.append("project")
+            
+            if let path {
+                args.append(path)
+            }
+            
+            if let group {
+                args.append(contentsOf: ["-g", group])
+            }
+            
+            if let shortcut {
+                args.append(contentsOf: ["-s", shortcut])
+            }
+            
+            if isMain {
+                args.append("--main-project")
             }
         }
         

@@ -68,12 +68,7 @@ extension Nnapp.Remove {
         var shortcut: String?
         
         func run() throws {
-            let shell = Nnapp.makeShell()
-            let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
-            let handler = ProjectHandler(shell: shell, picker: picker, context: context)
-            
-            try handler.removeProject(name: name, shortcut: shortcut)
+            try Nnapp.makeProjectHandler().removeProject(name: name, shortcut: shortcut)
         }
     }
 }

@@ -29,7 +29,7 @@ extension CategoryHandler {
         try validateName(folder.name, categories: categories)
         let category = LaunchCategory(name: folder.name, path: folder.path)
         
-        try context.saveCatgory(category)
+        try context.saveCategory(category)
         
         return category
     }
@@ -45,7 +45,7 @@ extension CategoryHandler {
         let categoryFolder = try parentFolder.createSubfolder(named: name)
         let category = LaunchCategory(name: name, path: categoryFolder.path)
         
-        try context.saveCatgory(category)
+        try context.saveCategory(category)
         
         return category
     }
@@ -109,25 +109,6 @@ private extension CategoryHandler {
     func validateParentFolder(_ folder: Folder, categoryName: String) throws {
         if folder.subfolders.contains(where: { $0.name.matches(categoryName) }) {
             throw CodeLaunchError.categoryPathTaken
-        }
-    }
-}
-
-
-// MARK: - Dependencies
-enum AssignCategoryType: CaseIterable {
-    case select, create, `import`
-}
-
-extension AssignCategoryType: DisplayablePickerItem {
-    var displayName: String {
-        switch self {
-        case .select:
-            return "Select an existing Category"
-        case .create:
-            return "Create new Category and folder"
-        case .import:
-            return "Import existing folder to create new Category"
         }
     }
 }

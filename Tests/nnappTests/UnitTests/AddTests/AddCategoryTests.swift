@@ -19,7 +19,7 @@ final class AddCategoryTests: MainActorBaseAddTests {
         let otherFolder = try #require(try tempFolder.createSubfolder(named: "OtherFolder"))
         let categoryFolderToImport = try #require(try otherFolder.createSubfolder(named: existingName))
         
-        try context.saveCatgory(existingCategory)
+        try context.saveCategory(existingCategory)
         
         #expect(throws: CodeLaunchError.categoryNameTaken) {
             try runCommand(factory, argType: .category(path: categoryFolderToImport.path))

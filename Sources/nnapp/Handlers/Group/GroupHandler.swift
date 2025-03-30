@@ -53,7 +53,7 @@ extension GroupHandler {
 
 
 // MARK: - Helper
-extension GroupHandler {
+extension GroupHandler: ProjectGroupSelector {
     func getGroup(named name: String?) throws -> LaunchGroup {
         let groups = try context.loadGroups()
         
@@ -107,7 +107,6 @@ private extension GroupHandler {
     }
     
     func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
-        let categoryPath = category.path
         let categoryFolder = try Folder(path: category.path)
         
         if let existingFolder = try? categoryFolder.subfolder(named: folder.name) {
@@ -146,21 +145,4 @@ private extension GroupHandler {
 // MARK: - Dependencies
 protocol GroupCategorySelector {
     func getCategory(named name: String?) throws -> LaunchCategory
-}
-
-enum AssignGroupType: CaseIterable {
-    case select, create, `import`
-}
-
-extension AssignGroupType: DisplayablePickerItem {
-    var displayName: String {
-        switch self {
-        case .select:
-            return "Select an existing Group"
-        case .create:
-            return "Create new Group and folder"
-        case .import:
-            return "Import existing folder to create new Group"
-        }
-    }
 }

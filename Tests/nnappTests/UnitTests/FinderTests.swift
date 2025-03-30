@@ -24,7 +24,7 @@ struct FinderTests {
         let categoryName = name ?? "categoryName"
         let category = makeCategory(name: categoryName)
         
-        try context.saveCatgory(category)
+        try context.saveCategory(category)
         try runCommand(factory, name: name, folderType: .category)
         try assertShell(shell, contains: category.path)
     }
@@ -40,7 +40,7 @@ struct FinderTests {
         let category = makeCategory()
         let group = makeGroup(name: info.name ?? "groupName", shortcut: info.shortcut)
         
-        try context.saveCatgory(category)
+        try context.saveCategory(category)
         try context.saveGroup(group, in: category)
         try runCommand(factory, name: info.nameArg, folderType: .group)
         try assertShell(shell, contains: group.path)
@@ -58,7 +58,7 @@ struct FinderTests {
         let group = makeGroup()
         let project = makeProject(name: info.name ?? "projectName", shorcut: info.shortcut)
         
-        try context.saveCatgory(category)
+        try context.saveCategory(category)
         try context.saveGroup(group, in: category)
         try context.saveProject(project, in: group)
         try runCommand(factory, name: info.nameArg, folderType: .project)

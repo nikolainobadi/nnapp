@@ -13,17 +13,16 @@ import GitShellKit
 struct ProjectHandler {
     private let shell: Shell
     private let picker: Picker
-    private let store: GroupHandler
     private let context: CodeLaunchContext
     private let gitShell: GitShellAdapter
+    private let groupSelector: ProjectGroupSelector
     
-    init(shell: Shell, picker: Picker, context: CodeLaunchContext) {
-        fatalError()
-//        self.shell = shell
-//        self.picker = picker
-//        self.context = context
-//        self.gitShell = .init(shell: shell)
-//        self.store = GroupHandler(picker: picker, context: context)
+    init(shell: Shell, picker: Picker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector) {
+        self.shell = shell
+        self.picker = picker
+        self.context = context
+        self.gitShell = .init(shell: shell)
+        self.groupSelector = groupSelector
     }
 }
 
@@ -31,24 +30,16 @@ struct ProjectHandler {
 // MARK: - Add
 extension ProjectHandler {
     func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool) throws {
-        let selectedGroup = try store.getGroup(named: group)
+        let selectedGroup = try groupSelector.getGroup(named: group)
         let projectFolder = try selectProjectFolder(path: path, group: selectedGroup)
-        try validateName(projectFolder.name)
-        let shortcut = try getShortcut(shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
-        try validateShortcut(shortcut)
-        let remote = getRemote(folder: projectFolder.folder)
-        let otherLinks = getOtherLinks()
-        let project = LaunchProject(name: projectFolder.name, shortcut: shortcut, type: projectFolder.type, remote: remote, links: otherLinks)
+        let info = try selectProjectInfo(folder: projectFolder.folder, shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
+        let project = LaunchProject(name: info.name, shortcut: info.shortcut, type: projectFolder.type, remote: info.remote, links: info.otherLinks)
         
         if isMainProject || (selectedGroup.shortcut == nil && picker.getPermission("Is this the main project of \(selectedGroup.name)?")) {
-            selectedGroup.shortcut = shortcut
+            selectedGroup.shortcut = info.shortcut
         }
         
-        guard let groupFolderPath = selectedGroup.path else {
-            throw CodeLaunchError.missingGroup
-        }
-        
-        try moveFolderIfNecessary(projectFolder.folder, parentPath: groupFolderPath)
+        try moveFolderIfNecessary(projectFolder.folder, parentPath: selectedGroup.path)
         try context.saveProject(project, in: selectedGroup)
     }
 }
@@ -83,106 +74,16 @@ extension ProjectHandler {
 
 // MARK: - Private Methods
 private extension ProjectHandler {
-    func validateName(_ name: String) throws {
-        let projects = try context.loadProjects()
-        
-        if projects.contains(where: { $0.name.matches(name) }) {
-            throw CodeLaunchError.projectNameTaken
-        }
-    }
-    
-    func validateShortcut(_ shortcut: String?) throws {
-        if let shortcut {
-            let groups = try context.loadGroups()
-            let projects = groups.flatMap({ $0.projects })
-            let allShortcuts = groups.compactMap({ $0.shortcut }) + projects.compactMap({ $0.shortcut })
-            
-            if allShortcuts.contains(where: { $0.matches(shortcut) }) {
-                throw CodeLaunchError.shortcutTaken
-            }
-        }
-    }
-    
     func selectProjectFolder(path: String?, group: LaunchGroup) throws -> ProjectFolder {
-        if let path, let folder = try? Folder(path: path) {
-            let projectType = try getProjectType(folder: folder)
-            
-            return .init(folder: folder, type: projectType)
-        }
+        let folderSelector = ProjectFolderSelector(picker: picker)
         
-        guard let groupPath = group.path else {
-            print("unable to resolve local path for \(group.name)")
-            throw CodeLaunchError.missingGroup
-        }
-        
-        let groupFolder = try Folder(path: groupPath)
-        let availableFolders = getAvailableSubfolders(group: group, folder: groupFolder)
-        
-        if !availableFolders.isEmpty, picker.getPermission("Would you like to select a project from the \(groupFolder.name) folder?") {
-            return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
-        }
-        
-        let path = try picker.getRequiredInput("Enter the path to the folder you want to use.")
-        let folder = try Folder(path: path)
-        let projectType = try getProjectType(folder: folder)
-        
-        return .init(folder: folder, type: projectType)
+        return try folderSelector.selectProjectFolder(path: path, group: group)
     }
     
-    // TODO: - need to verify that project shortcut is available
-    func getShortcut(shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> String? {
-        if let shortcut {
-            return shortcut
-        }
+    func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
+        let infoSelector = ProjectInfoSelector(picker: picker, gitShell: gitShell, context: context)
         
-        let prompt = "Enter the shortcut to launch this project."
-        
-        if group.shortcut != nil && !isMainProject {
-            guard picker.getPermission("Would you like to add a quick-launch shortcut for this project?") else {
-                return nil
-            }
-        }
-        
-        return try picker.getRequiredInput(prompt)
-    }
-    
-    func getAvailableSubfolders(group: LaunchGroup, folder: Folder) -> [ProjectFolder] {
-        return folder.subfolders.compactMap { subFolder in
-            guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()), let projectType = try? getProjectType(folder: subFolder) else {
-                return nil
-            }
-            
-            return .init(folder: subFolder, type: projectType)
-        }
-    }
-    
-    func getProjectType(folder: Folder) throws -> ProjectType {
-        if folder.containsFile(named: "Package.swift") {
-            return .package
-        }
-        
-        if folder.subfolders.contains(where: { $0.extension == "xcodeproj" }) {
-            return .project
-        }
-        
-        // TODO: - will need to also check for a workspace, then ask the user to choose which to use
-        throw CodeLaunchError.noProjectInFolder
-    }
-    
-    func getRemote(folder: Folder) -> ProjectLink? {
-        guard let githubURL = try? GitShellAdapter(shell: shell).getGitHubURL(at: folder.path), picker.getPermission("Is this the correct remote url: \(githubURL)?") else {
-            return nil
-        }
-        
-        // TODO: - will need to expand support for other websites
-        return .init(name: "GitHub", urlString: githubURL)
-    }
-    
-    func getOtherLinks() -> [ProjectLink] {
-        let linkOptions = context.loadProjectLinkNames()
-        let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions)
-        
-        return handler.getOtherLinks()
+        return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }
     
     func getProject(name: String?, shortcut: String?, selectionPrompt: String) throws -> LaunchProject {
@@ -205,7 +106,11 @@ private extension ProjectHandler {
         return try picker.requiredSingleSelection(selectionPrompt, items: projects)
     }
     
-    func moveFolderIfNecessary(_ folder: Folder, parentPath: String) throws {
+    func moveFolderIfNecessary(_ folder: Folder, parentPath: String?) throws {
+        guard let parentPath else {
+            throw CodeLaunchError.missingGroup
+        }
+        
         let parentFolder = try Folder(path: parentPath)
         
         if let existingSubfolder = try? parentFolder.subfolder(named: folder.name) {
@@ -223,13 +128,8 @@ private extension ProjectHandler {
 
 
 // MARK: - Dependencies
-struct ProjectFolder {
-    let folder: Folder
-    let type: ProjectType
-    
-    var name: String {
-        return folder.name
-    }
+protocol ProjectGroupSelector {
+    func getGroup(named name: String?) throws -> LaunchGroup
 }
 
 
@@ -314,17 +214,6 @@ private extension ProjectHandler {
 
 
 // MARK: - Dependencies
-struct BranchInfo {
-    let name: String
-    let isMerged: Bool
-    let isCurrent: Bool
-    let isAheadOfRemote: Bool
-    
-    var isMain: Bool {
-        return name == "main"
-    }
-}
-
 enum BranchSyncStatus: String, CaseIterable {
     case behind, ahead, nsync, diverged, undetermined, noRemoteBranch
 }

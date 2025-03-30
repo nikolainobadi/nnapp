@@ -34,6 +34,14 @@ extension MockContextFactory: ContextFactory {
         return picker
     }
     
+    func makeProjectGroupSelector(picker: Picker, context: CodeLaunchContext) -> ProjectGroupSelector {
+        return MockGroupSelector(context: context)
+    }
+    
+    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
+        return MockCategorySelector(context: context)
+    }
+    
     func makeContext() throws -> CodeLaunchContext {
         if let context {
             return context
@@ -47,11 +55,8 @@ extension MockContextFactory: ContextFactory {
         
         return context
     }
-    
-    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
-        return MockCategorySelector(context: context)
-    }
 }
+
 
 // MARK: - Private
 private extension MockContextFactory {
@@ -61,25 +66,5 @@ private extension MockContextFactory {
         userDefaults.removePersistentDomain(forName: testSuiteName)
         
         return userDefaults
-    }
-}
-
-final class MockCategorySelector {
-    private let context: CodeLaunchContext
-    
-    init(context: CodeLaunchContext) {
-        self.context = context
-    }
-}
-
-
-// MARK: - Selector
-extension MockCategorySelector: GroupCategorySelector {
-    func getCategory(named name: String?) throws -> LaunchCategory {
-        guard let category = try context.loadCategories().first else {
-            throw NSError(domain: "Test", code: 0)
-        }
-        
-        return category
     }
 }

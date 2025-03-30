@@ -114,7 +114,7 @@ private extension AddGroupTests {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let category = makeCategory(name: existingCategoryName, path: existingCategoryFolder.path)
-        try context.saveCatgory(category)
+        try context.saveCategory(category)
         
         if includeGroup {
             try context.saveGroup(makeGroup(name: existingGroupName), in: category)
