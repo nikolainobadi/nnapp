@@ -38,13 +38,11 @@ extension GroupHandler {
     
     @discardableResult
     func createGroup(name: String?, category: String?) throws -> LaunchGroup {
-        let name = try name ?? picker.getRequiredInput("Enter the name of your new group.")
         let category = try categorySelector.getCategory(named: category)
-        let categoryFolder = try Folder(path: category.path)
+        let name = try name ?? picker.getRequiredInput("Enter the name of your new group.")
+        try validateName(name, groups: category.groups)
         let group = LaunchGroup(name: name)
-        
-        // TODO: - maybe verify that another folder doesn't already have that name in categoryFolder?
-        try categoryFolder.createSubfolder(named: name)
+        try createNewGroupFolder(group: group, category: category)
         try context.saveGroup(group, in: category)
         
         return group
@@ -104,6 +102,17 @@ private extension GroupHandler {
         if groups.contains(where: { $0.name.matches(name) }) {
             throw CodeLaunchError.groupNameTaken
         }
+    }
+    
+    func createNewGroupFolder(group: LaunchGroup, category: LaunchCategory) throws {
+        let categoryFolder = try Folder(path: category.path)
+        let subfolderNames = categoryFolder.subfolders.map({ $0.name })
+        
+        if subfolderNames.contains(where: { $0.matches(group.name) }) {
+            throw CodeLaunchError.groupFolderAlreadyExists
+        }
+        
+        try categoryFolder.createSubfolder(named: group.name)
     }
     
     func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
