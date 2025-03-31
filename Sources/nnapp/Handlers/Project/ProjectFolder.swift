@@ -7,10 +7,12 @@
 
 import Files
 
+/// Wraps a `Folder` and its determined `ProjectType` during folder selection and validation.
 struct ProjectFolder {
     let folder: Folder
     let type: ProjectType
-    
+
+    /// The name of the folder, used as the project name.
     var name: String {
         return folder.name
     }

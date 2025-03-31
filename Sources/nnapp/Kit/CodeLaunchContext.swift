@@ -9,14 +9,21 @@ import SwiftData
 import Foundation
 import NnSwiftDataKit
 
-public final class CodeLaunchContext {
+/// Manages loading, saving, and deleting Categories, Groups, and Projects from SwiftData and UserDefaults.
+/// Acts as the primary interface to CodeLaunch's persistent state.
+final class CodeLaunchContext {
     private let launchScriptKey = "launchScriptKey"
     private let projectLinkNameListKey = "projectLinkNameListKey"
     
     let context: ModelContext
     let defaults: UserDefaults
     
-    public init(config: ModelConfiguration? = nil, defaults: UserDefaults? = nil) throws {
+    /// Initializes the CodeLaunchContext using optional configuration and user defaults.
+    /// If none are provided, a default SwiftData container is created for the app group.
+    /// - Parameters:
+    ///   - config: Optional SwiftData model configuration.
+    ///   - defaults: Optional UserDefaults, typically injected for testing or previews.
+    init(config: ModelConfiguration? = nil, defaults: UserDefaults? = nil) throws {
         let appGroupId = "R8SJ24LQF3.com.nobadi.codelaunch"
         var userDefaults: UserDefaults
         var configuration: ModelConfiguration
@@ -41,22 +48,32 @@ public final class CodeLaunchContext {
 
 // MARK: - Load
 extension CodeLaunchContext {
+    /// Loads all saved launch categories from the SwiftData context.
+    /// - Returns: An array of `LaunchCategory` objects.
     func loadCategories() throws -> [LaunchCategory] {
         return try load()
     }
     
+    /// Loads all saved launch groups from the SwiftData context.
+    /// - Returns: An array of `LaunchGroup` objects.
     func loadGroups() throws -> [LaunchGroup] {
         return try load()
     }
     
+    /// Loads all saved launch projects from the SwiftData context.
+    /// - Returns: An array of `LaunchProject` objects.
     func loadProjects() throws -> [LaunchProject] {
         return try load()
     }
     
+    /// Retrieves the list of saved project link names from UserDefaults.
+    /// - Returns: An array of link name strings, or an empty array if none exist.
     func loadProjectLinkNames() -> [String] {
         return defaults.array(forKey: projectLinkNameListKey) as? [String] ?? []
     }
     
+    /// Retrieves the terminal launch script from UserDefaults, if set and non-empty.
+    /// - Returns: The script as a string, or `nil` if not available.
     func loadLaunchScript() -> String? {
         guard let script = defaults.string(forKey: launchScriptKey), !script.isEmpty else {
             return nil
@@ -69,11 +86,17 @@ extension CodeLaunchContext {
 
 // MARK: - Save
 extension CodeLaunchContext {
+    /// Persists a new launch category to the SwiftData context.
+    /// - Parameter category: The category to save.
     func saveCategory(_ category: LaunchCategory) throws {
         context.insert(category)
         try context.save()
     }
     
+    /// Persists a new launch group under the specified category.
+    /// - Parameters:
+    ///   - group: The group to save.
+    ///   - category: The parent category to associate with.
     func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
         context.insert(group)
         group.category = category
@@ -82,6 +105,10 @@ extension CodeLaunchContext {
         try context.save()
     }
     
+    /// Persists a new launch project under the specified group.
+    /// - Parameters:
+    ///   - project: The project to save.
+    ///   - group: The parent group to associate with.
     func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws {
         context.insert(project)
         project.group = group
@@ -90,6 +117,8 @@ extension CodeLaunchContext {
         try context.save()
     }
     
+    /// Saves a list of project link names to UserDefaults.
+    /// - Parameter names: The list of names to save.
     func saveProjectLinkNames(_ names: [String]) {
         defaults.set(names, forKey: projectLinkNameListKey)
     }
@@ -98,6 +127,8 @@ extension CodeLaunchContext {
 
 // MARK: - Delete
 extension CodeLaunchContext {
+    /// Deletes a category and all associated groups and projects.
+    /// - Parameter category: The category to delete.
     func deleteCategory(_ category: LaunchCategory) throws {
         for group in category.groups {
             try deleteGroup(group, skipSave: true)
@@ -107,6 +138,10 @@ extension CodeLaunchContext {
         try context.save()
     }
     
+    /// Deletes a group and its associated projects.
+    /// - Parameters:
+    ///   - group: The group to delete.
+    ///   - skipSave: If true, defers saving the context (used when part of a batch operation).
     func deleteGroup(_ group: LaunchGroup, skipSave: Bool = false) throws {
         for project in group.projects {
             try deleteProject(project, skipSave: true)
@@ -119,6 +154,10 @@ extension CodeLaunchContext {
         }
     }
     
+    /// Deletes a single launch project from the SwiftData context.
+    /// - Parameters:
+    ///   - project: The project to delete.
+    ///   - skipSave: If true, defers saving the context (used when part of a batch operation).
     func deleteProject(_ project: LaunchProject, skipSave: Bool = false) throws {
         context.delete(project)
         
@@ -131,6 +170,8 @@ extension CodeLaunchContext {
 
 // MARK: - Private Methods
 private extension CodeLaunchContext {
+    /// Generic fetch for any PersistentModel type from SwiftData context.
+    /// - Returns: An array of loaded models of the specified type.
     func load<Item: PersistentModel>() throws -> [Item] {
         return try context.fetch(FetchDescriptor<Item>())
     }
@@ -138,136 +179,13 @@ private extension CodeLaunchContext {
 
 
 
-@Model
-public final class LaunchCategory {
-    @Attribute(.unique) public var name: String
-    @Attribute(.unique) public var path: String
-    @Relationship(deleteRule: .cascade, inverse: \LaunchGroup.category) public var groups: [LaunchGroup] = []
-    
-    public init(name: String, path: String) {
-        self.name = name
-        self.path = path
-    }
-}
-
-@Model
-public final class LaunchGroup {
-    @Attribute(.unique) public var name: String
-    @Relationship(deleteRule: .cascade, inverse: \LaunchProject.group) public var projects: [LaunchProject] = []
-    
-    public var shortcut: String?
-    public var category: LaunchCategory?
-    
-    public init(name: String, shortcut: String? = nil) {
-        self.name = name
-        self.shortcut = shortcut
-    }
-}
-
-public extension LaunchGroup {
-    var path: String? {
-        guard let category else {
-            return nil
-        }
-        
-        return category.path.appendingPathComponent(name)
-    }
-}
-
-@Model
-public final class LaunchProject {
-    @Attribute(.unique) public var name: String
-    @Attribute(.unique) public var shortcut: String?
-    
-    public var type: ProjectType
-    public var remote: ProjectLink?
-    public var links: [ProjectLink]
-    public var group: LaunchGroup?
-    
-    public init(name: String, shortcut: String?, type: ProjectType, remote: ProjectLink?, links: [ProjectLink]) {
-        self.name = name
-        self.shortcut = shortcut
-        self.type = type
-        self.remote = remote
-        self.links = links
-    }
-}
-
-public extension LaunchProject {
-    var fileName: String {
-        switch type {
-        case .package:
-            return "Package.swift"
-        default:
-            return "\(name).\(type.fileExtension)"
-        }
-    }
-    
-    var groupPath: String? {
-        guard let group, let category = group.category else {
-            return nil
-        }
-        
-        return category.path.appendingPathComponent(group.name)
-    }
-    
-    var folderPath: String? {
-        guard let groupPath else {
-            return nil
-        }
-        
-        return groupPath.appendingPathComponent(name)
-    }
-    
-    var filePath: String? {
-        guard let folderPath else {
-            return nil
-        }
-        
-        return folderPath.appendingPathComponent(fileName)
-    }
-}
-
-public enum ProjectType: Codable {
-    case project, package, workspace
-}
-
-public extension ProjectType {
-    var name: String {
-        switch self {
-        case .project:
-            return "Xcode Project"
-        case .package:
-            return "Swift Package"
-        case .workspace:
-            return "XCWorkspace"
-        }
-    }
-    
-    var fileExtension: String {
-        switch self {
-        case .project:
-            return "xcodeproj"
-        case .package:
-            return "swift"
-        case .workspace:
-            return "xcworkspace"
-        }
-    }
-}
-
-public struct ProjectLink: Codable, Equatable {
-    public let name: String
-    public let urlString: String
-    
-    public init(name: String, urlString: String) {
-        self.name = name
-        self.urlString = urlString
-    }
-}
-
-
-public extension String {
+// MARK: - Extension Dependencies
+extension String {
+    /// Appends a path component to the string, ensuring there is exactly one separating slash,
+    /// and returns a string that always ends with a trailing slash.
+    ///
+    /// - Parameter path: The path component to append.
+    /// - Returns: A combined path string ending with a `/`.
     func appendingPathComponent(_ path: String) -> String {
         let selfHasSlash = self.hasSuffix("/")
         let pathHasSlash = path.hasPrefix("/")
