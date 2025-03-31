@@ -10,6 +10,8 @@ import Foundation
 import SwiftPicker
 import GitShellKit
 
+/// Handles creation, removal, and eviction of `LaunchProject` objects.
+/// Coordinates folder movement, Git inspection, and persistence updates.
 struct ProjectHandler {
     private let shell: Shell
     private let picker: Picker
@@ -17,6 +19,12 @@ struct ProjectHandler {
     private let gitShell: GitShellAdapter
     private let groupSelector: ProjectGroupSelector
     
+    /// Initializes a new handler for managing projects.
+    /// - Parameters:
+    ///   - shell: Used for executing Git and terminal commands.
+    ///   - picker: User-facing prompt utility.
+    ///   - context: SwiftData-backed persistence layer.
+    ///   - groupSelector: Logic for resolving a group during project creation.
     init(shell: Shell, picker: Picker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector) {
         self.shell = shell
         self.picker = picker
@@ -29,6 +37,12 @@ struct ProjectHandler {
 
 // MARK: - Add
 extension ProjectHandler {
+    /// Creates and registers a new `LaunchProject`, optionally syncing the group shortcut.
+    /// - Parameters:
+    ///   - path: Optional path to the project folder.
+    ///   - group: Optional name of the group to assign the project to.
+    ///   - shortcut: Optional quick-launch shortcut.
+    ///   - isMainProject: Whether this is the main project for the group (used for terminal launches).
     func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool) throws {
         let selectedGroup = try groupSelector.getGroup(named: group)
         let projectFolder = try selectProjectFolder(path: path, group: selectedGroup)
@@ -47,27 +61,16 @@ extension ProjectHandler {
 
 // MARK: - Remove
 extension ProjectHandler {
+    /// Unregisters a project from the database (does not delete local files).
+    /// - Parameters:
+    ///   - name: Optional name of the project.
+    ///   - shortcut: Optional shortcut of the project.
     func removeProject(name: String?, shortcut: String?) throws {
         let projectToDelete = try getProject(name: name, shortcut: shortcut, selectionPrompt: "Select the Project you would like to remove. (Note: this will unregister the project from quick-launch. If you want to remove the project and keep it available for quick launch, use \("evict".bold)")
         
         // TODO: - maybe indicate that this is different from evicting?
         try picker.requiredPermission("Are you sure want to remove \(projectToDelete.name.yellow)?")
         try context.deleteProject(projectToDelete)
-    }
-}
-
-
-// MARK: - Evict
-extension ProjectHandler {
-    func evictProject(name: String?, shortcut: String?) throws {
-        let projectToEvict = try getProject(name: name, shortcut: shortcut, selectionPrompt: "Select the Project you would like to evict")
-        
-        guard let folderPath = projectToEvict.folderPath, let folder = try? Folder(path: folderPath) else {
-            print("Unable to locate the folder folder for \(projectToEvict.name).")
-            throw CodeLaunchError.missingProject
-        }
-        
-        try trashFolder(folder)
     }
 }
 
@@ -86,26 +89,7 @@ private extension ProjectHandler {
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }
     
-    func getProject(name: String?, shortcut: String?, selectionPrompt: String) throws -> LaunchProject {
-        let projects = try context.loadProjects()
-        
-        if let name {
-            if let project = projects.first(where: { $0.name.contains(name) }) {
-                return project
-            }
-            
-            print("Cannot find project named \(name)")
-        } else if let shortcut {
-            if let project = projects.first(where: { shortcut.matches($0.shortcut) }) {
-                return project
-            }
-            
-            print("Cannot find project with shortcut \(shortcut)")
-        }
-        
-        return try picker.requiredSingleSelection(selectionPrompt, items: projects)
-    }
-    
+    /// Moves a folder into the group folder if not already present.
     func moveFolderIfNecessary(_ folder: Folder, parentPath: String?) throws {
         guard let parentPath else {
             throw CodeLaunchError.missingGroup
@@ -130,6 +114,41 @@ private extension ProjectHandler {
 // MARK: - Dependencies
 protocol ProjectGroupSelector {
     func getGroup(named name: String?) throws -> LaunchGroup
+}
+
+
+// TODO: - will enable Evict soon
+extension ProjectHandler {
+    func evictProject(name: String?, shortcut: String?) throws {
+        let projectToEvict = try getProject(name: name, shortcut: shortcut, selectionPrompt: "Select the Project you would like to evict")
+        
+        guard let folderPath = projectToEvict.folderPath, let folder = try? Folder(path: folderPath) else {
+            print("Unable to locate the folder folder for \(projectToEvict.name).")
+            throw CodeLaunchError.missingProject
+        }
+        
+        try trashFolder(folder)
+    }
+    
+    private func getProject(name: String?, shortcut: String?, selectionPrompt: String) throws -> LaunchProject {
+        let projects = try context.loadProjects()
+        
+        if let name {
+            if let project = projects.first(where: { $0.name.contains(name) }) {
+                return project
+            }
+            
+            print("Cannot find project named \(name)")
+        } else if let shortcut {
+            if let project = projects.first(where: { shortcut.matches($0.shortcut) }) {
+                return project
+            }
+            
+            print("Cannot find project with shortcut \(shortcut)")
+        }
+        
+        return try picker.requiredSingleSelection(selectionPrompt, items: projects)
+    }
 }
 
 
