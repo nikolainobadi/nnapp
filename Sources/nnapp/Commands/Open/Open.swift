@@ -23,9 +23,11 @@ extension Nnapp {
         @Flag(help: "Open the project in an IDE (-x for xcode, -v for VSCode) or open a link (-r for remote repository, -l for other links)")
         var launchType: LaunchType = .xcode
         
-        // TODO: - might want to change the flag name
         @Flag(name: .customShort("g"), help: "Opens the list of projects within the group associated with the shortcut provided")
         var useGroupShortcut: Bool = false
+        
+        @Flag(help: "-n only launches the project, -t only launches terminal. Don't include to launch and open terminal. Only applies to opening in Xcode/VSCode")
+        var terminalOption: TerminalOption?
 
         func run() throws {
             let context = try Nnapp.makeContext()
@@ -33,7 +35,7 @@ extension Nnapp {
             
             switch launchType {
             case .xcode, .vscode:
-                try openInIDE(project, isXcode: launchType == .xcode, context: context)
+                try openInIDE(project, isXcode: launchType == .xcode, terminalOption: terminalOption, context: context)
             case .remote:
                 try openRemoteURL(for: project)
             case .link:
@@ -79,13 +81,18 @@ private extension Nnapp.Open {
 
 // MARK: - Launch
 private extension Nnapp.Open {
-    func openInIDE(_ project: LaunchProject, isXcode: Bool, context: CodeLaunchContext) throws {
+    func openInIDE(_ project: LaunchProject, isXcode: Bool, terminalOption: TerminalOption?, context: CodeLaunchContext) throws {
         guard let folderPath = project.folderPath, let filePath = project.filePath else {
             throw CodeLaunchError.missingProject
         }
         
         try cloneProjectIfNecessary(project, folderPath: folderPath, filePath: filePath)
-        openDirectoryInTerminalIfNecessary(folderPath: folderPath, context: context)
+        openDirectoryInTerminalIfNecessary(folderPath: folderPath, terminalOption: terminalOption, context: context)
+        
+        if let terminalOption, terminalOption == .onlyTerminal {
+            return
+        }
+        
         try shell.runAndPrint("\(isXcode ? "open" : "code") \(filePath)")
     }
     
@@ -107,7 +114,11 @@ private extension Nnapp.Open {
         }
     }
     
-    func openDirectoryInTerminalIfNecessary(folderPath: String, context: CodeLaunchContext) {
+    func openDirectoryInTerminalIfNecessary(folderPath: String, terminalOption: TerminalOption?, context: CodeLaunchContext) {
+        if let terminalOption, terminalOption == .noTerminal {
+            return 
+        }
+        
         guard let openPaths = try? shell.getITermSessionPaths(), !openPaths.contains(folderPath) else {
             return
         }
@@ -164,6 +175,10 @@ private extension Nnapp.Open {
 
 
 // MARK: - Dependencies
+enum TerminalOption: String, CaseIterable {
+    case noTerminal, onlyTerminal
+}
+
 public enum LaunchType: String, CaseIterable {
     case xcode, vscode, remote, link
     
@@ -186,6 +201,17 @@ public enum LaunchType: String, CaseIterable {
 extension LaunchType: EnumerableFlag {
     public static func name(for value: LaunchType) -> NameSpecification {
         return .customShort(value.argChar)
+    }
+}
+
+extension TerminalOption: EnumerableFlag {
+    public static func name(for value: TerminalOption) -> NameSpecification {
+        switch value {
+        case .noTerminal:
+            return [.customShort("n"), .customLong("no-terminal")]
+        case .onlyTerminal:
+            return [.customShort("t"), .customLong("terminal")]
+        }
     }
 }
 
