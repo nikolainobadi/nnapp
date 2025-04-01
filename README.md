@@ -1,5 +1,6 @@
 # nnapp
 
+![Build Status](https://github.com/nikolainobadi/nnapp/actions/workflows/ci.yml/badge.svg)
 ![Swift Version](https://badgen.net/badge/swift/6.0%2B/purple)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014-blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgray)
@@ -10,7 +11,11 @@
 
 Think of it as a personalized project launcher with just enough metadata to keep your Swift workspace tidy and quickly accessible.
 
----
+**Stability Notice (v0.5.0)**  
+`nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.  
+Breaking changes are possible before reaching v1.0.0.  
+Your feedback and suggestions are welcome as the project continues to improve!
+
 
 ## Features
 
