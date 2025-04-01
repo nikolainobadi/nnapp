@@ -7,7 +7,7 @@
 
 ## Overview
 
-**nnapp** is a command-line utility designed to manage and launch Xcode projects, Swift packages, and workspaces with ease. It organizes your local development environment into **Categories**, **Groups**, and **Projects**, supporting both local file system operations and Git integrations.
+**nnapp** is a command-line utility designed to manage and launch Xcode projects and Swift packages with ease. It organizes your local development environment into **Categories**, **Groups**, and **Projects**, supporting both local file system operations and Git integrations.
 
 Think of it as a personalized project launcher with just enough metadata to keep your Swift workspace tidy and quickly accessible.
 
