@@ -94,6 +94,8 @@ Each entity (`Category`, `Group`, `Project`) is managed via a declarative `@Mode
 - Source code is organized for discoverability
 - See each command's `run()` method and its related `Handler` for usage flow
 
+For more details and advanced usage, refer to the [Documentation](./docs/Documentation.md)
+
 ---
 
 ## Acknowledgments
