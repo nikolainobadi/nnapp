@@ -13,6 +13,7 @@ Think of it as a personalized project launcher with just enough metadata to keep
 
 **Stability Notice (v0.5.0)**  
 `nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.  
+Currently, `nnapp` is designed to work specifically with **iTerm**, but I'll add support for vanilla **Terminal** (and possible others) for the official release.
 Breaking changes are possible before reaching v1.0.0.  
 Your feedback and suggestions are welcome as the project continues to improve!
 
