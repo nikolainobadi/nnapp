@@ -90,8 +90,7 @@ private extension Nnapp.Open {
 private extension Nnapp.Open {
     /// Opens the project in Xcode or VSCode, optionally launching terminal in the project directory.
     func openInIDE(_ project: LaunchProject, isXcode: Bool, terminalOption: TerminalOption?, context: CodeLaunchContext) throws {
-        guard let folderPath = project.folderPath,
-              let filePath = project.filePath else {
+        guard let folderPath = project.folderPath, let filePath = project.filePath else {
             throw CodeLaunchError.missingProject
         }
 
@@ -101,8 +100,8 @@ private extension Nnapp.Open {
         if let terminalOption, terminalOption == .onlyTerminal {
             return
         }
-
-        try shell.runAndPrint("\(isXcode ? "open" : "code") \(filePath)")
+        
+        try shell.runAndPrint("\(isXcode ? "open" : "code") \(isXcode ? filePath : folderPath)")
     }
 
     /// Clones the project repo if it doesn’t exist locally and a remote is available.
