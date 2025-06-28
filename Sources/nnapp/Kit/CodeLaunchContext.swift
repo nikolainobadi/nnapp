@@ -122,6 +122,12 @@ extension CodeLaunchContext {
     func saveProjectLinkNames(_ names: [String]) {
         defaults.set(names, forKey: projectLinkNameListKey)
     }
+
+    /// Persists the launch script string to UserDefaults.
+    /// - Parameter script: The script to save.
+    func saveLaunchScript(_ script: String) {
+        defaults.set(script, forKey: launchScriptKey)
+    }
 }
 
 
@@ -160,10 +166,15 @@ extension CodeLaunchContext {
     ///   - skipSave: If true, defers saving the context (used when part of a batch operation).
     func deleteProject(_ project: LaunchProject, skipSave: Bool = false) throws {
         context.delete(project)
-        
+
         if !skipSave {
             try context.save()
         }
+    }
+
+    /// Removes the stored launch script from UserDefaults.
+    func deleteLaunchScript() {
+        defaults.removeObject(forKey: launchScriptKey)
     }
 }
 
