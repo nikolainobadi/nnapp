@@ -117,6 +117,72 @@ extension GroupHandler {
 }
 
 
+// MARK: - SetMainProject
+extension GroupHandler {
+    /// Changes the main project for a group by allowing the user to select from available non-main projects.
+    /// - Parameter group: Optional name or shortcut of the group to modify. If `nil`, user selects from list.
+    func setMainProject(group: String?) throws {
+        let groups = try context.loadGroups()
+        var selectedGroup: LaunchGroup
+
+        if let group {
+            if let foundGroup = groups.first(where: { $0.name.matches(group) || $0.shortcut?.matches(group) == true }) {
+                selectedGroup = foundGroup
+            } else {
+                throw CodeLaunchError.missingGroup
+            }
+        } else {
+            selectedGroup = try picker.requiredSingleSelection("Select a group to set the main project for", items: groups)
+        }
+
+        // Find current main project (project with same shortcut as group)
+        let currentMainProject = selectedGroup.projects.first { project in
+            guard let groupShortcut = selectedGroup.shortcut,
+                  let projectShortcut = project.shortcut else { return false }
+            return groupShortcut.matches(projectShortcut)
+        }
+
+        // Display current main project
+        if let mainProject = currentMainProject {
+            print("Current main project: \(mainProject.name.bold)")
+            guard picker.getPermission("Would you like to change the main project?") else {
+                print("No changes made.")
+                return
+            }
+        } else {
+            print("No main project is currently set for group '\(selectedGroup.name.bold)'")
+        }
+
+        // Get non-main projects
+        let nonMainProjects = selectedGroup.projects.filter { project in
+            guard let mainProject = currentMainProject else { return true }
+            return project.name != mainProject.name
+        }
+
+        // Check if any non-main projects exist
+        guard !nonMainProjects.isEmpty else {
+            let message = currentMainProject != nil 
+                ? "No other projects exist in this group to switch to."
+                : "No projects exist in this group. Add a project first using 'nnapp add project'."
+            print(message)
+            return
+        }
+
+        // Let user select new main project
+        let newMainProject = try picker.requiredSingleSelection(
+            "Select the new main project for '\(selectedGroup.name)'", 
+            items: nonMainProjects
+        )
+
+        // Update group shortcut to match the selected project's shortcut
+        selectedGroup.shortcut = newMainProject.shortcut
+        try context.saveGroup(selectedGroup, in: selectedGroup.category!)
+        
+        print("Successfully set '\(newMainProject.name.bold)' as the main project for group '\(selectedGroup.name.bold)'")
+    }
+}
+
+
 // MARK: - Private Methods
 private extension GroupHandler {
     /// Ensures the group name doesn't already exist under the given category.
