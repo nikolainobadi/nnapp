@@ -194,7 +194,7 @@ private extension ProjectHandler {
             .split(separator: "\n")
             .map({ $0.trimmingCharacters(in: .whitespaces) })
         
-        let mergedOutput = try shell.run(makeGitCommand(.listMergedBranches, path: folder.path))
+        let mergedOutput = try shell.run(makeGitCommand(.listMergedBranches(branchName: "main"), path: folder.path))
         let mergedBranches = Set(mergedOutput.split(separator: "\n").map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) }))
         
         return try branchNames.map { branchName in
