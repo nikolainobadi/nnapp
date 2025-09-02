@@ -137,8 +137,10 @@ extension GroupHandler {
 
         // Find current main project (project with same shortcut as group)
         let currentMainProject = selectedGroup.projects.first { project in
-            guard let groupShortcut = selectedGroup.shortcut,
-                  let projectShortcut = project.shortcut else { return false }
+            guard let groupShortcut = selectedGroup.shortcut, let projectShortcut = project.shortcut else {
+                return false
+            }
+            
             return groupShortcut.matches(projectShortcut)
         }
 
@@ -174,8 +176,31 @@ extension GroupHandler {
             items: nonMainProjects
         )
 
-        // Update group shortcut to match the selected project's shortcut
-        selectedGroup.shortcut = newMainProject.shortcut
+        // Determine shortcut to use
+        let shortcutToUse: String
+        if let groupShortcut = selectedGroup.shortcut {
+            // Group has shortcut, use it
+            shortcutToUse = groupShortcut
+        } else if let projectShortcut = newMainProject.shortcut {
+            // Group has no shortcut but new project does, use project's shortcut
+            shortcutToUse = projectShortcut
+        } else {
+            // Neither has shortcut, prompt user
+            shortcutToUse = try picker.getRequiredInput("Enter a shortcut for the main project and group:")
+        }
+
+        // Clear current main project's shortcut if it exists
+        if let currentMain = currentMainProject {
+            currentMain.shortcut = nil
+            try context.saveProject(currentMain, in: selectedGroup)
+        }
+
+        // Set new main project's shortcut and update group
+        newMainProject.shortcut = shortcutToUse
+        selectedGroup.shortcut = shortcutToUse
+        
+        // Save changes
+        try context.saveProject(newMainProject, in: selectedGroup)
         try context.saveGroup(selectedGroup, in: selectedGroup.category!)
         
         print("Successfully set '\(newMainProject.name.bold)' as the main project for group '\(selectedGroup.name.bold)'")

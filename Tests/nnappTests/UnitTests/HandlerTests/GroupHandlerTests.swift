@@ -231,38 +231,30 @@ extension GroupHandlerTests {
 extension GroupHandlerTests {
     @Test("Updates group shortcut to match project when group shortcut is empty")
     func updatesGroupShortcutToMatchProject() throws {
-        
-    }
-    
-    @Test("Requires confirmation to change main project when group shortcut is not empty")
-    func requiresConfirmationToChangeMainProject() throws {
-        
-    }
-    
-    @Test("Handles group with no projects")
-    func handlesGroupWithNoProjects() throws {
+        let group = makeGroup()
+        let project = makeProject(shortcut: "newshortcut")
         let (sut, context) = try makeSUT()
-        let group = makeGroup(name: "EmptyGroup")
-        let existingCategory = try #require(try context.loadCategories().first)
+        let category = try #require(try context.loadCategories().first)
         
-        try context.saveGroup(group, in: existingCategory)
+        #expect(group.shortcut == nil)
         
-        // Should not throw error, just print message and return early
+        try context.saveGroup(group, in: category)
+        try context.saveProject(project, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroups = try context.loadGroups()
-        let updatedGroup = try #require(updatedGroups.first)
-        #expect(updatedGroup.shortcut == nil) // Should remain nil
+        let updatedGroup = try #require(try context.loadGroups().first)
+        
+        #expect(updatedGroup.shortcut == project.shortcut)
     }
 }
 
 
 // MARK: - Helper Methods
 private extension GroupHandlerTests {
-    func makeSUT(categoryName: String? = nil, picker: MockPicker? = nil, permissionResponses: [Bool] = []) throws -> (sut: GroupHandler, context: CodeLaunchContext) {
+    func makeSUT(picker: MockPicker? = nil, permissionResponses: [Bool] = []) throws -> (sut: GroupHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
-        let existingCategoryFolder = try #require(try tempFolder.createSubfolderIfNeeded(withName: categoryName ?? existingCategoryName))
+        let existingCategoryFolder = try #require(try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName))
         let category = makeCategory(name: existingCategoryFolder.name, path: existingCategoryFolder.path)
         
         try context.saveCategory(category)
