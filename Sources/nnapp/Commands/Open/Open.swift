@@ -121,7 +121,7 @@ private extension Nnapp.Open {
             Would you like to fetch it from \(remote.name.green) - \(remote.urlString.yellow)?
             """)
 
-            let cloneCommand = makeGitCommand(.clone(remote.urlString), path: groupPath)
+            let cloneCommand = makeGitCommand(.clone(url: remote.urlString), path: groupPath)
             try shell.runAndPrint(cloneCommand)
         }
     }

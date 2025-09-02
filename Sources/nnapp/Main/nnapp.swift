@@ -12,6 +12,7 @@ import ArgumentParser
 struct Nnapp: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Utility to manage Xcode Projects and Swift Packages for quick launching with command-line.",
+        version: "0.5.2",
         subcommands: [
             Add.self,
             Create.self,
@@ -19,7 +20,8 @@ struct Nnapp: ParsableCommand {
 //            Evict.self, // TODO: - will enable soon
             List.self,
             Open.self,
-            Finder.self
+            Finder.self,
+            Script.self
         ]
     )
     

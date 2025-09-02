@@ -67,6 +67,7 @@ nnapp open abc
 | `list`      | Display all registered Categories, Groups, Projects, or Links |
 | `open`      | Open a Project or Group in Xcode/VSCode, or open associated URLs |
 | `finder`    | Open a Category, Group, or Project in Finder |
+| `script`    | Manage the launch script executed with `open` |
 <!-- | `evict`     | Delete a Project folder while keeping quick-launch metadata | -->
 
 ---
@@ -208,6 +209,24 @@ Opens a Category, Group, or Project folder in Finder.
 | `-c`        | Open a Category     |
 | `-g`        | Open a Group        |
 | `-p`        | Open a Project (default) |
+
+---
+
+### script
+
+```bash
+nnapp script <subcommand>
+```
+
+Manage the terminal launch script that runs with `nnapp open`.
+
+#### Subcommands
+
+| Subcommand | Description |
+|------------|-------------|
+| `show`     | Display the saved launch script |
+| `set`      | Save or update the launch script |
+| `delete`   | Remove the saved launch script |
 
 ---
 
