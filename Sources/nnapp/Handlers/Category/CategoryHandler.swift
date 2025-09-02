@@ -11,14 +11,14 @@ import SwiftPicker
 /// Handles creation, import, selection, and deletion of `LaunchCategory` objects.
 /// Used by commands to manage high-level category folders and associated model persistence.
 struct CategoryHandler {
-    private let picker: Picker
+    private let picker: CommandLinePicker
     private let context: CodeLaunchContext
 
     /// Initializes a new handler for managing categories.
     /// - Parameters:
     ///   - picker: User-facing selection and input utility.
     ///   - context: The persistence context for loading and saving models.
-    init(picker: Picker, context: CodeLaunchContext) {
+    init(picker: CommandLinePicker, context: CodeLaunchContext) {
         self.picker = picker
         self.context = context
     }

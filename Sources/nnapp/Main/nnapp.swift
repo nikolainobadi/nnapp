@@ -36,7 +36,7 @@ extension Nnapp {
         return contextFactory.makeShell()
     }
     
-    static func makePicker() -> Picker {
+    static func makePicker() -> CommandLinePicker {
         return contextFactory.makePicker()
     }
     
@@ -44,11 +44,11 @@ extension Nnapp {
         return try contextFactory.makeContext()
     }
     
-    static func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
+    static func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector {
         return contextFactory.makeGroupCategorySelector(picker: picker, context: context)
     }
     
-    static func makeProjectGroupSelector(picker: Picker, context: CodeLaunchContext) -> ProjectGroupSelector {
+    static func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> ProjectGroupSelector {
         return contextFactory.makeProjectGroupSelector(picker: picker, context: context)
     }
 }
@@ -85,8 +85,8 @@ extension Nnapp {
 // MARK: - Dependencies
 protocol ContextFactory {
     func makeShell() -> Shell
-    func makePicker() -> Picker
+    func makePicker() -> CommandLinePicker
     func makeContext() throws -> CodeLaunchContext
-    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector
-    func makeProjectGroupSelector(picker: Picker, context: CodeLaunchContext) -> ProjectGroupSelector
+    func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector
+    func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> ProjectGroupSelector
 }

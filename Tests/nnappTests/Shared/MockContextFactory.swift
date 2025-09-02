@@ -30,15 +30,15 @@ extension MockContextFactory: ContextFactory {
         return shell
     }
     
-    func makePicker() -> Picker {
+    func makePicker() -> CommandLinePicker {
         return picker
     }
     
-    func makeProjectGroupSelector(picker: Picker, context: CodeLaunchContext) -> ProjectGroupSelector {
+    func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> ProjectGroupSelector {
         return MockGroupSelector(context: context)
     }
     
-    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
+    func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector {
         return MockCategorySelector(context: context)
     }
     

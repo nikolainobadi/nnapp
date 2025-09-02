@@ -11,7 +11,7 @@ import SwiftPicker
 /// Handles creation, import, selection, and deletion of `LaunchGroup` objects.
 /// Groups belong to a `LaunchCategory` and contain one or more `LaunchProject` entries.
 struct GroupHandler {
-    private let picker: Picker
+    private let picker: CommandLinePicker
     private let context: CodeLaunchContext
     private let categorySelector: GroupCategorySelector
 
@@ -20,7 +20,7 @@ struct GroupHandler {
     ///   - picker: Utility for prompting user input.
     ///   - context: Data context for persistence and fetching.
     ///   - categorySelector: Used to determine the group’s parent category.
-    init(picker: Picker, context: CodeLaunchContext, categorySelector: GroupCategorySelector) {
+    init(picker: CommandLinePicker, context: CodeLaunchContext, categorySelector: GroupCategorySelector) {
         self.picker = picker
         self.context = context
         self.categorySelector = categorySelector

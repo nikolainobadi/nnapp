@@ -16,8 +16,8 @@ final class DefaultContextFactory: ContextFactory {
     }
 
     /// Returns an instance of the standard interactive picker.
-    func makePicker() -> Picker {
-        return SwiftPicker()
+    func makePicker() -> CommandLinePicker {
+        return InteractivePicker()
     }
 
     /// Creates the primary persistence context used for saving/loading data.
@@ -29,7 +29,7 @@ final class DefaultContextFactory: ContextFactory {
     /// - Parameters:
     ///   - picker: A user input prompt utility.
     ///   - context: The persistence context for data access.
-    func makeGroupCategorySelector(picker: Picker, context: CodeLaunchContext) -> GroupCategorySelector {
+    func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector {
         return CategoryHandler(picker: picker, context: context)
     }
 
@@ -37,7 +37,7 @@ final class DefaultContextFactory: ContextFactory {
     /// - Parameters:
     ///   - picker: A user input prompt utility.
     ///   - context: The persistence context for data access.
-    func makeProjectGroupSelector(picker: Picker, context: CodeLaunchContext) -> ProjectGroupSelector {
+    func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> ProjectGroupSelector {
         let categorySelector = makeGroupCategorySelector(picker: picker, context: context)
         return GroupHandler(picker: picker, context: context, categorySelector: categorySelector)
     }

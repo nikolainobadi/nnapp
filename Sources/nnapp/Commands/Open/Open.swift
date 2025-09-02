@@ -58,7 +58,7 @@ private extension Nnapp.Open {
         return Nnapp.makeShell()
     }
 
-    var picker: Picker {
+    var picker: CommandLinePicker {
         return Nnapp.makePicker()
     }
 

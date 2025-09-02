@@ -8,10 +8,10 @@
 import SwiftPicker
 
 struct ProjectLinkHandler {
-    private let picker: Picker
+    private let picker: CommandLinePicker
     private let linkOptions: [String]
     
-    init(picker: Picker, linkOptions: [String]) {
+    init(picker: CommandLinePicker, linkOptions: [String]) {
         self.picker = picker
         self.linkOptions = linkOptions
     }
