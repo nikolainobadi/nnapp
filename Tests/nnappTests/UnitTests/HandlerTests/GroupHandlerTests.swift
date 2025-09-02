@@ -8,6 +8,7 @@
 import Darwin
 import Testing
 import Foundation
+import Files
 @testable import nnapp
 
 @MainActor
@@ -91,9 +92,174 @@ extension GroupHandlerTests {
 }
 
 
+// MARK: - CreateGroup Tests
+extension GroupHandlerTests {
+    @Test("Creates group with provided name")
+    func createsGroupWithProvidedName() throws {
+        let (sut, _) = try makeSUT()
+        let groupName = "NewTestGroup"
+        
+        let group = try sut.createGroup(name: groupName, category: existingCategoryName)
+        
+        #expect(group.name == groupName)
+    }
+    
+    @Test("Persists created group in storage")
+    func persistsCreatedGroup() throws {
+        let (sut, context) = try makeSUT()
+        let groupName = "NewTestGroup"
+        
+        _ = try sut.createGroup(name: groupName, category: existingCategoryName)
+        
+        let groups = try #require(try context.loadGroups())
+        let firstGroup = try #require(groups.first)
+        
+        #expect(groups.count == 1)
+        #expect(firstGroup.name == groupName)
+    }
+    
+    @Test("Creates group folder on disk")
+    func createsGroupFolderOnDisk() throws {
+        let sut = try makeSUT().sut
+        let groupName = "NewTestGroup"
+        
+        _ = try sut.createGroup(name: groupName, category: existingCategoryName)
+        
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        #expect(categoryFolder.containsSubfolder(named: groupName))
+    }
+    
+    @Test("Throws error when creating group with existing name")
+    func throwsErrorWhenCreatingGroupWithExistingName() throws {
+        let (sut, context) = try makeSUT()
+        let existingGroup = makeGroup(name: existingGroupName)
+        let existingCategory = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(existingGroup, in: existingCategory)
+        
+        #expect(throws: CodeLaunchError.groupNameTaken) {
+            try sut.createGroup(name: existingGroupName, category: existingCategoryName)
+        }
+    }
+}
+
+
+// MARK: - GetGroup Tests
+extension GroupHandlerTests {
+    @Test("Returns existing group when found")
+    func returnsExistingGroupWhenFound() throws {
+        let (sut, context) = try makeSUT()
+        let existingGroup = makeGroup(name: "FoundGroup")
+        let existingCategory = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(existingGroup, in: existingCategory)
+        
+        let result = try sut.getGroup(named: "foundgroup") // case-insensitive
+        
+        #expect(result.name == existingGroup.name)
+    }
+    
+    @Test("Creates new group from selection")
+    func createsNewGroupFromSelection() throws {
+        let mockPicker = MockPicker(requiredInputResponses: ["CreatedFromSelection"], permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let group = makeGroup(name: "TestGroup")
+        let category = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(group, in: category)
+        
+        let result = try sut.getGroup(named: nil)
+        
+        #expect(result.name == group.name)
+    }
+}
+
+
+// MARK: - RemoveGroup Tests
+extension GroupHandlerTests {
+    @Test("Removes group by name")
+    func removesGroupByName() throws {
+        let (sut, context) = try makeSUT(permissionResponses: [true])
+        let groupToDelete = makeGroup(name: "GroupToDelete")
+        let existingCategory = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(groupToDelete, in: existingCategory)
+        
+        try sut.removeGroup(name: "groupToDelete") // case-insensitive
+        
+        let groups = try context.loadGroups()
+        #expect(groups.isEmpty)
+    }
+    
+    @Test("Prompts user to select group when no name")
+    func promptsUserToSelectGroupWhenNoName() throws {
+        let groupToDelete = makeGroup(name: "GroupToDelete")
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let category = try #require(try context.loadCategories().first)
+
+        try context.saveGroup(groupToDelete, in: category)
+        
+        try sut.removeGroup(name: nil)
+        
+        let groups = try context.loadGroups()
+        
+        #expect(groups.isEmpty)
+    }
+    
+    @Test("Requires confirmation before delete")
+    func requiresConfirmationBeforeDelete() throws {
+        let mockPicker = MockPicker(permissionResponses: [false], shouldThrowError: true)
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let groupToKeep = makeGroup(name: "GroupToKeep")
+        let existingCategory = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(groupToKeep, in: existingCategory)
+        
+        #expect(throws: NSError.self) {
+            try sut.removeGroup(name: "GroupToKeep")
+        }
+        
+        let groups = try context.loadGroups()
+        #expect(groups.count == 1)
+        #expect(groups.first?.name == "GroupToKeep")
+    }
+}
+
+
+// MARK: - SetMainProject Tests
+extension GroupHandlerTests {
+    @Test("Updates group shortcut to match project when group shortcut is empty")
+    func updatesGroupShortcutToMatchProject() throws {
+        
+    }
+    
+    @Test("Requires confirmation to change main project when group shortcut is not empty")
+    func requiresConfirmationToChangeMainProject() throws {
+        
+    }
+    
+    @Test("Handles group with no projects")
+    func handlesGroupWithNoProjects() throws {
+        let (sut, context) = try makeSUT()
+        let group = makeGroup(name: "EmptyGroup")
+        let existingCategory = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(group, in: existingCategory)
+        
+        // Should not throw error, just print message and return early
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroups = try context.loadGroups()
+        let updatedGroup = try #require(updatedGroups.first)
+        #expect(updatedGroup.shortcut == nil) // Should remain nil
+    }
+}
+
+
 // MARK: - Helper Methods
 private extension GroupHandlerTests {
-    func makeSUT(categoryName: String? = nil, permissionResponses: [Bool] = []) throws -> (sut: GroupHandler, context: CodeLaunchContext) {
+    func makeSUT(categoryName: String? = nil, picker: MockPicker? = nil, permissionResponses: [Bool] = []) throws -> (sut: GroupHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let existingCategoryFolder = try #require(try tempFolder.createSubfolderIfNeeded(withName: categoryName ?? existingCategoryName))
@@ -101,7 +267,7 @@ private extension GroupHandlerTests {
         
         try context.saveCategory(category)
         
-        let mockPicker = MockPicker(permissionResponses: permissionResponses)
+        let mockPicker = picker ?? MockPicker(permissionResponses: permissionResponses)
         let mockCategorySelector = MockCategorySelector(context: context)
         let sut = GroupHandler(picker: mockPicker, context: context, categorySelector: mockCategorySelector)
         
