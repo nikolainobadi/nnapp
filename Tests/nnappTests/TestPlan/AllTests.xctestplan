@@ -1,0 +1,34 @@
+{
+  "configurations" : [
+    {
+      "id" : "2B8DF794-A056-4C7C-BEB2-77DD973E9D78",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "nnapp",
+          "name" : "nnapp"
+        }
+      ]
+    },
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "nnappTests",
+        "name" : "nnappTests"
+      }
+    }
+  ],
+  "version" : 1
+}

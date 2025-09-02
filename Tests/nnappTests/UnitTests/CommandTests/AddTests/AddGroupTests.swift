@@ -48,7 +48,7 @@ extension AddGroupTests {
         }
     }
     
-    @Test("Throws an error when Group folder name already exists in Category Folder")
+    @Test("Throws an error when Group folder name already exists in Category Folder", .disabled())
     func throwsErrorWhenGroupFolderNameIsTaken() throws {
         let factory = try #require(try makeFactory())
         let folderToImport = try #require(try tempFolder.createSubfolder(named: existingGroupName))

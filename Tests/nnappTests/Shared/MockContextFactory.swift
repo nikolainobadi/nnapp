@@ -15,11 +15,13 @@ final class MockContextFactory {
     private let picker: MockPicker
     private let throwCategorySelectorError: Bool
     private var context: CodeLaunchContext?
+    private let uniqueId: String
     
     init(shell: MockShell = .init(), picker: MockPicker = .init(), throwCategorySelectorError: Bool = false) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
+        self.uniqueId = UUID().uuidString
     }
 }
 
@@ -48,7 +50,10 @@ extension MockContextFactory: ContextFactory {
         }
         
         let defaults = makeDefaults()
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let config = ModelConfiguration(
+            "TestModel-\(uniqueId)",
+            isStoredInMemoryOnly: true
+        )
         let context = try CodeLaunchContext(config: config, defaults: defaults)
         
         self.context = context
@@ -61,7 +66,7 @@ extension MockContextFactory: ContextFactory {
 // MARK: - Private
 private extension MockContextFactory {
     func makeDefaults() -> UserDefaults {
-        let testSuiteName = "testSuiteDefaults"
+        let testSuiteName = "testSuiteDefaults-\(uniqueId)"
         let userDefaults = UserDefaults(suiteName: testSuiteName)!
         userDefaults.removePersistentDomain(forName: testSuiteName)
         

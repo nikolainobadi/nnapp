@@ -207,7 +207,6 @@ private extension GroupHandler {
     /// Moves a group folder into its assigned category folder if needed.
     func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
         let categoryFolder = try Folder(path: category.path)
-
         if let existingFolder = try? categoryFolder.subfolder(named: folder.name) {
             if existingFolder.path != folder.path {
                 throw CodeLaunchError.groupFolderAlreadyExists
@@ -215,8 +214,9 @@ private extension GroupHandler {
             print("folder is already in the correct location")
             return
         }
-
+        
         try folder.move(to: categoryFolder)
+        
     }
 
     /// Selects a folder to use for group import, optionally from disk or from subfolders.
