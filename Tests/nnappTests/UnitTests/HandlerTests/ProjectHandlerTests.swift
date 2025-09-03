@@ -50,14 +50,13 @@ extension ProjectHandlerTests {
         #expect(savedProject.type == .package)
     }
     
-    @Test("Adds project from group folder selection", .disabled())
+    @Test("Adds project from group folder selection")
     func addsProjectFromGroupFolderSelection() throws {
         let mockPicker = MockPicker(permissionResponses: [true])
         let (sut, context) = try makeSUT(picker: mockPicker)
         let group = try setupTestGroup(context: context)
-        
-        // Create a Swift package in the group folder
-        let groupFolder = try #require(try tempFolder.subfolder(named: existingGroupName))
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        let groupFolder = try categoryFolder.subfolder(named: existingGroupName)
         _ = try createSwiftPackage(named: projectName, in: groupFolder)
         
         try sut.addProject(
