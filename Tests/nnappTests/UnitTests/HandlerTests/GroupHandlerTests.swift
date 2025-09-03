@@ -193,9 +193,9 @@ extension GroupHandlerTests {
     
     @Test("Prompts user to select group when no name")
     func promptsUserToSelectGroupWhenNoName() throws {
-        let groupToDelete = makeGroup(name: "GroupToDelete")
         let mockPicker = MockPicker(permissionResponses: [true])
         let (sut, context) = try makeSUT(picker: mockPicker)
+        let groupToDelete = makeGroup(name: "GroupToDelete")
         let category = try #require(try context.loadCategories().first)
 
         try context.saveGroup(groupToDelete, in: category)
@@ -273,11 +273,11 @@ extension GroupHandlerTests {
     
     @Test("Uses group shortcut when switching to project without shortcut")
     func usesGroupShortcutWhenProjectHasNone() throws {
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(shortcut: "groupcut")
         let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
         let newProject = makeProject(name: "NewProject", shortcut: nil)
-        let mockPicker = MockPicker(permissionResponses: [true])
-        let (sut, context) = try makeSUT(picker: mockPicker)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
@@ -296,10 +296,10 @@ extension GroupHandlerTests {
     
     @Test("Prompts for shortcut when neither group nor project has one")
     func promptsForShortcutWhenNeitherHasOne() throws {
-        let group = makeGroup()
-        let project = makeProject(name: "Project", shortcut: nil)
         let mockPicker = MockPicker(requiredInputResponses: ["newcut"])
         let (sut, context) = try makeSUT(picker: mockPicker)
+        let group = makeGroup()
+        let project = makeProject(name: "Project", shortcut: nil)
         let category = try #require(try context.loadCategories().first)
         
         #expect(group.shortcut == nil)
@@ -338,12 +338,12 @@ extension GroupHandlerTests {
     
     @Test("Correctly identifies current main project by matching shortcuts")
     func correctlyIdentifiesMainProjectByShortcut() throws {
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(shortcut: "main")
         let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
         let otherProject1 = makeProject(name: "Other1", shortcut: "other1")
         let otherProject2 = makeProject(name: "Other2", shortcut: "other2")
-        let mockPicker = MockPicker(permissionResponses: [true])
-        let (sut, context) = try makeSUT(picker: mockPicker)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
@@ -367,11 +367,11 @@ extension GroupHandlerTests {
     
     @Test("Shows current main project message and requires confirmation")
     func showsCurrentMainProjectAndRequiresConfirmation() throws {
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(shortcut: "main")
         let mainProject = makeProject(name: "CurrentMain", shortcut: group.shortcut)
         let otherProject = makeProject(name: "Other", shortcut: "other")
-        let mockPicker = MockPicker(permissionResponses: [true])
-        let (sut, context) = try makeSUT(picker: mockPicker)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
@@ -391,11 +391,11 @@ extension GroupHandlerTests {
     
     @Test("Cancels operation when user denies confirmation")
     func cancelsOperationWhenUserDeniesConfirmation() throws {
+        let mockPicker = MockPicker(permissionResponses: [false])
+        let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(shortcut: "main")
         let mainProject = makeProject(name: "CurrentMain", shortcut: "main")
         let otherProject = makeProject(name: "Other", shortcut: "other")
-        let mockPicker = MockPicker(permissionResponses: [false])
-        let (sut, context) = try makeSUT(picker: mockPicker)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
