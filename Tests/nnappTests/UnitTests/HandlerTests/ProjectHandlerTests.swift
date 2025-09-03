@@ -99,6 +99,34 @@ extension ProjectHandlerTests {
         #expect(savedProject.type == .package)
     }
     
+    @Test("Handles projects without Git repository gracefully")
+    func handlesProjectsWithoutGitRepository() throws {
+        // Create a MockShell that throws error for Git commands
+        let mockShell = MockShell(shouldThrowError: true)
+        let mockPicker = MockPicker(permissionResponses: [false]) // No to "Would you like to add a shortcut?"
+        let (sut, context) = try makeSUT(picker: mockPicker, shell: mockShell)
+        let group = try setupTestGroup(context: context)
+        let projectFolder = try createSwiftPackage(named: projectName, in: tempFolder)
+        
+        // Add project - should succeed despite Git command failure
+        try sut.addProject(
+            path: projectFolder.path,
+            group: group.name,
+            shortcut: nil,
+            isMainProject: false,
+            fromDesktop: false
+        )
+        
+        // Verify project was added successfully
+        let projects = try context.loadProjects()
+        let savedProject = try #require(projects.first)
+        
+        #expect(projects.count == 1)
+        #expect(savedProject.name == projectName)
+        #expect(savedProject.type == .package)
+        #expect(savedProject.remote == nil) // No remote URL due to Git error
+    }
+    
     @Test("Sets group shortcut when isMainProject is true")
     func setsGroupShortcutWhenIsMainProjectIsTrue() throws {
         let (sut, context) = try makeSUT()
@@ -294,7 +322,7 @@ extension ProjectHandlerTests {
 
 // MARK: - Helper Methods
 private extension ProjectHandlerTests {
-    func makeSUT(picker: MockPicker? = nil, permissionResponses: [Bool] = [], desktopPath: String? = nil) throws -> (sut: ProjectHandler, context: CodeLaunchContext) {
+    func makeSUT(picker: MockPicker? = nil, shell: MockShell? = nil, permissionResponses: [Bool] = [], desktopPath: String? = nil) throws -> (sut: ProjectHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let existingCategoryFolder = try #require(try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName))
@@ -305,7 +333,7 @@ private extension ProjectHandlerTests {
         let picker = picker ?? MockPicker(permissionResponses: permissionResponses)
         let groupSelector = MockGroupSelector(context: context)
         
-        let shell = MockShell()
+        let shell = shell ?? MockShell()
         let sut = ProjectHandler(shell: shell, picker: picker, context: context, groupSelector: groupSelector, desktopPath: desktopPath)
         
         return (sut, context)
