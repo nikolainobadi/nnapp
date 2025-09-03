@@ -84,13 +84,18 @@ extension Nnapp.Add {
         /// Whether this is the primary project in its Group (syncs shortcut with Group).
         @Flag(name: .customLong("main-project"), help: "Syncs the new Project shortcut with the Group shortcut")
         var isMainProject: Bool = false
+        
+        /// Whether to select from projects on the Desktop.
+        @Flag(name: .customLong("from-desktop"), help: "Select from valid Xcode projects or Swift packages on the Desktop")
+        var fromDesktop: Bool = false
 
         func run() throws {
             try Nnapp.makeProjectHandler().addProject(
                 path: path,
                 group: group,
                 shortcut: shortcut,
-                isMainProject: isMainProject
+                isMainProject: isMainProject,
+                fromDesktop: fromDesktop
             )
         }
     }

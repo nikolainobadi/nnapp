@@ -27,11 +27,24 @@ extension ProjectFolderSelector {
     /// - Parameters:
     ///   - path: Optional absolute path to a project folder.
     ///   - group: The group the project will belong to (used for default folder lookup).
+    ///   - fromDesktop: Whether to filter and select from valid projects on the Desktop.
     /// - Returns: A validated `ProjectFolder` containing the resolved folder and type.
-    func selectProjectFolder(path: String?, group: LaunchGroup) throws -> ProjectFolder {
+    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
         if let path, let folder = try? Folder(path: path) {
             let projectType = try getProjectType(folder: folder)
             return .init(folder: folder, type: projectType)
+        }
+        
+        // Handle --from-desktop flag
+        if fromDesktop {
+            let desktopFolders = try getDesktopProjectFolders()
+            
+            guard !desktopFolders.isEmpty else {
+                print("No valid Xcode projects or Swift packages found on Desktop")
+                throw CodeLaunchError.noProjectInFolder
+            }
+            
+            return try picker.requiredSingleSelection("Select a project from Desktop", items: desktopFolders)
         }
 
         guard let groupPath = group.path else {
@@ -80,6 +93,21 @@ private extension ProjectFolderSelector {
                 return nil
             }
 
+            return .init(folder: subFolder, type: projectType)
+        }
+    }
+    
+    /// Returns a list of valid Xcode projects and Swift packages from the user's Desktop.
+    func getDesktopProjectFolders() throws -> [ProjectFolder] {
+        let desktopPath = Folder.home.path.appendingPathComponent("Desktop")
+        let desktopFolder = try Folder(path: desktopPath)
+        
+        return desktopFolder.subfolders.compactMap { subFolder in
+            // Only include folders that contain valid Xcode projects or Swift packages
+            guard let projectType = try? getProjectType(folder: subFolder) else {
+                return nil
+            }
+            
             return .init(folder: subFolder, type: projectType)
         }
     }
