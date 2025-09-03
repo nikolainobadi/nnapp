@@ -129,6 +129,44 @@ extension GroupHandlerTests {
         #expect(categoryFolder.containsSubfolder(named: groupName))
     }
     
+    @Test("Uses existing folder when user accepts")
+    func usesExistingFolderWhenUserAccepts() throws {
+        let mockPicker = MockPicker(permissionResponses: [true]) // User says yes to using existing folder
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let groupName = "ExistingFolderGroup"
+        
+        // Create an existing folder with the same name
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        try categoryFolder.createSubfolder(named: groupName)
+        
+        // Should succeed when user accepts the existing folder
+        let group = try sut.createGroup(name: groupName, category: existingCategoryName)
+        
+        #expect(group.name == groupName)
+        #expect(categoryFolder.containsSubfolder(named: groupName))
+        
+        // Verify group was saved to context
+        let groups = try context.loadGroups()
+        #expect(groups.count == 1)
+        #expect(groups.first?.name == groupName)
+    }
+    
+    @Test("Throws error when user rejects existing folder")
+    func throwsErrorWhenUserRejectsExistingFolder() throws {
+        let mockPicker = MockPicker(permissionResponses: [false]) // User says no to using existing folder
+        let (sut, _) = try makeSUT(picker: mockPicker)
+        let groupName = "ExistingFolderGroup"
+        
+        // Create an existing folder with the same name
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        try categoryFolder.createSubfolder(named: groupName)
+        
+        // Should throw error when user rejects the existing folder
+        #expect(throws: CodeLaunchError.groupFolderAlreadyExists) {
+            try sut.createGroup(name: groupName, category: existingCategoryName)
+        }
+    }
+    
     @Test("Throws error when creating group with existing name")
     func throwsErrorWhenCreatingGroupWithExistingName() throws {
         let (sut, context) = try makeSUT()

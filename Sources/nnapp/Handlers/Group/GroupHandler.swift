@@ -224,6 +224,7 @@ private extension GroupHandler {
         let subfolderNames = categoryFolder.subfolders.map({ $0.name })
 
         if subfolderNames.contains(where: { $0.matches(group.name) }) {
+            // TODO: - this may need to be 'toggle off' for automation scenarios
             guard picker.getPermission("\(group.name) already exists in the \(category.name) folder. Would you like to use \(group.name)?") else {
                 throw CodeLaunchError.groupFolderAlreadyExists
             }
