@@ -16,10 +16,11 @@ swift build -c release
 
 ### Testing
 ```bash
-# Use xcodebuild for tests (SwiftData requires macOS runtime)
-xcodebuild test -scheme nnapp -destination 'platform=macOS'
+# Run tests
+swift test
 
-# swift test does NOT work with SwiftData persistence layer
+# Note: SwiftData tests may encounter bundle initialization issues
+# If tests fail with "Unable to determine Bundle Name", this is a known SwiftData test infrastructure issue
 ```
 
 ### Running
@@ -78,6 +79,12 @@ Tests are located in `Tests/nnappTests/` with:
 - **Shared/**: Mock implementations and test utilities
 - Test targets use dependency injection with mock factories
 
+### Important Testing Patterns
+
+- **Category Relationship**: When creating test groups, ensure the `category` property is set to establish the parent-child relationship required for path resolution
+- **Order Independence**: Tests should not rely on SwiftData's non-deterministic ordering of collections
+- **Mock Picker**: Use `MockPicker` with appropriate `selectedItemIndex` for predictable test behavior
+
 ### Main Project Management
 
 The `setMainProject` functionality in `GroupHandler` manages which project serves as the "main" or default project for a group. Key behaviors:
@@ -89,6 +96,16 @@ The `setMainProject` functionality in `GroupHandler` manages which project serve
   - If neither has shortcuts → user is prompted to enter a new shortcut
 - **Cleanup**: Previous main project's shortcut is cleared when switching
 - **Confirmation**: User must confirm when changing an existing main project
+- **Sorted Selection**: Non-main projects are presented alphabetically sorted for consistent selection
+
+### Project Desktop Selection
+
+The Add Project command supports a `--from-desktop` flag that allows users to select projects directly from their Desktop folder:
+
+- **Usage**: `nnapp add project --from-desktop --group GroupName`
+- **Filtering**: Only folders containing valid Xcode projects or Swift packages are shown
+- **Detection**: Swift packages are identified by presence of `Package.swift`
+- **Testing**: Desktop path can be injected for testing purposes via `ProjectHandler` constructor
 
 ## Configuration
 
