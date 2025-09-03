@@ -12,7 +12,7 @@ import ArgumentParser
 struct Nnapp: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Utility to manage Xcode Projects and Swift Packages for quick launching with command-line.",
-        version: "0.5.2",
+        version: "v0.6.0",
         subcommands: [
             Add.self,
             Create.self,
