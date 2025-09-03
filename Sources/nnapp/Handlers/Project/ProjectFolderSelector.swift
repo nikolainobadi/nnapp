@@ -12,11 +12,13 @@ import SwiftPicker
 /// Determines the `ProjectType` by inspecting folder contents.
 struct ProjectFolderSelector {
     private let picker: CommandLinePicker
+    private let desktopPath: String
 
     /// Initializes a new folder selector using the provided user input picker.
     /// - Parameter picker: Utility for interactive user prompts.
-    init(picker: CommandLinePicker) {
+    init(picker: CommandLinePicker, desktopPath: String? = nil) {
         self.picker = picker
+        self.desktopPath = desktopPath ?? Folder.home.path.appendingPathComponent("Desktop")
     }
 }
 
@@ -99,7 +101,6 @@ private extension ProjectFolderSelector {
     
     /// Returns a list of valid Xcode projects and Swift packages from the user's Desktop.
     func getDesktopProjectFolders() throws -> [ProjectFolder] {
-        let desktopPath = Folder.home.path.appendingPathComponent("Desktop")
         let desktopFolder = try Folder(path: desktopPath)
         
         return desktopFolder.subfolders.compactMap { subFolder in
