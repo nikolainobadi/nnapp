@@ -122,9 +122,14 @@ extension ProjectHandlerTests {
         #expect(updatedGroup.shortcut == shortcut)
     }
     
-    @Test("Prompts for main project when group has no shortcut", .disabled())
+    @Test("Prompts for main project when group has no shortcut")
     func promptsForMainProjectWhenGroupHasNoShortcut() throws {
-        let mockPicker = MockPicker(permissionResponses: [true])
+        let responses = [
+            true, // would you like to add shorcut?
+            true, // is this gh url correct?
+            true // would you like to make this main project for group?
+        ]
+        let mockPicker = MockPicker(permissionResponses: responses)
         let (sut, context) = try makeSUT(picker: mockPicker)
         let group = try setupTestGroup(context: context)
         let projectFolder = try createSwiftPackage(named: projectName, in: tempFolder)
@@ -169,7 +174,6 @@ extension ProjectHandlerTests {
     @Test("Throws error when no valid projects found on desktop")
     func throwsErrorWhenNoValidProjectsFoundOnDesktop() throws {
         let fakeDesktop = try createFakeDesktop()
-        // Create a regular folder without Package.swift
         try fakeDesktop.createSubfolder(named: "NotAProject")
         
         let (sut, context) = try makeSUT(desktopPath: fakeDesktop.path)
