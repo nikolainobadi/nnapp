@@ -11,11 +11,11 @@ import SwiftPicker
 /// Handles selection and validation of project folders for use in `LaunchProject` creation.
 /// Determines the `ProjectType` by inspecting folder contents.
 struct ProjectFolderSelector {
-    private let picker: Picker
+    private let picker: CommandLinePicker
 
     /// Initializes a new folder selector using the provided user input picker.
     /// - Parameter picker: Utility for interactive user prompts.
-    init(picker: Picker) {
+    init(picker: CommandLinePicker) {
         self.picker = picker
     }
 }

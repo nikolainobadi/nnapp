@@ -24,7 +24,7 @@ Your feedback and suggestions are welcome as the project continues to improve!
 - Launch Xcode or VSCode with optional terminal workflows
 - Open remote repositories or linked documentation instantly
 - Automatically clone projects from Git remotes if missing locally
-- Manage custom quick-launch shortcuts
+- Manage custom quick-launch shortcuts and set main projects for groups
 - Stores metadata using `SwiftData` and `UserDefaults`
 - Shell integration via `SwiftShell`
 - Fully interactive CLI built on `ArgumentParser`
@@ -60,6 +60,11 @@ nnapp --help
 - Add a new project:
   ```sh
   nnapp add project --path ~/dev/MyApp --group Mobile
+  ```
+
+- Set a project as the main project for its group:
+  ```sh
+  nnapp set-main-project "Mobile"
   ```
 
 - Open project in Xcode with terminal:

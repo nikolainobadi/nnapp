@@ -11,7 +11,7 @@ import SwiftPicker
 /// Handles creation, import, selection, and deletion of `LaunchGroup` objects.
 /// Groups belong to a `LaunchCategory` and contain one or more `LaunchProject` entries.
 struct GroupHandler {
-    private let picker: Picker
+    private let picker: CommandLinePicker
     private let context: CodeLaunchContext
     private let categorySelector: GroupCategorySelector
 
@@ -20,7 +20,7 @@ struct GroupHandler {
     ///   - picker: Utility for prompting user input.
     ///   - context: Data context for persistence and fetching.
     ///   - categorySelector: Used to determine the group’s parent category.
-    init(picker: Picker, context: CodeLaunchContext, categorySelector: GroupCategorySelector) {
+    init(picker: CommandLinePicker, context: CodeLaunchContext, categorySelector: GroupCategorySelector) {
         self.picker = picker
         self.context = context
         self.categorySelector = categorySelector
@@ -117,6 +117,97 @@ extension GroupHandler {
 }
 
 
+// MARK: - SetMainProject
+extension GroupHandler {
+    /// Changes the main project for a group by allowing the user to select from available non-main projects.
+    /// - Parameter group: Optional name or shortcut of the group to modify. If `nil`, user selects from list.
+    func setMainProject(group: String?) throws {
+        let groups = try context.loadGroups()
+        var selectedGroup: LaunchGroup
+
+        if let group {
+            if let foundGroup = groups.first(where: { $0.name.matches(group) || $0.shortcut?.matches(group) == true }) {
+                selectedGroup = foundGroup
+            } else {
+                throw CodeLaunchError.missingGroup
+            }
+        } else {
+            selectedGroup = try picker.requiredSingleSelection("Select a group to set the main project for", items: groups)
+        }
+
+        // Find current main project (project with same shortcut as group)
+        let currentMainProject = selectedGroup.projects.first { project in
+            guard let groupShortcut = selectedGroup.shortcut, let projectShortcut = project.shortcut else {
+                return false
+            }
+            
+            return groupShortcut.matches(projectShortcut)
+        }
+
+        // Display current main project
+        if let mainProject = currentMainProject {
+            print("Current main project: \(mainProject.name.bold)")
+            guard picker.getPermission("Would you like to change the main project?") else {
+                print("No changes made.")
+                return
+            }
+        } else {
+            print("No main project is currently set for group '\(selectedGroup.name.bold)'")
+        }
+
+        // Get non-main projects
+        let nonMainProjects = selectedGroup.projects.filter { project in
+            guard let mainProject = currentMainProject else { return true }
+            return project.name != mainProject.name
+        }
+
+        // Check if any non-main projects exist
+        guard !nonMainProjects.isEmpty else {
+            let message = currentMainProject != nil 
+                ? "No other projects exist in this group to switch to."
+                : "No projects exist in this group. Add a project first using 'nnapp add project'."
+            print(message)
+            return
+        }
+
+        // Let user select new main project
+        let newMainProject = try picker.requiredSingleSelection(
+            "Select the new main project for '\(selectedGroup.name)'", 
+            items: nonMainProjects
+        )
+
+        // Determine shortcut to use
+        let shortcutToUse: String
+        if let groupShortcut = selectedGroup.shortcut {
+            // Group has shortcut, use it
+            shortcutToUse = groupShortcut
+        } else if let projectShortcut = newMainProject.shortcut {
+            // Group has no shortcut but new project does, use project's shortcut
+            shortcutToUse = projectShortcut
+        } else {
+            // Neither has shortcut, prompt user
+            shortcutToUse = try picker.getRequiredInput("Enter a shortcut for the main project and group:")
+        }
+
+        // Clear current main project's shortcut if it exists
+        if let currentMain = currentMainProject {
+            currentMain.shortcut = nil
+            try context.saveProject(currentMain, in: selectedGroup)
+        }
+
+        // Set new main project's shortcut and update group
+        newMainProject.shortcut = shortcutToUse
+        selectedGroup.shortcut = shortcutToUse
+        
+        // Save changes
+        try context.saveProject(newMainProject, in: selectedGroup)
+        try context.saveGroup(selectedGroup, in: selectedGroup.category!)
+        
+        print("Successfully set '\(newMainProject.name.bold)' as the main project for group '\(selectedGroup.name.bold)'")
+    }
+}
+
+
 // MARK: - Private Methods
 private extension GroupHandler {
     /// Ensures the group name doesn't already exist under the given category.
@@ -141,7 +232,6 @@ private extension GroupHandler {
     /// Moves a group folder into its assigned category folder if needed.
     func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
         let categoryFolder = try Folder(path: category.path)
-
         if let existingFolder = try? categoryFolder.subfolder(named: folder.name) {
             if existingFolder.path != folder.path {
                 throw CodeLaunchError.groupFolderAlreadyExists
@@ -149,8 +239,9 @@ private extension GroupHandler {
             print("folder is already in the correct location")
             return
         }
-
+        
         try folder.move(to: categoryFolder)
+        
     }
 
     /// Selects a folder to use for group import, optionally from disk or from subfolders.

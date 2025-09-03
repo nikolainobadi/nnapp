@@ -14,7 +14,7 @@ import GitShellKit
 /// Coordinates folder movement, Git inspection, and persistence updates.
 struct ProjectHandler {
     private let shell: Shell
-    private let picker: Picker
+    private let picker: CommandLinePicker
     private let context: CodeLaunchContext
     private let gitShell: GitShellAdapter
     private let groupSelector: ProjectGroupSelector
@@ -25,7 +25,7 @@ struct ProjectHandler {
     ///   - picker: User-facing prompt utility.
     ///   - context: SwiftData-backed persistence layer.
     ///   - groupSelector: Logic for resolving a group during project creation.
-    init(shell: Shell, picker: Picker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector) {
+    init(shell: Shell, picker: CommandLinePicker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector) {
         self.shell = shell
         self.picker = picker
         self.context = context

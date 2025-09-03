@@ -14,7 +14,17 @@ class MainActorTempFolderDatasource {
     let tempFolder: Folder
     
     init(testFolder: TestFolder = .init(name: "nnappTempSubFolder", subFolders: [])) throws {
-        self.tempFolder = try Folder.temporary.createSubfolder(named: "\(UUID().uuidString)_\(testFolder.name)")
+        // Ensure SIGPIPE is ignored during tests.
+        // By default, Darwin/Linux will terminate a process with exit code 13 if it writes
+        // to a closed stdout/stderr pipe. Since our code and tests use `print`, the test
+        // runner can crash if its stdout pipe closes (e.g., when output is truncated or piped).
+        // Calling `_ignoreSigpipe` installs a global signal handler that ignores SIGPIPE,
+        // making `print` harmless in these scenarios.
+        _ = _ignoreSigpipe
+        
+        self.tempFolder = try Folder.temporary.createSubfolder(
+            named: "\(UUID().uuidString)_\(testFolder.name)"
+        )
         
         try createSubfolders(in: tempFolder, subFolders: testFolder.subFolders)
     }
@@ -31,7 +41,12 @@ struct TestFolder {
     let subFolders: [TestFolder]
 }
 
-fileprivate func createSubfolders(in folder: Folder, subFolders: [TestFolder]) throws {
+/// Ensures that SIGPIPE is ignored for the entire test process.
+/// Without this, any call to `print` (which writes to stdout) could terminate the test runner
+/// if the stdout pipe is closed by the environment (exit code 13).
+private let _ignoreSigpipe: Void = { signal(SIGPIPE, SIG_IGN) }()
+
+private func createSubfolders(in folder: Folder, subFolders: [TestFolder]) throws {
     for sub in subFolders {
         let newFolder = try folder.createSubfolder(named: sub.name)
         try createSubfolders(in: newFolder, subFolders: sub.subFolders)

@@ -16,7 +16,10 @@ swift build -c release
 
 ### Testing
 ```bash
-swift test
+# Use xcodebuild for tests (SwiftData requires macOS runtime)
+xcodebuild test -scheme nnapp -destination 'platform=macOS'
+
+# swift test does NOT work with SwiftData persistence layer
 ```
 
 ### Running
@@ -29,7 +32,7 @@ swift run nnapp --help
 ### Core Components
 
 - **`CodeLaunchContext`**: Primary persistence layer managing SwiftData models and UserDefaults storage
-- **Command Pattern**: Each CLI command (`Add`, `Create`, `Remove`, `List`, `Open`, `Finder`, `Script`) implements `ParsableCommand`
+- **Command Pattern**: Each CLI command (`Add`, `Create`, `Remove`, `List`, `Open`, `Finder`, `Script`, `SetMainProject`) implements `ParsableCommand`
 - **Handler Classes**: Domain-specific logic orchestrators (`CategoryHandler`, `GroupHandler`, `ProjectHandler`)
 - **Shell Abstraction**: `Shell` protocol with `DefaultShell` implementation using SwiftShell
 - **Interactive Prompts**: `SwiftPicker` for CLI user input and selection
@@ -74,6 +77,18 @@ Tests are located in `Tests/nnappTests/` with:
 - **UnitTests/**: Command-specific test suites
 - **Shared/**: Mock implementations and test utilities
 - Test targets use dependency injection with mock factories
+
+### Main Project Management
+
+The `setMainProject` functionality in `GroupHandler` manages which project serves as the "main" or default project for a group. Key behaviors:
+
+- **Main Project Definition**: A project with the same shortcut as its parent group
+- **Shortcut Synchronization**: When switching main projects, shortcuts are transferred appropriately:
+  - If group has a shortcut → new main project gets the group's shortcut
+  - If group has no shortcut but new project does → both get the project's shortcut  
+  - If neither has shortcuts → user is prompted to enter a new shortcut
+- **Cleanup**: Previous main project's shortcut is cleared when switching
+- **Confirmation**: User must confirm when changing an existing main project
 
 ## Configuration
 
