@@ -31,7 +31,7 @@ extension DefaultShell: Shell {
         let output = SwiftShell.run(bash: command)
 
         guard output.succeeded else {
-            fatalError() // TODO: - 
+            throw ShellError.commandFailed(command: command, error: output.stderror)
         }
 
         return output.stdout.trimmingCharacters(in: .whitespaces)
