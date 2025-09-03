@@ -231,9 +231,9 @@ extension GroupHandlerTests {
 extension GroupHandlerTests {
     @Test("Updates group shortcut to match project when group shortcut is empty")
     func updatesGroupShortcutToMatchProject() throws {
+        let (sut, context) = try makeSUT()
         let group = makeGroup()
         let project = makeProject(shortcut: "newshortcut")
-        let (sut, context) = try makeSUT()
         let category = try #require(try context.loadCategories().first)
         
         #expect(group.shortcut == nil)
@@ -245,6 +245,172 @@ extension GroupHandlerTests {
         let updatedGroup = try #require(try context.loadGroups().first)
         
         #expect(updatedGroup.shortcut == project.shortcut)
+    }
+    
+    @Test("Clears current main project shortcut when switching to new main project")
+    func clearsPreviousMainProjectShortcut() throws {
+        let shortcut = "groupShortcut"
+        let picker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: picker)
+        let group = makeGroup(shortcut: shortcut)
+        let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
+        let otherProject = makeProject(name: "OtherProject")
+        let category = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(group, in: category)
+        try context.saveProject(mainProject, in: group)
+        try context.saveProject(otherProject, in: group)
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "MainProject" })
+        let updatedOtherProject = try #require(updatedGroup.projects.first { $0.name == "OtherProject" })
+        
+        #expect(updatedMainProject.shortcut == nil)
+        #expect(updatedOtherProject.shortcut == shortcut)
+        #expect(updatedGroup.shortcut == shortcut)
+    }
+    
+    @Test("Uses group shortcut when switching to project without shortcut")
+    func usesGroupShortcutWhenProjectHasNone() throws {
+        let group = makeGroup(shortcut: "groupcut")
+        let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
+        let newProject = makeProject(name: "NewProject", shortcut: nil)
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let category = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(group, in: category)
+        try context.saveProject(mainProject, in: group)
+        try context.saveProject(newProject, in: group)
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "MainProject" })
+        let updatedNewProject = try #require(updatedGroup.projects.first { $0.name == "NewProject" })
+        
+        #expect(updatedMainProject.shortcut == nil)
+        #expect(updatedNewProject.shortcut == "groupcut")
+        #expect(updatedGroup.shortcut == "groupcut")
+    }
+    
+    @Test("Prompts for shortcut when neither group nor project has one")
+    func promptsForShortcutWhenNeitherHasOne() throws {
+        let group = makeGroup()
+        let project = makeProject(name: "Project", shortcut: nil)
+        let mockPicker = MockPicker(requiredInputResponses: ["newcut"])
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let category = try #require(try context.loadCategories().first)
+        
+        #expect(group.shortcut == nil)
+        #expect(project.shortcut == nil)
+        
+        try context.saveGroup(group, in: category)
+        try context.saveProject(project, in: group)
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedProject = try #require(updatedGroup.projects.first { $0.name == "Project" })
+        
+        #expect(updatedProject.shortcut == "newcut")
+        #expect(updatedGroup.shortcut == "newcut")
+    }
+    
+    @Test("Handles switching from no main project to first main project")
+    func handlesFirstMainProjectAssignment() throws {
+        let group = makeGroup()
+        let project = makeProject(name: "FirstMain", shortcut: "projcut")
+        let (sut, context) = try makeSUT()
+        let category = try #require(try context.loadCategories().first)
+        
+        #expect(group.shortcut == nil)
+        
+        try context.saveGroup(group, in: category)
+        try context.saveProject(project, in: group)
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedProject = try #require(updatedGroup.projects.first { $0.name == "FirstMain" })
+        
+        #expect(updatedProject.shortcut == "projcut")
+        #expect(updatedGroup.shortcut == "projcut")
+    }
+    
+    @Test("Correctly identifies current main project by matching shortcuts")
+    func correctlyIdentifiesMainProjectByShortcut() throws {
+        let group = makeGroup(shortcut: "main")
+        let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
+        let otherProject1 = makeProject(name: "Other1", shortcut: "other1")
+        let otherProject2 = makeProject(name: "Other2", shortcut: "other2")
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let category = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(group, in: category)
+        try context.saveProject(mainProject, in: group)
+        try context.saveProject(otherProject1, in: group)
+        try context.saveProject(otherProject2, in: group)
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "MainProject" })
+        let updatedOther1 = try #require(updatedGroup.projects.first { $0.name == "Other1" })
+        let updatedOther2 = try #require(updatedGroup.projects.first { $0.name == "Other2" })
+        
+        // Original main project should lose its shortcut
+        #expect(updatedMainProject.shortcut == nil)
+        // Other1 becomes new main project and gets group shortcut (MockPicker defaults to index 0)
+        #expect(updatedOther1.shortcut == "main")
+        #expect(updatedOther2.shortcut == "other2")
+        #expect(updatedGroup.shortcut == "main")
+    }
+    
+    @Test("Shows current main project message and requires confirmation")
+    func showsCurrentMainProjectAndRequiresConfirmation() throws {
+        let group = makeGroup(shortcut: "main")
+        let mainProject = makeProject(name: "CurrentMain", shortcut: group.shortcut)
+        let otherProject = makeProject(name: "Other", shortcut: "other")
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let category = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(group, in: category)
+        try context.saveProject(mainProject, in: group)
+        try context.saveProject(otherProject, in: group)
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "CurrentMain" })
+        let updatedOtherProject = try #require(updatedGroup.projects.first { $0.name == "Other" })
+        
+        // Confirm the switch happened
+        #expect(updatedMainProject.shortcut == nil)
+        #expect(updatedOtherProject.shortcut == "main")
+        #expect(updatedGroup.shortcut == "main")
+    }
+    
+    @Test("Cancels operation when user denies confirmation")
+    func cancelsOperationWhenUserDeniesConfirmation() throws {
+        let group = makeGroup(shortcut: "main")
+        let mainProject = makeProject(name: "CurrentMain", shortcut: "main")
+        let otherProject = makeProject(name: "Other", shortcut: "other")
+        let mockPicker = MockPicker(permissionResponses: [false])
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let category = try #require(try context.loadCategories().first)
+        
+        try context.saveGroup(group, in: category)
+        try context.saveProject(mainProject, in: group)
+        try context.saveProject(otherProject, in: group)
+        try sut.setMainProject(group: group.name)
+        
+        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "CurrentMain" })
+        let updatedOtherProject = try #require(updatedGroup.projects.first { $0.name == "Other" })
+        
+        // Confirm no changes were made
+        #expect(updatedMainProject.shortcut == "main")
+        #expect(updatedOtherProject.shortcut == "other")
+        #expect(updatedGroup.shortcut == "main")
     }
 }
 

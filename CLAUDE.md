@@ -16,7 +16,10 @@ swift build -c release
 
 ### Testing
 ```bash
-swift test
+# Use xcodebuild for tests (SwiftData requires macOS runtime)
+xcodebuild test -scheme nnapp -destination 'platform=macOS'
+
+# swift test does NOT work with SwiftData persistence layer
 ```
 
 ### Running
