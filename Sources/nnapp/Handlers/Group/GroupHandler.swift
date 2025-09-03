@@ -160,6 +160,7 @@ extension GroupHandler {
             guard let mainProject = currentMainProject else { return true }
             return project.name != mainProject.name
         }
+            .sorted(by: { $0.name < $1.name })
 
         // Check if any non-main projects exist
         guard !nonMainProjects.isEmpty else {
@@ -223,7 +224,10 @@ private extension GroupHandler {
         let subfolderNames = categoryFolder.subfolders.map({ $0.name })
 
         if subfolderNames.contains(where: { $0.matches(group.name) }) {
-            throw CodeLaunchError.groupFolderAlreadyExists
+            // TODO: - this may need to be 'toggle off' for automation scenarios
+            guard picker.getPermission("\(group.name) already exists in the \(category.name) folder. Would you like to use \(group.name)?") else {
+                throw CodeLaunchError.groupFolderAlreadyExists
+            }
         }
 
         try categoryFolder.createSubfolder(named: group.name)

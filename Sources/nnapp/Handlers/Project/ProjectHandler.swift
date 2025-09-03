@@ -18,6 +18,7 @@ struct ProjectHandler {
     private let context: CodeLaunchContext
     private let gitShell: GitShellAdapter
     private let groupSelector: ProjectGroupSelector
+    private let desktopPath: String?
     
     /// Initializes a new handler for managing projects.
     /// - Parameters:
@@ -25,12 +26,14 @@ struct ProjectHandler {
     ///   - picker: User-facing prompt utility.
     ///   - context: SwiftData-backed persistence layer.
     ///   - groupSelector: Logic for resolving a group during project creation.
-    init(shell: Shell, picker: CommandLinePicker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector) {
+    ///   - desktopPath: Optional custom desktop path for testing purposes.
+    init(shell: Shell, picker: CommandLinePicker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector, desktopPath: String? = nil) {
         self.shell = shell
         self.picker = picker
         self.context = context
         self.gitShell = .init(shell: shell)
         self.groupSelector = groupSelector
+        self.desktopPath = desktopPath
     }
 }
 
@@ -43,9 +46,10 @@ extension ProjectHandler {
     ///   - group: Optional name of the group to assign the project to.
     ///   - shortcut: Optional quick-launch shortcut.
     ///   - isMainProject: Whether this is the main project for the group (used for terminal launches).
-    func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool) throws {
+    ///   - fromDesktop: Whether to filter and select from valid projects on the Desktop.
+    func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool, fromDesktop: Bool) throws {
         let selectedGroup = try groupSelector.getGroup(named: group)
-        let projectFolder = try selectProjectFolder(path: path, group: selectedGroup)
+        let projectFolder = try selectProjectFolder(path: path, group: selectedGroup, fromDesktop: fromDesktop)
         let info = try selectProjectInfo(folder: projectFolder.folder, shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
         let project = LaunchProject(name: info.name, shortcut: info.shortcut, type: projectFolder.type, remote: info.remote, links: info.otherLinks)
         
@@ -77,10 +81,10 @@ extension ProjectHandler {
 
 // MARK: - Private Methods
 private extension ProjectHandler {
-    func selectProjectFolder(path: String?, group: LaunchGroup) throws -> ProjectFolder {
-        let folderSelector = ProjectFolderSelector(picker: picker)
+    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
+        let folderSelector = ProjectFolderSelector(picker: picker, desktopPath: desktopPath)
         
-        return try folderSelector.selectProjectFolder(path: path, group: group)
+        return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
     }
     
     func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {

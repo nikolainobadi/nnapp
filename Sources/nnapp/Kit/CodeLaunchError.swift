@@ -23,3 +23,7 @@ enum CodeLaunchError: Error {
     case shortcutTaken
     case folderNameTaken
 }
+
+enum ShellError: Error {
+    case commandFailed(command: String, error: String)
+}

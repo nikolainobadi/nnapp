@@ -62,10 +62,16 @@ nnapp --help
   nnapp add project --path ~/dev/MyApp --group Mobile
   ```
 
+- Add a project from the Desktop:
+  ```sh
+  nnapp add project --from-desktop --group Mobile
+  ```
+
 - Set a project as the main project for its group:
   ```sh
   nnapp set-main-project "Mobile"
   ```
+  This synchronizes the project and group shortcuts for quick terminal access.
 
 - Open project in Xcode with terminal:
   ```sh

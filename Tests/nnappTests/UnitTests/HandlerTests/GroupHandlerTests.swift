@@ -129,6 +129,44 @@ extension GroupHandlerTests {
         #expect(categoryFolder.containsSubfolder(named: groupName))
     }
     
+    @Test("Uses existing folder when user accepts")
+    func usesExistingFolderWhenUserAccepts() throws {
+        let mockPicker = MockPicker(permissionResponses: [true]) // User says yes to using existing folder
+        let (sut, context) = try makeSUT(picker: mockPicker)
+        let groupName = "ExistingFolderGroup"
+        
+        // Create an existing folder with the same name
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        try categoryFolder.createSubfolder(named: groupName)
+        
+        // Should succeed when user accepts the existing folder
+        let group = try sut.createGroup(name: groupName, category: existingCategoryName)
+        
+        #expect(group.name == groupName)
+        #expect(categoryFolder.containsSubfolder(named: groupName))
+        
+        // Verify group was saved to context
+        let groups = try context.loadGroups()
+        #expect(groups.count == 1)
+        #expect(groups.first?.name == groupName)
+    }
+    
+    @Test("Throws error when user rejects existing folder")
+    func throwsErrorWhenUserRejectsExistingFolder() throws {
+        let mockPicker = MockPicker(permissionResponses: [false]) // User says no to using existing folder
+        let (sut, _) = try makeSUT(picker: mockPicker)
+        let groupName = "ExistingFolderGroup"
+        
+        // Create an existing folder with the same name
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        try categoryFolder.createSubfolder(named: groupName)
+        
+        // Should throw error when user rejects the existing folder
+        #expect(throws: CodeLaunchError.groupFolderAlreadyExists) {
+            try sut.createGroup(name: groupName, category: existingCategoryName)
+        }
+    }
+    
     @Test("Throws error when creating group with existing name")
     func throwsErrorWhenCreatingGroupWithExistingName() throws {
         let (sut, context) = try makeSUT()
@@ -193,9 +231,9 @@ extension GroupHandlerTests {
     
     @Test("Prompts user to select group when no name")
     func promptsUserToSelectGroupWhenNoName() throws {
-        let groupToDelete = makeGroup(name: "GroupToDelete")
         let mockPicker = MockPicker(permissionResponses: [true])
         let (sut, context) = try makeSUT(picker: mockPicker)
+        let groupToDelete = makeGroup(name: "GroupToDelete")
         let category = try #require(try context.loadCategories().first)
 
         try context.saveGroup(groupToDelete, in: category)
@@ -273,11 +311,11 @@ extension GroupHandlerTests {
     
     @Test("Uses group shortcut when switching to project without shortcut")
     func usesGroupShortcutWhenProjectHasNone() throws {
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(shortcut: "groupcut")
         let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
         let newProject = makeProject(name: "NewProject", shortcut: nil)
-        let mockPicker = MockPicker(permissionResponses: [true])
-        let (sut, context) = try makeSUT(picker: mockPicker)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
@@ -296,10 +334,10 @@ extension GroupHandlerTests {
     
     @Test("Prompts for shortcut when neither group nor project has one")
     func promptsForShortcutWhenNeitherHasOne() throws {
-        let group = makeGroup()
-        let project = makeProject(name: "Project", shortcut: nil)
         let mockPicker = MockPicker(requiredInputResponses: ["newcut"])
         let (sut, context) = try makeSUT(picker: mockPicker)
+        let group = makeGroup()
+        let project = makeProject(name: "Project", shortcut: nil)
         let category = try #require(try context.loadCategories().first)
         
         #expect(group.shortcut == nil)
@@ -338,40 +376,40 @@ extension GroupHandlerTests {
     
     @Test("Correctly identifies current main project by matching shortcuts")
     func correctlyIdentifiesMainProjectByShortcut() throws {
-        let group = makeGroup(shortcut: "main")
-        let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
-        let otherProject1 = makeProject(name: "Other1", shortcut: "other1")
-        let otherProject2 = makeProject(name: "Other2", shortcut: "other2")
+        let groupShortcut = "main"
+        let secondShortcut = "second"
         let mockPicker = MockPicker(permissionResponses: [true])
         let (sut, context) = try makeSUT(picker: mockPicker)
+        let group = makeGroup(shortcut: groupShortcut)
+        let mainProject = makeProject(name: "MainProject", shortcut: groupShortcut)
+        let firstOtherProject = makeProject(name: "First", shortcut: "first")
+        let secondOtherProject = makeProject(name: "Second", shortcut: secondShortcut)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
         try context.saveProject(mainProject, in: group)
-        try context.saveProject(otherProject1, in: group)
-        try context.saveProject(otherProject2, in: group)
+        try context.saveProject(firstOtherProject, in: group)
+        try context.saveProject(secondOtherProject, in: group)
         try sut.setMainProject(group: group.name)
         
         let updatedGroup = try #require(try context.loadGroups().first)
-        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "MainProject" })
-        let updatedOther1 = try #require(updatedGroup.projects.first { $0.name == "Other1" })
-        let updatedOther2 = try #require(updatedGroup.projects.first { $0.name == "Other2" })
+        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == mainProject.name })
+        let firstUpdatedProject = try #require(updatedGroup.projects.first { $0.name == firstOtherProject.name })
+        let secondUpdatedProject = try #require(updatedGroup.projects.first { $0.name == secondOtherProject.name })
         
-        // Original main project should lose its shortcut
         #expect(updatedMainProject.shortcut == nil)
-        // Other1 becomes new main project and gets group shortcut (MockPicker defaults to index 0)
-        #expect(updatedOther1.shortcut == "main")
-        #expect(updatedOther2.shortcut == "other2")
-        #expect(updatedGroup.shortcut == "main")
+        #expect(firstUpdatedProject.shortcut == groupShortcut)
+        #expect(secondUpdatedProject.shortcut == secondShortcut)
+        #expect(updatedGroup.shortcut == groupShortcut)
     }
     
     @Test("Shows current main project message and requires confirmation")
     func showsCurrentMainProjectAndRequiresConfirmation() throws {
+        let mockPicker = MockPicker(permissionResponses: [true])
+        let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(shortcut: "main")
         let mainProject = makeProject(name: "CurrentMain", shortcut: group.shortcut)
         let otherProject = makeProject(name: "Other", shortcut: "other")
-        let mockPicker = MockPicker(permissionResponses: [true])
-        let (sut, context) = try makeSUT(picker: mockPicker)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
@@ -391,11 +429,11 @@ extension GroupHandlerTests {
     
     @Test("Cancels operation when user denies confirmation")
     func cancelsOperationWhenUserDeniesConfirmation() throws {
+        let mockPicker = MockPicker(permissionResponses: [false])
+        let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(shortcut: "main")
         let mainProject = makeProject(name: "CurrentMain", shortcut: "main")
         let otherProject = makeProject(name: "Other", shortcut: "other")
-        let mockPicker = MockPicker(permissionResponses: [false])
-        let (sut, context) = try makeSUT(picker: mockPicker)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
