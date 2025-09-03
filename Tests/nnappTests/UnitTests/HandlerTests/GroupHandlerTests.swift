@@ -338,31 +338,31 @@ extension GroupHandlerTests {
     
     @Test("Correctly identifies current main project by matching shortcuts")
     func correctlyIdentifiesMainProjectByShortcut() throws {
+        let groupShortcut = "main"
+        let secondShortcut = "second"
         let mockPicker = MockPicker(permissionResponses: [true])
         let (sut, context) = try makeSUT(picker: mockPicker)
-        let group = makeGroup(shortcut: "main")
-        let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
-        let otherProject1 = makeProject(name: "Other1", shortcut: "other1")
-        let otherProject2 = makeProject(name: "Other2", shortcut: "other2")
+        let group = makeGroup(shortcut: groupShortcut)
+        let mainProject = makeProject(name: "MainProject", shortcut: groupShortcut)
+        let firstOtherProject = makeProject(name: "First", shortcut: "first")
+        let secondOtherProject = makeProject(name: "Second", shortcut: secondShortcut)
         let category = try #require(try context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
         try context.saveProject(mainProject, in: group)
-        try context.saveProject(otherProject1, in: group)
-        try context.saveProject(otherProject2, in: group)
+        try context.saveProject(firstOtherProject, in: group)
+        try context.saveProject(secondOtherProject, in: group)
         try sut.setMainProject(group: group.name)
         
         let updatedGroup = try #require(try context.loadGroups().first)
-        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "MainProject" })
-        let updatedOther1 = try #require(updatedGroup.projects.first { $0.name == "Other1" })
-        let updatedOther2 = try #require(updatedGroup.projects.first { $0.name == "Other2" })
+        let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == mainProject.name })
+        let firstUpdatedProject = try #require(updatedGroup.projects.first { $0.name == firstOtherProject.name })
+        let secondUpdatedProject = try #require(updatedGroup.projects.first { $0.name == secondOtherProject.name })
         
-        // Original main project should lose its shortcut
         #expect(updatedMainProject.shortcut == nil)
-        // Other1 becomes new main project and gets group shortcut (MockPicker defaults to index 0)
-        #expect(updatedOther1.shortcut == "main")
-        #expect(updatedOther2.shortcut == "other2")
-        #expect(updatedGroup.shortcut == "main")
+        #expect(firstUpdatedProject.shortcut == groupShortcut)
+        #expect(secondUpdatedProject.shortcut == secondShortcut)
+        #expect(updatedGroup.shortcut == groupShortcut)
     }
     
     @Test("Shows current main project message and requires confirmation")

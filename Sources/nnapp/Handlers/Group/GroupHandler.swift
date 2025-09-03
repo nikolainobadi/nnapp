@@ -160,6 +160,7 @@ extension GroupHandler {
             guard let mainProject = currentMainProject else { return true }
             return project.name != mainProject.name
         }
+            .sorted(by: { $0.name < $1.name })
 
         // Check if any non-main projects exist
         guard !nonMainProjects.isEmpty else {
