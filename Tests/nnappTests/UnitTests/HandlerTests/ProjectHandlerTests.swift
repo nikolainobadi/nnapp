@@ -190,14 +190,14 @@ extension ProjectHandlerTests {
         }
     }
     
-    @Test("Moves project folder to group folder when necessary", .disabled())
+    @Test("Moves project folder to group folder when necessary")
     func movesProjectFolderToGroupFolderWhenNecessary() throws {
         let (sut, context) = try makeSUT()
         let group = try setupTestGroup(context: context)
         let projectFolder = try createSwiftPackage(named: projectName, in: tempFolder)
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        let groupFolder = try categoryFolder.subfolder(named: existingGroupName)
         
-        // Verify project is not in group folder initially
-        let groupFolder = try #require(try tempFolder.subfolder(named: existingGroupName))
         #expect(!groupFolder.containsSubfolder(named: projectName))
         
         try sut.addProject(
@@ -208,7 +208,6 @@ extension ProjectHandlerTests {
             fromDesktop: false
         )
         
-        // Verify project was moved to group folder
         #expect(groupFolder.containsSubfolder(named: projectName))
     }
 }
@@ -340,9 +339,10 @@ let package = Package(
     }
     
     func setupTestGroup(context: CodeLaunchContext) throws -> LaunchGroup {
-        let category = try #require(try context.loadCategories().first)
-        _ = try #require(try tempFolder.createSubfolderIfNeeded(withName: existingGroupName))
         let group = makeGroup(name: existingGroupName)
+        let category = try #require(try context.loadCategories().first)
+        
+        group.category = category
         
         try context.saveGroup(group, in: category)
         return group
