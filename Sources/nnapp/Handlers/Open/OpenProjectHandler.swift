@@ -1,5 +1,5 @@
 //
-//  OpenManager.swift
+//  OpenProjectHandler.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/26/25.
@@ -11,7 +11,7 @@ import GitShellKit
 import SwiftPicker
 
 /// Manages the logic for opening projects in various ways (IDE, terminal, browser).
-struct OpenManager {
+struct OpenProjectHandler {
     private let shell: Shell
     private let picker: CommandLinePicker
     private let context: CodeLaunchContext
@@ -30,7 +30,7 @@ struct OpenManager {
 
 
 // MARK: - Project Selection
-extension OpenManager {
+extension OpenProjectHandler {
     /// Resolves a `LaunchProject` using either a shortcut or interactive selection.
     /// - Parameters:
     ///   - shortcut: Optional shortcut to identify the project or group.
@@ -60,7 +60,7 @@ extension OpenManager {
 
 
 // MARK: - IDE Operations
-extension OpenManager {
+extension OpenProjectHandler {
     /// Opens the project in Xcode or VSCode, optionally launching terminal in the project directory.
     /// - Parameters:
     ///   - project: The project to open.
@@ -130,7 +130,7 @@ extension OpenManager {
 
 
 // MARK: - URL Operations
-extension OpenManager {
+extension OpenProjectHandler {
     /// Opens the remote repository URL in the browser.
     /// - Parameter project: The project whose remote URL to open.
     func openRemoteURL(for project: LaunchProject) throws {
@@ -170,7 +170,7 @@ extension OpenManager {
 
 
 // MARK: - Terminal Integration
-private extension OpenManager {
+private extension OpenProjectHandler {
     /// Runs the given shell script in a new iTerm tab, if iTerm is available.
     /// - Parameter script: A shell command string to execute.
     func runScriptInNewTerminalWindow(script: String) {

@@ -80,7 +80,7 @@ extension Nnapp {
         return .init(shell: shell, picker: picker, context: context, groupSelector: groupSelector)
     }
     
-    static func makeOpenManager() throws -> OpenManager {
+    static func makeOpenManager() throws -> OpenProjectHandler {
         let shell = makeShell()
         let picker = makePicker()
         let context = try makeContext()
