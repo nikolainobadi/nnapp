@@ -84,8 +84,23 @@ extension Nnapp {
         let shell = makeShell()
         let picker = makePicker()
         let context = try makeContext()
+        let ideLauncher = makeIDELauncher(shell: shell, picker: picker)
+        let terminalManager = makeTerminalManager(shell: shell, context: context)
+        let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
         
-        return .init(shell: shell, picker: picker, context: context)
+        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher)
+    }
+    
+    static func makeIDELauncher(shell: Shell, picker: CommandLinePicker) -> IDELauncher {
+        return .init(shell: shell, picker: picker)
+    }
+    
+    static func makeTerminalManager(shell: Shell, context: CodeLaunchContext) -> TerminalManager {
+        return .init(shell: shell, context: context)
+    }
+    
+    static func makeURLLauncher(shell: Shell, picker: CommandLinePicker) -> URLLauncher {
+        return .init(shell: shell, picker: picker)
     }
 }
 
