@@ -79,6 +79,14 @@ extension Nnapp {
         
         return .init(shell: shell, picker: picker, context: context, groupSelector: groupSelector)
     }
+    
+    static func makeOpenManager() throws -> OpenManager {
+        let shell = makeShell()
+        let picker = makePicker()
+        let context = try makeContext()
+        
+        return .init(shell: shell, picker: picker, context: context)
+    }
 }
 
 
