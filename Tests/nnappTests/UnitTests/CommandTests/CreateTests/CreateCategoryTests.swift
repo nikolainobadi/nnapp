@@ -23,24 +23,30 @@ final class CreateCategoryTests: MainActorBaseCreateTests {
 extension CreateCategoryTests {
     @Test("Throws an error when a folder already exists in the parent directory with same name")
     func throwsErrorWhenFolderAlreadyExists() throws {
-        let _ = try #require(try tempFolder.createSubfolder(named: categoryName))
-        
-        #expect(throws: CodeLaunchError.categoryPathTaken) {
+        let _ = try tempFolder.createSubfolder(named: categoryName)
+
+        do {
             try runCategoryCommand()
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .categoryPathTaken)
         }
     }
     
     @Test("Throws an error when the name is taken by an existing Category")
     func throwsErrorWhenCategoryNameAlreadyExists() throws {
-        let existingCategoryFolder = try #require(try tempFolder.createSubfolder(named: categoryName))
+        let existingCategoryFolder = try tempFolder.createSubfolder(named: categoryName)
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let category = makeCategory(name: categoryName, path: existingCategoryFolder.path)
-        
+
         try context.saveCategory(category)
-        
-        #expect(throws: CodeLaunchError.categoryNameTaken) {
+
+        do {
             try runCategoryCommand(factory: factory)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .categoryNameTaken)
         }
     }
     
@@ -48,11 +54,12 @@ extension CreateCategoryTests {
     func createCategoryFolder(info: TestInfo) throws {
         let picker = MockPicker(requiredInputResponses: makeCategoryInputs(info: info))
         let factory = MockContextFactory(picker: picker)
-        
+
         try runCategoryCommand(factory: factory, info: info)
-        
-        let updatedFolder = try #require(try Folder(path: parentPath))
-        let _ = try #require(updatedFolder.containsSubfolder(named: categoryName))
+
+        let updatedFolder = try Folder(path: parentPath)
+
+        #expect(updatedFolder.containsSubfolder(named: categoryName))
     }
     
     @Test("Saves the new category", arguments: TestInfo.testOptions)
