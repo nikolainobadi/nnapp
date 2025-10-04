@@ -27,42 +27,51 @@ final class CreateGroupTests: MainActorBaseCreateTests {
 extension CreateGroupTests {
     @Test("Throws error when no Category is selected")
     func throwsErrorWhenNoCategorySelected() throws {
-        #expect(throws: (any Error).self) {
+        do {
             try runGroupCommand()
+            Issue.record("expected an error to be thrown")
+        } catch {
+            // Expected error
         }
     }
     
     @Test("Throws error when name is taken by existing Group")
     func throwsErrorWhenGroupNameIsTaken() throws {
-        let factory = try #require(try makeFactory(includeGroup: true))
-        
-        #expect(throws: CodeLaunchError.groupNameTaken) {
+        let factory = try makeFactory(includeGroup: true)
+
+        do {
             try runGroupCommand(factory: factory, name: existingGroupName, category: existingCategoryName)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .groupNameTaken)
         }
     }
     
     @Test("Throws error when name is taken by existing folder in Category folder")
     func throwsErrorWhenGroupFolderNameIsTaken() throws {
-        let factory = try #require(try makeFactory(includeGroup: false))
-        
-        #expect(throws: CodeLaunchError.groupFolderAlreadyExists) {
+        let factory = try makeFactory(includeGroup: false)
+
+        do {
             try runGroupCommand(factory: factory, name: existingGroupName, category: existingCategoryName)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .groupFolderAlreadyExists)
         }
     }
     
     @Test("Creates a new Group folder in an existing Category folder")
     func createsNewGroupFolderInExistingCategoryFolder() throws {
         let groupName = "newGroupName"
-        let factory = try #require(try makeFactory())
-        
+        let factory = try makeFactory()
+
         try runGroupCommand(factory: factory, name: groupName, category: existingCategoryName)
-        
+
         let context = try factory.makeContext()
-        let newGroup = try #require(try context.loadGroups().first)
+        let newGroup = try #require(context.loadGroups().first)
         let newGroupPath = try #require(newGroup.path)
-        let updatedCategoryFolder = try #require(try tempFolder.subfolder(named: existingCategoryName))
-        let newGroupFolder = try #require(try updatedCategoryFolder.subfolder(named: groupName))
-        
+        let updatedCategoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        let newGroupFolder = try updatedCategoryFolder.subfolder(named: groupName)
+
         #expect(newGroup.name == groupName)
         #expect(newGroupPath == newGroupFolder.path)
     }
@@ -72,16 +81,16 @@ extension CreateGroupTests {
 // MARK: - Factory
 private extension CreateGroupTests {
     func makeFactory(includeGroup: Bool = false) throws -> MockContextFactory {
-        let existingCategoryFolder = try #require(try tempFolder.subfolder(named: existingCategoryName))
+        let existingCategoryFolder = try tempFolder.subfolder(named: existingCategoryName)
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let category = makeCategory(name: existingCategoryName, path: existingCategoryFolder.path)
         try context.saveCategory(category)
-        
+
         if includeGroup {
             try context.saveGroup(makeGroup(name: existingGroupName), in: category)
         }
-        
+
         return factory
     }
 }
