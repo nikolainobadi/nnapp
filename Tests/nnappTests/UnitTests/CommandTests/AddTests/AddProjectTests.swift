@@ -27,58 +27,70 @@ final class AddProjectTests: MainActorBaseAddTests {
 extension AddProjectTests {
     @Test("Throws an error if no group is selected")
     func throwsErrorWhenNoGroupSelected() throws {
-        #expect(throws: (any Error).self) {
+        do {
             try runProjectCommand()
+            Issue.record("expected an error to be thrown")
+        } catch {
+            // Expected error
         }
     }
     
     @Test("Throws error if path from arg finds folder without a project type.")
     func throwsErrorWhenNoProjecTypeExists() throws {
-        let factory = try #require(try makeFactory())
-        let nonProjectFolder = try #require(try tempFolder.createSubfolder(named: "NonProjectFolder"))
+        let factory = try makeFactory()
+        let nonProjectFolder = try tempFolder.createSubfolder(named: "NonProjectFolder")
 
-        #expect(throws: CodeLaunchError.noProjectInFolder) {
+        do {
             try runProjectCommand(factory, path: nonProjectFolder.path, group: existingGroupName)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .noProjectInFolder)
         }
     }
     
     @Test("Throws error if Project name is taken")
     func throwsErrorWhenProjectNameTaken() throws {
-        let factory = try #require(try makeFactory())
+        let factory = try makeFactory()
         let context = try factory.makeContext()
         let group = try #require(context.loadGroups().first)
         let existing = makeProject(name: "MyProject")
         try context.saveProject(existing, in: group)
 
-        let tempProjectFolder = try #require(try tempFolder.createSubfolder(named: "MyProject"))
+        let tempProjectFolder = try tempFolder.createSubfolder(named: "MyProject")
         try tempProjectFolder.createFile(named: "Package.swift")
 
-        #expect(throws: CodeLaunchError.projectNameTaken) {
+        do {
             try runProjectCommand(factory, path: tempProjectFolder.path, group: existingGroupName)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .projectNameTaken)
         }
     }
 
     @Test("Throws error if Project shortcut is taken")
     func throwsErrorWhenProjectShortcutTaken() throws {
-        let factory = try #require(try makeFactory())
+        let factory = try makeFactory()
         let context = try factory.makeContext()
         let group = try #require(context.loadGroups().first)
         let existing = makeProject(name: "OtherProject", shortcut: "dup")
         try context.saveProject(existing, in: group)
 
-        let tempProjectFolder = try #require(try tempFolder.createSubfolder(named: "MyProject"))
+        let tempProjectFolder = try tempFolder.createSubfolder(named: "MyProject")
         try tempProjectFolder.createFile(named: "Package.swift")
 
-        #expect(throws: CodeLaunchError.shortcutTaken) {
+        do {
             try runProjectCommand(factory, path: tempProjectFolder.path, group: existingGroupName, shortcut: "dup")
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .shortcutTaken)
         }
     }
     
     @Test("Moves Project folder to Group folder when necessary")
     func movesProjectFolderWhenNecessary() throws {
-        let factory = try #require(try makeFactory())
-        let groupFolder = try #require(try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName))
-        let outsideFolder = try #require(try tempFolder.createSubfolder(named: "MyProject"))
+        let factory = try makeFactory()
+        let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
+        let outsideFolder = try tempFolder.createSubfolder(named: "MyProject")
         try outsideFolder.createFile(named: "Package.swift")
 
         try runProjectCommand(factory, path: outsideFolder.path, group: existingGroupName)
@@ -88,9 +100,9 @@ extension AddProjectTests {
     
     @Test("Does not move Project folder to Group folder if it is already there")
     func doesNotMoveProjectFolderWhenAlreadyInGroupFolder() throws {
-        let factory = try #require(try makeFactory())
-        let groupFolder = try #require(try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName))
-        let projectFolder = try #require(try groupFolder.createSubfolder(named: "MyProject"))
+        let factory = try makeFactory()
+        let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
+        let projectFolder = try groupFolder.createSubfolder(named: "MyProject")
         try projectFolder.createFile(named: "Package.swift")
 
         try runProjectCommand(factory, path: projectFolder.path, group: existingGroupName)
@@ -100,9 +112,9 @@ extension AddProjectTests {
     
     @Test("Saves new Project to selected Group")
     func savesNewProjectToGroup() throws {
-        let factory = try #require(try makeFactory())
-        let groupFolder = try #require(try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName))
-        let projectFolder = try #require(try groupFolder.createSubfolder(named: "MyProject"))
+        let factory = try makeFactory()
+        let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
+        let projectFolder = try groupFolder.createSubfolder(named: "MyProject")
         try projectFolder.createFile(named: "Package.swift")
 
         let context = try factory.makeContext()
@@ -120,9 +132,9 @@ extension AddProjectTests {
     
     @Test("Sets the Group shortcut when isMainProject is true")
     func updatesGroupShortcutWhenIsMainProjectIsTrue() throws {
-        let factory = try #require(try makeFactory())
-        let groupFolder = try #require(try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName))
-        let projectFolder = try #require(try groupFolder.createSubfolder(named: "MainApp"))
+        let factory = try makeFactory()
+        let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
+        let projectFolder = try groupFolder.createSubfolder(named: "MainApp")
         try projectFolder.createFile(named: "Package.swift")
 
         let shortcut = "mainapp"
@@ -141,15 +153,15 @@ extension AddProjectTests {
 // MARK: - Factory
 private extension AddProjectTests {
     func makeFactory() throws -> MockContextFactory {
-        let categoryFolder = try #require(try tempFolder.subfolder(named: existingCategoryName))
-        let groupFolder = try #require(try categoryFolder.subfolder(named: existingGroupName))
+        let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
+        let groupFolder = try categoryFolder.subfolder(named: existingGroupName)
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let category = makeCategory(name: categoryFolder.name, path: categoryFolder.path)
         let group = makeGroup(name: groupFolder.name)
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
-        
+
         return factory
     }
 }

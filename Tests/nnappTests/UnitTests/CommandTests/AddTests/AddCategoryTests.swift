@@ -16,19 +16,22 @@ final class AddCategoryTests: MainActorBaseAddTests {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let existingCategory = makeCategory(name: existingName, path: tempFolder.path.appendingPathComponent(existingName))
-        let otherFolder = try #require(try tempFolder.createSubfolder(named: "OtherFolder"))
-        let categoryFolderToImport = try #require(try otherFolder.createSubfolder(named: existingName))
+        let otherFolder = try tempFolder.createSubfolder(named: "OtherFolder")
+        let categoryFolderToImport = try otherFolder.createSubfolder(named: existingName)
         
         try context.saveCategory(existingCategory)
         
-        #expect(throws: CodeLaunchError.categoryNameTaken) {
+        do {
             try runCommand(factory, argType: .category(path: categoryFolderToImport.path))
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .categoryNameTaken)
         }
     }
     
     @Test("Saves new Category", arguments: [true, false])
     func savesNewCategory(useArg: Bool) throws {
-        let categoryFolderToImport = try #require(try tempFolder.createSubfolder(named: "newCategory"))
+        let categoryFolderToImport = try tempFolder.createSubfolder(named: "newCategory")
         let path = categoryFolderToImport.path
         let picker = MockPicker(requiredInputResponses: useArg ? [] : [path])
         let factory = MockContextFactory(picker: picker)
@@ -36,7 +39,7 @@ final class AddCategoryTests: MainActorBaseAddTests {
         
         try runCommand(factory, argType: .category(path: useArg ? path : nil))
         
-        let categories = try #require(try context.loadCategories())
+        let categories = try context.loadCategories()
         let savedCategory = try #require(categories.first)
         
         #expect(categories.count == 1)
