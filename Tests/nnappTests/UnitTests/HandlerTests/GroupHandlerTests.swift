@@ -39,13 +39,13 @@ extension GroupHandlerTests {
     @Test("Persists the imported group in storage")
     func persistsImportedGroup() throws {
         let (sut, context) = try makeSUT()
-        let folder = try #require(try tempFolder.createSubfolder(named: importedGroupName))
+        let folder = try tempFolder.createSubfolder(named: importedGroupName)
 
         _ = try sut.importGroup(path: folder.path, category: existingCategoryName)
 
-        let groups = try #require(try context.loadGroups())
+        let groups = try context.loadGroups()
         let firstGroup = try #require(groups.first)
-        
+
         #expect(groups.count == 1)
         #expect(firstGroup.name == importedGroupName)
     }
@@ -53,12 +53,12 @@ extension GroupHandlerTests {
     @Test("Creates a subfolder under the category directory")
     func createsCategorySubfolder() throws {
         let sut = try makeSUT().sut
-        let folder = try #require(try tempFolder.createSubfolder(named: importedGroupName))
+        let folder = try tempFolder.createSubfolder(named: importedGroupName)
 
         _ = try sut.importGroup(path: folder.path, category: existingCategoryName)
 
         let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
-        
+
         #expect(categoryFolder.containsSubfolder(named: importedGroupName))
     }
 
@@ -66,13 +66,16 @@ extension GroupHandlerTests {
     func throwsErrorWhenGroupNameAlreadyExists() throws {
         let (sut, context) = try makeSUT()
         let existingGroup = makeGroup(name: existingGroupName)
-        let existingCategory = try #require(try context.loadCategories().first)
+        let existingCategory = try #require(context.loadCategories().first)
         let folderToImport = try tempFolder.createSubfolder(named: existingGroupName)
-        
+
         try context.saveGroup(existingGroup, in: existingCategory)
-        
-        #expect(throws: CodeLaunchError.groupNameTaken) {
+
+        do {
             try sut.importGroup(path: folderToImport.path, category: existingCategoryName)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .groupNameTaken)
         }
     }
     
@@ -108,12 +111,12 @@ extension GroupHandlerTests {
     func persistsCreatedGroup() throws {
         let (sut, context) = try makeSUT()
         let groupName = "NewTestGroup"
-        
+
         _ = try sut.createGroup(name: groupName, category: existingCategoryName)
-        
-        let groups = try #require(try context.loadGroups())
+
+        let groups = try context.loadGroups()
         let firstGroup = try #require(groups.first)
-        
+
         #expect(groups.count == 1)
         #expect(firstGroup.name == groupName)
     }
@@ -156,14 +159,17 @@ extension GroupHandlerTests {
         let mockPicker = MockPicker(permissionResponses: [false]) // User says no to using existing folder
         let (sut, _) = try makeSUT(picker: mockPicker)
         let groupName = "ExistingFolderGroup"
-        
+
         // Create an existing folder with the same name
         let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
         try categoryFolder.createSubfolder(named: groupName)
-        
+
         // Should throw error when user rejects the existing folder
-        #expect(throws: CodeLaunchError.groupFolderAlreadyExists) {
+        do {
             try sut.createGroup(name: groupName, category: existingCategoryName)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .groupFolderAlreadyExists)
         }
     }
     
@@ -171,12 +177,15 @@ extension GroupHandlerTests {
     func throwsErrorWhenCreatingGroupWithExistingName() throws {
         let (sut, context) = try makeSUT()
         let existingGroup = makeGroup(name: existingGroupName)
-        let existingCategory = try #require(try context.loadCategories().first)
-        
+        let existingCategory = try #require(context.loadCategories().first)
+
         try context.saveGroup(existingGroup, in: existingCategory)
-        
-        #expect(throws: CodeLaunchError.groupNameTaken) {
+
+        do {
             try sut.createGroup(name: existingGroupName, category: existingCategoryName)
+            Issue.record("expected an error to be thrown")
+        } catch let launchError as CodeLaunchError {
+            #expect(launchError == .groupNameTaken)
         }
     }
 }
@@ -188,12 +197,12 @@ extension GroupHandlerTests {
     func returnsExistingGroupWhenFound() throws {
         let (sut, context) = try makeSUT()
         let existingGroup = makeGroup(name: "FoundGroup")
-        let existingCategory = try #require(try context.loadCategories().first)
-        
+        let existingCategory = try #require(context.loadCategories().first)
+
         try context.saveGroup(existingGroup, in: existingCategory)
-        
+
         let result = try sut.getGroup(named: "foundgroup") // case-insensitive
-        
+
         #expect(result.name == existingGroup.name)
     }
     
@@ -202,12 +211,12 @@ extension GroupHandlerTests {
         let mockPicker = MockPicker(requiredInputResponses: ["CreatedFromSelection"], permissionResponses: [true])
         let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup(name: "TestGroup")
-        let category = try #require(try context.loadCategories().first)
-        
+        let category = try #require(context.loadCategories().first)
+
         try context.saveGroup(group, in: category)
-        
+
         let result = try sut.getGroup(named: nil)
-        
+
         #expect(result.name == group.name)
     }
 }
@@ -219,12 +228,12 @@ extension GroupHandlerTests {
     func removesGroupByName() throws {
         let (sut, context) = try makeSUT(permissionResponses: [true])
         let groupToDelete = makeGroup(name: "GroupToDelete")
-        let existingCategory = try #require(try context.loadCategories().first)
-        
+        let existingCategory = try #require(context.loadCategories().first)
+
         try context.saveGroup(groupToDelete, in: existingCategory)
-        
+
         try sut.removeGroup(name: "groupToDelete") // case-insensitive
-        
+
         let groups = try context.loadGroups()
         #expect(groups.isEmpty)
     }
@@ -234,14 +243,14 @@ extension GroupHandlerTests {
         let mockPicker = MockPicker(permissionResponses: [true])
         let (sut, context) = try makeSUT(picker: mockPicker)
         let groupToDelete = makeGroup(name: "GroupToDelete")
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
 
         try context.saveGroup(groupToDelete, in: category)
-        
+
         try sut.removeGroup(name: nil)
-        
+
         let groups = try context.loadGroups()
-        
+
         #expect(groups.isEmpty)
     }
     
@@ -250,14 +259,15 @@ extension GroupHandlerTests {
         let mockPicker = MockPicker(permissionResponses: [false], shouldThrowError: true)
         let (sut, context) = try makeSUT(picker: mockPicker)
         let groupToKeep = makeGroup(name: "GroupToKeep")
-        let existingCategory = try #require(try context.loadCategories().first)
-        
+        let existingCategory = try #require(context.loadCategories().first)
+
         try context.saveGroup(groupToKeep, in: existingCategory)
-        
-        #expect(throws: NSError.self) {
+
+        do {
             try sut.removeGroup(name: "GroupToKeep")
-        }
-        
+            Issue.record("expected an error to be thrown")
+        } catch { }
+
         let groups = try context.loadGroups()
         #expect(groups.count == 1)
         #expect(groups.first?.name == "GroupToKeep")
@@ -272,7 +282,7 @@ extension GroupHandlerTests {
         let (sut, context) = try makeSUT()
         let group = makeGroup()
         let project = makeProject(shortcut: "newshortcut")
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         #expect(group.shortcut == nil)
         
@@ -280,7 +290,7 @@ extension GroupHandlerTests {
         try context.saveProject(project, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         
         #expect(updatedGroup.shortcut == project.shortcut)
     }
@@ -293,14 +303,14 @@ extension GroupHandlerTests {
         let group = makeGroup(shortcut: shortcut)
         let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
         let otherProject = makeProject(name: "OtherProject")
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
         try context.saveProject(mainProject, in: group)
         try context.saveProject(otherProject, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "MainProject" })
         let updatedOtherProject = try #require(updatedGroup.projects.first { $0.name == "OtherProject" })
         
@@ -316,14 +326,14 @@ extension GroupHandlerTests {
         let group = makeGroup(shortcut: "groupcut")
         let mainProject = makeProject(name: "MainProject", shortcut: group.shortcut)
         let newProject = makeProject(name: "NewProject", shortcut: nil)
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
         try context.saveProject(mainProject, in: group)
         try context.saveProject(newProject, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "MainProject" })
         let updatedNewProject = try #require(updatedGroup.projects.first { $0.name == "NewProject" })
         
@@ -338,7 +348,7 @@ extension GroupHandlerTests {
         let (sut, context) = try makeSUT(picker: mockPicker)
         let group = makeGroup()
         let project = makeProject(name: "Project", shortcut: nil)
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         #expect(group.shortcut == nil)
         #expect(project.shortcut == nil)
@@ -347,7 +357,7 @@ extension GroupHandlerTests {
         try context.saveProject(project, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         let updatedProject = try #require(updatedGroup.projects.first { $0.name == "Project" })
         
         #expect(updatedProject.shortcut == "newcut")
@@ -359,7 +369,7 @@ extension GroupHandlerTests {
         let group = makeGroup()
         let project = makeProject(name: "FirstMain", shortcut: "projcut")
         let (sut, context) = try makeSUT()
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         #expect(group.shortcut == nil)
         
@@ -367,7 +377,7 @@ extension GroupHandlerTests {
         try context.saveProject(project, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         let updatedProject = try #require(updatedGroup.projects.first { $0.name == "FirstMain" })
         
         #expect(updatedProject.shortcut == "projcut")
@@ -384,7 +394,7 @@ extension GroupHandlerTests {
         let mainProject = makeProject(name: "MainProject", shortcut: groupShortcut)
         let firstOtherProject = makeProject(name: "First", shortcut: "first")
         let secondOtherProject = makeProject(name: "Second", shortcut: secondShortcut)
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
         try context.saveProject(mainProject, in: group)
@@ -392,7 +402,7 @@ extension GroupHandlerTests {
         try context.saveProject(secondOtherProject, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == mainProject.name })
         let firstUpdatedProject = try #require(updatedGroup.projects.first { $0.name == firstOtherProject.name })
         let secondUpdatedProject = try #require(updatedGroup.projects.first { $0.name == secondOtherProject.name })
@@ -410,14 +420,14 @@ extension GroupHandlerTests {
         let group = makeGroup(shortcut: "main")
         let mainProject = makeProject(name: "CurrentMain", shortcut: group.shortcut)
         let otherProject = makeProject(name: "Other", shortcut: "other")
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
         try context.saveProject(mainProject, in: group)
         try context.saveProject(otherProject, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "CurrentMain" })
         let updatedOtherProject = try #require(updatedGroup.projects.first { $0.name == "Other" })
         
@@ -434,14 +444,14 @@ extension GroupHandlerTests {
         let group = makeGroup(shortcut: "main")
         let mainProject = makeProject(name: "CurrentMain", shortcut: "main")
         let otherProject = makeProject(name: "Other", shortcut: "other")
-        let category = try #require(try context.loadCategories().first)
+        let category = try #require(context.loadCategories().first)
         
         try context.saveGroup(group, in: category)
         try context.saveProject(mainProject, in: group)
         try context.saveProject(otherProject, in: group)
         try sut.setMainProject(group: group.name)
         
-        let updatedGroup = try #require(try context.loadGroups().first)
+        let updatedGroup = try #require(context.loadGroups().first)
         let updatedMainProject = try #require(updatedGroup.projects.first { $0.name == "CurrentMain" })
         let updatedOtherProject = try #require(updatedGroup.projects.first { $0.name == "Other" })
         
@@ -458,15 +468,15 @@ private extension GroupHandlerTests {
     func makeSUT(picker: MockPicker? = nil, permissionResponses: [Bool] = []) throws -> (sut: GroupHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
-        let existingCategoryFolder = try #require(try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName))
+        let existingCategoryFolder = try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName)
         let category = makeCategory(name: existingCategoryFolder.name, path: existingCategoryFolder.path)
-        
+
         try context.saveCategory(category)
-        
+
         let mockPicker = picker ?? MockPicker(permissionResponses: permissionResponses)
         let mockCategorySelector = MockCategorySelector(context: context)
         let sut = GroupHandler(picker: mockPicker, context: context, categorySelector: mockCategorySelector)
-        
+
         return (sut, context)
     }
 }
