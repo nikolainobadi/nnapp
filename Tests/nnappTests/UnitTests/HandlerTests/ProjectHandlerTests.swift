@@ -309,9 +309,10 @@ extension ProjectHandlerTests {
         let projects = try context.loadProjects()
         #expect(projects.count == 1)
         
-        #expect(throws: NSError.self) {
+        do {
             try sut.removeProject(name: projectName, shortcut: nil)
-        }
+            Issue.record("expected an error to be thrown")
+        } catch { }
         
         let remainingProjects = try context.loadProjects()
         #expect(remainingProjects.count == 1)
@@ -325,7 +326,7 @@ private extension ProjectHandlerTests {
     func makeSUT(picker: MockPicker? = nil, shell: MockShell? = nil, permissionResponses: [Bool] = [], desktopPath: String? = nil) throws -> (sut: ProjectHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
-        let existingCategoryFolder = try #require(try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName))
+        let existingCategoryFolder = try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName)
         let category = makeCategory(name: existingCategoryFolder.name, path: existingCategoryFolder.path)
         
         try context.saveCategory(category)
