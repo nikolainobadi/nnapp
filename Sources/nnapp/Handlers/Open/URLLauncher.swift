@@ -25,11 +25,8 @@ struct URLLauncher {
 
 // MARK: - URL Operations
 extension URLLauncher {
-    /// Opens the remote repository URL in the browser.
-    /// - Parameter project: The project whose remote URL to open.
-    func openRemoteURL(for project: LaunchProject) throws {
-        guard let remote = project.remote else {
-            print("\(project.name) doesn't have a remote repository registered")
+    func openRemoteURL(remote: ProjectLink?) throws {
+        guard let remote else {
             throw CodeLaunchError.missingGitRepository
         }
         
@@ -37,10 +34,7 @@ extension URLLauncher {
         try shell.runAndPrint("open \(remote.urlString)")
     }
     
-    /// Opens one of the project's custom links, prompting if multiple exist.
-    /// - Parameter project: The project whose link to open.
-    func openProjectLink(for project: LaunchProject) throws {
-        let links = project.links
+    func openProjectLink(links: [ProjectLink]) throws {
         var selection: ProjectLink?
         
         switch links.count {
@@ -56,7 +50,6 @@ extension URLLauncher {
         if let selection {
             try shell.runAndPrint("open \(selection.urlString)")
         } else {
-            print("\(project.name) doesn't have any links")
             throw CodeLaunchError.missingProjectLink
         }
     }

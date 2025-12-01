@@ -89,12 +89,12 @@ extension OpenProjectHandler {
     /// Opens the remote repository URL in the browser.
     /// - Parameter project: The project whose remote URL to open.
     func openRemoteURL(for project: LaunchProject) throws {
-        try urlLauncher.openRemoteURL(for: project)
+        try urlLauncher.openRemoteURL(remote: project.remote)
     }
     
     /// Opens one of the project's custom links, prompting if multiple exist.
     /// - Parameter project: The project whose link to open.
     func openProjectLink(for project: LaunchProject) throws {
-        try urlLauncher.openProjectLink(for: project)
+        try urlLauncher.openProjectLink(links: project.links)
     }
 }
