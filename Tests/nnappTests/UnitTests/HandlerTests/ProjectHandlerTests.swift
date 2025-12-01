@@ -5,10 +5,11 @@
 //  Created by Nikolai Nobadi on 9/2/25.
 //
 
+import Files
 import Testing
 import Foundation
-import Files
 import SwiftPicker
+import NnShellTesting
 @testable import nnapp
 
 @MainActor
@@ -102,7 +103,7 @@ extension ProjectHandlerTests {
     @Test("Handles projects without Git repository gracefully")
     func handlesProjectsWithoutGitRepository() throws {
         // Create a MockShell that throws error for Git commands
-        let mockShell = MockShell(shouldThrowError: true)
+        let mockShell = MockShell(shouldThrowErrorOnFinal: true)
         let mockPicker = MockPicker(permissionResponses: [false]) // No to "Would you like to add a shortcut?"
         let (sut, context) = try makeSUT(picker: mockPicker, shell: mockShell)
         let group = try setupTestGroup(context: context)
@@ -299,6 +300,7 @@ extension ProjectHandlerTests {
     
     @Test("Requires confirmation before deletion")
     func requiresConfirmationBeforeDeletion() throws {
+        let projectName = projectName
         let mockPicker = MockPicker(permissionResponses: [false], shouldThrowError: true)
         let (sut, context) = try makeSUT(picker: mockPicker)
         let group = try setupTestGroup(context: context)

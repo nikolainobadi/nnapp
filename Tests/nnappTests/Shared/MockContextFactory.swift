@@ -7,7 +7,9 @@
 
 import SwiftData
 import Foundation
+import NnShellKit
 import SwiftPicker
+import NnShellTesting
 @testable import nnapp
 
 final class MockContextFactory {
@@ -28,7 +30,7 @@ final class MockContextFactory {
 
 // MARK: - ContextFactory
 extension MockContextFactory: ContextFactory {
-    func makeShell() -> Shell {
+    func makeShell() -> any Shell {
         return shell
     }
     

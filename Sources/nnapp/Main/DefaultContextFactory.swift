@@ -5,14 +5,15 @@
 //  Created by Nikolai Nobadi on 3/29/25.
 //
 
+import NnShellKit
 import SwiftPicker
 
 /// Default implementation of the `ContextFactory` protocol used by the `Nnapp` CLI.
 /// Provides fully configured dependencies for use across commands.
 final class DefaultContextFactory: ContextFactory {
     /// Creates a new instance of the default shell adapter.
-    func makeShell() -> Shell {
-        return DefaultShell()
+    func makeShell() -> any Shell {
+        return NnShell()
     }
 
     /// Returns an instance of the standard interactive picker.

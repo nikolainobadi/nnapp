@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import NnShellKit
 import SwiftPicker
 import ArgumentParser
 
@@ -32,7 +33,7 @@ struct Nnapp: ParsableCommand {
 
 // MARK: - Essential Factory Methods
 extension Nnapp {
-    static func makeShell() -> Shell {
+    static func makeShell() -> any Shell {
         return contextFactory.makeShell()
     }
     
@@ -107,7 +108,7 @@ extension Nnapp {
 
 // MARK: - Dependencies
 protocol ContextFactory {
-    func makeShell() -> Shell
+    func makeShell() -> any Shell
     func makePicker() -> CommandLinePicker
     func makeContext() throws -> CodeLaunchContext
     func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector

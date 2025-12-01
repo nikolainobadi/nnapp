@@ -5,18 +5,19 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import NnShellKit
 import SwiftPicker
 
 /// Handles opening URLs including remote repositories and project links.
 struct URLLauncher {
-    private let shell: Shell
+    private let shell: any Shell
     private let picker: CommandLinePicker
     
     /// Initializes a new URL launcher.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - picker: Utility for prompting user selections.
-    init(shell: Shell, picker: CommandLinePicker) {
+    init(shell: any Shell, picker: CommandLinePicker) {
         self.shell = shell
         self.picker = picker
     }
@@ -31,7 +32,7 @@ extension URLLauncher {
         }
         
         print("opening \(remote.name), url: \(remote.urlString)")
-        try shell.runAndPrint("open \(remote.urlString)")
+        try shell.runAndPrint(bash: "open \(remote.urlString)")
     }
     
     func openProjectLink(links: [ProjectLink]) throws {
@@ -42,13 +43,13 @@ extension URLLauncher {
             break
         case 1:
             selection = links.first
-            try shell.runAndPrint("open \(links.first!.urlString)")
+            try shell.runAndPrint(bash: "open \(links.first!.urlString)")
         default:
             selection = try picker.requiredSingleSelection("Select a link to open", items: links)
         }
         
         if let selection {
-            try shell.runAndPrint("open \(selection.urlString)")
+            try shell.runAndPrint(bash: "open \(selection.urlString)")
         } else {
             throw CodeLaunchError.missingProjectLink
         }

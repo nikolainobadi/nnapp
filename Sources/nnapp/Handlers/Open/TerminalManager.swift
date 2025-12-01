@@ -6,17 +6,18 @@
 //
 
 import Foundation
+import NnShellKit
 
 /// Manages terminal operations including iTerm integration and session management.
 struct TerminalManager {
-    private let shell: Shell
+    private let shell: any Shell
     private let context: CodeLaunchContext
     
     /// Initializes a new terminal manager.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - context: Data context for loading launch scripts.
-    init(shell: Shell, context: CodeLaunchContext) {
+    init(shell: any Shell, context: CodeLaunchContext) {
         self.shell = shell
         self.context = context
     }

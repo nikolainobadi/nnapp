@@ -7,19 +7,20 @@
 
 import Files
 import Foundation
+import NnShellKit
 import GitShellKit
 import SwiftPicker
 
 /// Handles launching projects in IDEs (Xcode/VSCode) and cloning repositories when needed.
 struct IDELauncher {
-    private let shell: Shell
+    private let shell: any Shell
     private let picker: CommandLinePicker
     
     /// Initializes a new IDE launcher.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - picker: Utility for prompting user input and permissions.
-    init(shell: Shell, picker: CommandLinePicker) {
+    init(shell: any Shell, picker: CommandLinePicker) {
         self.shell = shell
         self.picker = picker
     }
@@ -40,7 +41,7 @@ extension IDELauncher {
         try cloneProjectIfNecessary(project, folderPath: folderPath, filePath: filePath)
         
         let isXcode = launchType == .xcode
-        try shell.runAndPrint("\(isXcode ? "open" : "code") \(isXcode ? filePath : folderPath)")
+        try shell.runAndPrint(bash: "\(isXcode ? "open" : "code") \(isXcode ? filePath : folderPath)")
     }
     
     /// Clones the project repo if it doesn't exist locally and a remote is available.
@@ -61,7 +62,7 @@ extension IDELauncher {
             """)
             
             let cloneCommand = makeGitCommand(.clone(url: remote.urlString), path: groupPath)
-            try shell.runAndPrint(cloneCommand)
+            try shell.runAndPrint(bash: cloneCommand)
         }
     }
 }
