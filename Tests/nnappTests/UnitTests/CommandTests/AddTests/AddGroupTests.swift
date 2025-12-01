@@ -22,7 +22,7 @@ final class AddGroupTests: MainActorBaseAddTests {
 }
 
 
-// MARK: -
+// MARK: - Tests
 extension AddGroupTests {
     @Test("Existing Category Folder exists with existing Group Folder")
     func startingValues() throws {
@@ -62,12 +62,17 @@ extension AddGroupTests {
     func throwsErrorWhenGroupFolderNameIsTaken() throws {
         let factory = try makeFactory()
         let folderToImport = try tempFolder.createSubfolder(named: existingGroupName)
-
+        
         do {
             try runGroupCommand(factory, path: folderToImport.path)
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .groupFolderAlreadyExists)
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .groupFolderAlreadyExists:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     
@@ -75,14 +80,13 @@ extension AddGroupTests {
     func movesGroupFolderToCategoryFolder() throws {
         let factory = try makeFactory()
         let folderToImport = try tempFolder.createSubfolder(named: "newGroupName")
-
+        
         try runGroupCommand(factory, path: folderToImport.path, category: existingCategoryName)
-
+        
         let existingCategoryFolder = try tempFolder.subfolder(named: existingCategoryName)
-
+        
         #expect(existingCategoryFolder.subfolders.count() == 2)
         #expect(existingCategoryFolder.containsSubfolder(named: folderToImport.name))
-
     }
     
     @Test("Does not move imported Group folder to Category Folder when it is already there")
@@ -94,9 +98,9 @@ extension AddGroupTests {
         #expect(existingCategoryFolder.subfolders.count() == 2)
 
         try runGroupCommand(factory, path: folderToImport.path, category: folderToImport.name)
-
+        
         let updatedCategoryFolder = try tempFolder.subfolder(named: existingCategoryName)
-
+        
         #expect(updatedCategoryFolder.subfolders.count() == 2)
         #expect(updatedCategoryFolder.containsSubfolder(named: folderToImport.name))
     }
