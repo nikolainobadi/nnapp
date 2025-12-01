@@ -45,12 +45,16 @@ extension AddGroupTests {
     func throwsErrorWhenGroupNameIsTaken() throws {
         let factory = try makeFactory(includeGroup: true)
         let folderToImport = try tempFolder.createSubfolder(named: existingGroupName)
-
+        
         do {
             try runGroupCommand(factory, path: folderToImport.path)
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .groupNameTaken)
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .groupNameTaken:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     

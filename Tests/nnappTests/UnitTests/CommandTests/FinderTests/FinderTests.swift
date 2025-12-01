@@ -119,7 +119,7 @@ extension FinderTests {
 }
 
 // MARK: - Extension Dependencies
-fileprivate extension LaunchFolderType {
+private extension LaunchFolderType {
     var argCharacter: Character {
         return rawValue.first!
     }
