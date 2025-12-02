@@ -51,9 +51,9 @@ extension ProjectHandlerTests {
         #expect(savedProject.type == .package)
     }
     
-    @Test("Adds project from group folder selection", .disabled()) // TODO: - 
+    @Test("Adds project from group folder selection")
     func addsProjectFromGroupFolderSelection() throws {
-        let (sut, context) = try makeSUT()
+        let (sut, context) = try makeSUT(permissionResponses: [true])
         let group = try setupTestGroup(context: context)
         let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
         let groupFolder = try categoryFolder.subfolder(named: existingGroupName)
