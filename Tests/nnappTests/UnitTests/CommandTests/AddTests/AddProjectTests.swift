@@ -6,6 +6,7 @@
 //
 
 import Testing
+import SwiftPickerTesting
 @testable import nnapp
 
 @MainActor
@@ -100,7 +101,7 @@ extension AddProjectTests {
         }
     }
     
-    @Test("Moves Project folder to Group folder when necessary", .disabled()) // TODO: -
+    @Test("Moves Project folder to Group folder when necessary")
     func movesProjectFolderWhenNecessary() throws {
         let factory = try makeFactory()
         let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
@@ -112,7 +113,7 @@ extension AddProjectTests {
         #expect(groupFolder.containsSubfolder(named: "MyProject"))
     }
     
-    @Test("Does not move Project folder to Group folder if it is already there", .disabled()) // TODO: -
+    @Test("Does not move Project folder to Group folder if it is already there")
     func doesNotMoveProjectFolderWhenAlreadyInGroupFolder() throws {
         let factory = try makeFactory()
         let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
@@ -124,7 +125,7 @@ extension AddProjectTests {
         #expect(groupFolder.containsSubfolder(named: "MyProject"))
     }
     
-    @Test("Saves new Project to selected Group", .disabled()) // TODO: - 
+    @Test("Saves new Project to selected Group")
     func savesNewProjectToGroup() throws {
         let factory = try makeFactory()
         let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
@@ -169,7 +170,11 @@ private extension AddProjectTests {
     func makeFactory() throws -> MockContextFactory {
         let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
         let groupFolder = try categoryFolder.subfolder(named: existingGroupName)
-        let factory = MockContextFactory()
+        let picker = MockSwiftPicker(
+            inputResult: .init(defaultValue: "shortcut"),
+            selectionResult: .init(defaultSingle: .index(0))
+        )
+        let factory = MockContextFactory(picker: picker)
         let context = try factory.makeContext()
         let category = makeCategory(name: categoryFolder.name, path: categoryFolder.path)
         let group = makeGroup(name: groupFolder.name)
