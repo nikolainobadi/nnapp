@@ -6,6 +6,7 @@
 //
 
 import Testing
+import SwiftPickerTesting
 @testable import nnapp
 
 @MainActor
@@ -37,7 +38,7 @@ final class AddCategoryTests: MainActorBaseAddTests {
     func savesNewCategory(useArg: Bool) throws {
         let categoryFolderToImport = try tempFolder.createSubfolder(named: "newCategory")
         let path = categoryFolderToImport.path
-        let picker = MockPicker(requiredInputResponses: useArg ? [] : [path])
+        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(useArg ? [] : [path])))
         let factory = MockContextFactory(picker: picker)
         let context = try factory.makeContext()
         

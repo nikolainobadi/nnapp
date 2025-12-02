@@ -6,6 +6,7 @@
 //
 
 import Testing
+import SwiftPickerTesting
 @testable import nnapp
 @preconcurrency import Files
 
@@ -62,7 +63,7 @@ extension CreateCategoryTests {
     
     @Test("Creates a new folder for the new category", arguments: TestInfo.testOptions)
     func createCategoryFolder(info: TestInfo) throws {
-        let picker = MockPicker(requiredInputResponses: makeCategoryInputs(info: info))
+        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info))))
         let factory = MockContextFactory(picker: picker)
 
         try runCategoryCommand(factory: factory, info: info)
@@ -74,7 +75,7 @@ extension CreateCategoryTests {
     
     @Test("Saves the new category", arguments: TestInfo.testOptions)
     func savesNewCategory(info: TestInfo) throws {
-        let picker = MockPicker(requiredInputResponses: makeCategoryInputs(info: info))
+        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info)))) 
         let factory = MockContextFactory(picker: picker)
         
         try runCategoryCommand(factory: factory, info: info)

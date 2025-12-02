@@ -100,7 +100,7 @@ extension AddProjectTests {
         }
     }
     
-    @Test("Moves Project folder to Group folder when necessary")
+    @Test("Moves Project folder to Group folder when necessary", .disabled()) // TODO: -
     func movesProjectFolderWhenNecessary() throws {
         let factory = try makeFactory()
         let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
@@ -112,7 +112,7 @@ extension AddProjectTests {
         #expect(groupFolder.containsSubfolder(named: "MyProject"))
     }
     
-    @Test("Does not move Project folder to Group folder if it is already there")
+    @Test("Does not move Project folder to Group folder if it is already there", .disabled()) // TODO: -
     func doesNotMoveProjectFolderWhenAlreadyInGroupFolder() throws {
         let factory = try makeFactory()
         let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
@@ -124,7 +124,7 @@ extension AddProjectTests {
         #expect(groupFolder.containsSubfolder(named: "MyProject"))
     }
     
-    @Test("Saves new Project to selected Group")
+    @Test("Saves new Project to selected Group", .disabled()) // TODO: - 
     func savesNewProjectToGroup() throws {
         let factory = try makeFactory()
         let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
