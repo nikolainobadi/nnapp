@@ -6,7 +6,7 @@
 //
 
 import NnShellKit
-import SwiftPicker
+import SwiftPickerKit
 import ArgumentParser
 
 @main
@@ -37,7 +37,7 @@ extension Nnapp {
         return contextFactory.makeShell()
     }
     
-    static func makePicker() -> CommandLinePicker {
+    static func makePicker() -> any CommandLinePicker {
         return contextFactory.makePicker()
     }
     
@@ -45,11 +45,11 @@ extension Nnapp {
         return try contextFactory.makeContext()
     }
     
-    static func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector {
+    static func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
         return contextFactory.makeGroupCategorySelector(picker: picker, context: context)
     }
     
-    static func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> ProjectGroupSelector {
+    static func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
         return contextFactory.makeProjectGroupSelector(picker: picker, context: context)
     }
 }

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftPicker
 import ArgumentParser
 
 /// Manage the terminal launch script executed alongside `nnapp open`.

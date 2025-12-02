@@ -8,17 +8,17 @@
 import Files
 import Foundation
 import NnShellKit
-import SwiftPicker
 import GitShellKit
+import SwiftPickerKit
 
 /// Handles creation, removal, and eviction of `LaunchProject` objects.
 /// Coordinates folder movement, Git inspection, and persistence updates.
 struct ProjectHandler {
     private let shell: any Shell
-    private let picker: CommandLinePicker
+    private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
     private let gitShell: GitShellAdapter
-    private let groupSelector: ProjectGroupSelector
+    private let groupSelector: any ProjectGroupSelector
     private let desktopPath: String?
     
     /// Initializes a new handler for managing projects.
@@ -28,7 +28,7 @@ struct ProjectHandler {
     ///   - context: SwiftData-backed persistence layer.
     ///   - groupSelector: Logic for resolving a group during project creation.
     ///   - desktopPath: Optional custom desktop path for testing purposes.
-    init(shell: any Shell, picker: CommandLinePicker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector, desktopPath: String? = nil) {
+    init(shell: any Shell, picker: any CommandLinePicker, context: CodeLaunchContext, groupSelector: any ProjectGroupSelector, desktopPath: String? = nil) {
         self.shell = shell
         self.picker = picker
         self.context = context

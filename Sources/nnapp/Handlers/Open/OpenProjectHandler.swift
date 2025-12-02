@@ -5,11 +5,11 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import SwiftPicker
+import SwiftPickerKit
 
 /// Coordinates project opening operations by delegating to specialized components.
 struct OpenProjectHandler {
-    private let picker: CommandLinePicker
+    private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
     private let ideLauncher: IDELauncher
     private let terminalManager: TerminalManager
@@ -22,7 +22,7 @@ struct OpenProjectHandler {
     ///   - ideLauncher: Component for launching IDEs and cloning projects.
     ///   - terminalManager: Component for terminal operations.
     ///   - urlLauncher: Component for opening URLs and links.
-    init(picker: CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher) {
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher) {
         self.picker = picker
         self.context = context
         self.ideLauncher = ideLauncher

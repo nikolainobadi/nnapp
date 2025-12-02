@@ -6,7 +6,7 @@
 //
 
 import Files
-import SwiftPicker
+import SwiftPickerKit
 
 extension LaunchCategory: DisplayablePickerItem {
     public var displayName: String {
