@@ -5,13 +5,13 @@
 //  Created by Nikolai Nobadi on 3/28/25.
 //
 
-import SwiftPicker
+import SwiftPickerKit
 
 struct ProjectLinkHandler {
-    private let picker: CommandLinePicker
+    private let picker: any CommandLinePicker
     private let linkOptions: [String]
     
-    init(picker: CommandLinePicker, linkOptions: [String]) {
+    init(picker: any CommandLinePicker, linkOptions: [String]) {
         self.picker = picker
         self.linkOptions = linkOptions
     }

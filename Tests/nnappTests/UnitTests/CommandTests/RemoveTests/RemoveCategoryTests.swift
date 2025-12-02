@@ -6,6 +6,7 @@
 //
 
 import Testing
+import SwiftPickerTesting
 @testable import nnapp
 
 @MainActor
@@ -35,8 +36,7 @@ final class RemoveTests: MainActorTempFolderDatasource {
 
     @Test("Prompts to select category if name is not provided")
     func promptsIfNoCategoryNameProvided() throws {
-        let picker = MockPicker(selectedItemIndex: 0)
-        let factory = try makeFactory(picker: picker)
+        let factory = try makeFactory()
         let context = try factory.makeContext()
         let category = makeCategory(name: "A")
         try context.saveCategory(category)
@@ -123,7 +123,7 @@ extension RemoveTests {
 
     @Test("Removes selected link")
     func removesSelectedLink() throws {
-        let picker = MockPicker(selectedItemIndex: 0)
+        let picker = MockSwiftPicker(selectionResult: .init(defaultSingle: .index(0)))
         let factory = MockContextFactory(picker: picker)
         let context = try factory.makeContext()
         context.saveProjectLinkNames(["One", "Two"])
@@ -138,7 +138,11 @@ extension RemoveTests {
 
 // MARK: - Factory
 private extension RemoveTests {
-    func makeFactory(picker: MockPicker = .init()) throws -> MockContextFactory {
+    func makeFactory(picker: MockSwiftPicker? = nil) throws -> MockContextFactory {
+        let picker = picker ?? MockSwiftPicker(
+            permissionResult: .init(defaultValue: true),
+            selectionResult: .init(defaultSingle: .index(0))
+        )
         let factory = MockContextFactory(picker: picker)
         
         return factory

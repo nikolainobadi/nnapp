@@ -7,6 +7,7 @@
 
 import Testing
 import NnShellTesting
+import SwiftPickerTesting
 @testable import nnapp
 
 @MainActor
@@ -63,9 +64,10 @@ struct FinderTests {
 
 // MARK: - Factory
 extension FinderTests {
-    func makeTestObjects() -> (factory: MockContextFactory, shell: MockShell) {
+    func makeTestObjects(picker: MockSwiftPicker? = nil) -> (factory: MockContextFactory, shell: MockShell) {
         let shell = MockShell()
-        let factory = MockContextFactory(shell: shell)
+        let picker = picker ?? MockSwiftPicker(selectionResult: .init(defaultSingle: .index(0)))
+        let factory = MockContextFactory(shell: shell, picker: picker)
         
         return (factory, shell)
     }

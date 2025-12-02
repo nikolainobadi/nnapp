@@ -8,18 +8,19 @@
 import SwiftData
 import Foundation
 import NnShellKit
-import SwiftPicker
+import SwiftPickerKit
 import NnShellTesting
+import SwiftPickerTesting
 @testable import nnapp
 
 final class MockContextFactory {
     private let shell: MockShell
-    private let picker: MockPicker
+    private let picker: MockSwiftPicker
     private let throwCategorySelectorError: Bool
     private var context: CodeLaunchContext?
     private let uniqueId: String
     
-    init(shell: MockShell = .init(), picker: MockPicker = .init(), throwCategorySelectorError: Bool = false) {
+    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
@@ -34,15 +35,15 @@ extension MockContextFactory: ContextFactory {
         return shell
     }
     
-    func makePicker() -> CommandLinePicker {
+    func makePicker() -> any CommandLinePicker {
         return picker
     }
     
-    func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> ProjectGroupSelector {
+    func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
         return MockGroupSelector(context: context)
     }
     
-    func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector {
+    func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
         return MockCategorySelector(context: context)
     }
     

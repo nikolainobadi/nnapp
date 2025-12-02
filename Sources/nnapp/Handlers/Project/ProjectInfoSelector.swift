@@ -6,14 +6,14 @@
 //
 
 import Files
-import SwiftPicker
 import GitShellKit
+import SwiftPickerKit
 
 /// Handles interactive input for project metadata such as name, shortcut, and links.
 /// Used during the creation of new `LaunchProject` instances.
 struct ProjectInfoSelector {
-    private let picker: CommandLinePicker
-    private let gitShell: GitShell
+    private let picker: any CommandLinePicker
+    private let gitShell: any GitShell
     private let context: CodeLaunchContext
 
     /// Initializes the selector with supporting dependencies.
@@ -21,7 +21,7 @@ struct ProjectInfoSelector {
     ///   - picker: Input utility for user interaction.
     ///   - gitShell: Adapter for executing Git commands.
     ///   - context: Persistence layer for validation and lookups.
-    init(picker: CommandLinePicker, gitShell: GitShell, context: CodeLaunchContext) {
+    init(picker: any CommandLinePicker, gitShell: any GitShell, context: CodeLaunchContext) {
         self.picker = picker
         self.gitShell = gitShell
         self.context = context

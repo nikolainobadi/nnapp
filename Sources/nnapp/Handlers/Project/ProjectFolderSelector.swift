@@ -6,17 +6,17 @@
 //
 
 import Files
-import SwiftPicker
+import SwiftPickerKit
 
 /// Handles selection and validation of project folders for use in `LaunchProject` creation.
 /// Determines the `ProjectType` by inspecting folder contents.
 struct ProjectFolderSelector {
-    private let picker: CommandLinePicker
+    private let picker: any CommandLinePicker
     private let desktopPath: String
 
     /// Initializes a new folder selector using the provided user input picker.
     /// - Parameter picker: Utility for interactive user prompts.
-    init(picker: CommandLinePicker, desktopPath: String? = nil) {
+    init(picker: any CommandLinePicker, desktopPath: String? = nil) {
         self.picker = picker
         self.desktopPath = desktopPath ?? Folder.home.path.appendingPathComponent("Desktop")
     }

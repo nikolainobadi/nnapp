@@ -1,4 +1,5 @@
 import Testing
+import SwiftPickerTesting
 @testable import nnapp
 
 @MainActor
@@ -30,7 +31,7 @@ struct ScriptTests {
 
     @Test("Saves launch script from user input")
     func setScriptFromInput() throws {
-        let picker = MockPicker(requiredInputResponses: ["echo there"]) 
+        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(["echo there"])))
         let factory = MockContextFactory(picker: picker)
         let context = try factory.makeContext()
         try runCommand(factory, subcommand: .set(nil))
@@ -46,7 +47,7 @@ struct ScriptTests {
 
     @Test("Deletes existing launch script after confirmation")
     func deleteScript() throws {
-        let picker = MockPicker()
+        let picker = MockSwiftPicker(permissionResult: .init(defaultValue: true))
         let factory = MockContextFactory(picker: picker)
         let context = try factory.makeContext()
         context.saveLaunchScript("echo remove")
@@ -54,7 +55,7 @@ struct ScriptTests {
         let output = try runCommand(factory, subcommand: .delete)
         #expect(context.loadLaunchScript() == nil)
         #expect(output.contains("Launch script deleted"))
-        #expect(picker.prompts.contains(where: { $0.title.contains("Delete the existing launch script?") }))
+        #expect(picker.capturedPermissionPrompts.contains(where: { $0.contains("Delete the existing launch script?") }))
     }
 }
 

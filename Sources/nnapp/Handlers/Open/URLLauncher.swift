@@ -6,18 +6,18 @@
 //
 
 import NnShellKit
-import SwiftPicker
+import SwiftPickerKit
 
 /// Handles opening URLs including remote repositories and project links.
 struct URLLauncher {
     private let shell: any Shell
-    private let picker: CommandLinePicker
+    private let picker: any CommandLinePicker
     
     /// Initializes a new URL launcher.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - picker: Utility for prompting user selections.
-    init(shell: any Shell, picker: CommandLinePicker) {
+    init(shell: any Shell, picker: any CommandLinePicker) {
         self.shell = shell
         self.picker = picker
     }

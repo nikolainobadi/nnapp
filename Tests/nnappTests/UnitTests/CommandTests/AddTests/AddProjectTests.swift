@@ -6,6 +6,7 @@
 //
 
 import Testing
+import SwiftPickerTesting
 @testable import nnapp
 
 @MainActor
@@ -169,7 +170,11 @@ private extension AddProjectTests {
     func makeFactory() throws -> MockContextFactory {
         let categoryFolder = try tempFolder.subfolder(named: existingCategoryName)
         let groupFolder = try categoryFolder.subfolder(named: existingGroupName)
-        let factory = MockContextFactory()
+        let picker = MockSwiftPicker(
+            inputResult: .init(defaultValue: "shortcut"),
+            selectionResult: .init(defaultSingle: .index(0))
+        )
+        let factory = MockContextFactory(picker: picker)
         let context = try factory.makeContext()
         let category = makeCategory(name: categoryFolder.name, path: categoryFolder.path)
         let group = makeGroup(name: groupFolder.name)

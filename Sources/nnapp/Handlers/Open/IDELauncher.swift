@@ -9,18 +9,18 @@ import Files
 import Foundation
 import NnShellKit
 import GitShellKit
-import SwiftPicker
+import SwiftPickerKit
 
 /// Handles launching projects in IDEs (Xcode/VSCode) and cloning repositories when needed.
 struct IDELauncher {
     private let shell: any Shell
-    private let picker: CommandLinePicker
+    private let picker: any CommandLinePicker
     
     /// Initializes a new IDE launcher.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - picker: Utility for prompting user input and permissions.
-    init(shell: any Shell, picker: CommandLinePicker) {
+    init(shell: any Shell, picker: any CommandLinePicker) {
         self.shell = shell
         self.picker = picker
     }
