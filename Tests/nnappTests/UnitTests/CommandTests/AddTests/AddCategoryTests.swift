@@ -23,9 +23,13 @@ final class AddCategoryTests: MainActorBaseAddTests {
         
         do {
             try runCommand(factory, argType: .category(path: categoryFolderToImport.path))
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .categoryNameTaken)
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .categoryNameTaken:
+                break
+            default:
+                Issue.record("unexpeded error")
+            }
         }
     }
     

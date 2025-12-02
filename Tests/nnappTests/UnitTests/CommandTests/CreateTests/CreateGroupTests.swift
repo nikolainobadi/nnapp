@@ -26,36 +26,44 @@ final class CreateGroupTests: MainActorBaseCreateTests {
 // MARK: - Unit Tests
 extension CreateGroupTests {
     @Test("Throws error when no Category is selected")
-    func throwsErrorWhenNoCategorySelected() throws {
+    func throwsErrorWhenNoCategorySelected() {
         do {
             try runGroupCommand()
-            Issue.record("expected an error to be thrown")
-        } catch {
-            // Expected error
-        }
+            Issue.record("expected an error but none were thrown")
+        } catch { }
     }
     
     @Test("Throws error when name is taken by existing Group")
     func throwsErrorWhenGroupNameIsTaken() throws {
         let factory = try makeFactory(includeGroup: true)
-
+        
         do {
             try runGroupCommand(factory: factory, name: existingGroupName, category: existingCategoryName)
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .groupNameTaken)
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .groupNameTaken:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     
     @Test("Throws error when name is taken by existing folder in Category folder")
     func throwsErrorWhenGroupFolderNameIsTaken() throws {
         let factory = try makeFactory(includeGroup: false)
-
+        
         do {
             try runGroupCommand(factory: factory, name: existingGroupName, category: existingCategoryName)
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .groupFolderAlreadyExists)
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .groupFolderAlreadyExists:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     

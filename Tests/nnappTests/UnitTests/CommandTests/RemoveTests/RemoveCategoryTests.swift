@@ -9,11 +9,7 @@ import Testing
 @testable import nnapp
 
 @MainActor
-final class RemoveTests: MainActorTempFolderDatasource { }
-
-
-// MARK: - Category Tests
-extension RemoveTests {
+final class RemoveTests: MainActorTempFolderDatasource {
     @Test("Removes category and cascades delete of groups/projects")
     func removesCategoryAndChildren() throws {
         let factory = try makeFactory()

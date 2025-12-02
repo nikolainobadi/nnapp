@@ -6,17 +6,11 @@
 //
 
 import Testing
+import NnShellTesting
 @testable import nnapp
 
 @MainActor
 struct FinderTests {
-    @Test("Starting values are empty")
-    func emptyStartingValues() {
-        let shell = MockShell()
-        
-        #expect(shell.printedCommands.isEmpty)
-    }
-    
     @Test("Opens Category folder when only -c is passed as arg", arguments: [nil, "categoryName"])
     func opensCategoryFolder(name: String?) throws {
         let (factory, shell) = makeTestObjects()
@@ -99,8 +93,8 @@ private extension FinderTests {
     func assertShell(_ shell: MockShell, contains path: String?) throws {
         let path = try #require(path)
         
-        #expect(shell.printedCommands.count == 1)
-        #expect(shell.printedCommands.contains(where: { $0.contains(path) }))
+        #expect(shell.executedCommands.count == 1)
+        #expect(shell.executedCommand(containing: path))
     }
 }
 
@@ -125,7 +119,7 @@ extension FinderTests {
 }
 
 // MARK: - Extension Dependencies
-fileprivate extension LaunchFolderType {
+private extension LaunchFolderType {
     var argCharacter: Character {
         return rawValue.first!
     }

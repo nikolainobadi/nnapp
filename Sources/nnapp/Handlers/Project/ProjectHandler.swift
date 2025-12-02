@@ -7,13 +7,14 @@
 
 import Files
 import Foundation
+import NnShellKit
 import SwiftPicker
 import GitShellKit
 
 /// Handles creation, removal, and eviction of `LaunchProject` objects.
 /// Coordinates folder movement, Git inspection, and persistence updates.
 struct ProjectHandler {
-    private let shell: Shell
+    private let shell: any Shell
     private let picker: CommandLinePicker
     private let context: CodeLaunchContext
     private let gitShell: GitShellAdapter
@@ -27,7 +28,7 @@ struct ProjectHandler {
     ///   - context: SwiftData-backed persistence layer.
     ///   - groupSelector: Logic for resolving a group during project creation.
     ///   - desktopPath: Optional custom desktop path for testing purposes.
-    init(shell: Shell, picker: CommandLinePicker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector, desktopPath: String? = nil) {
+    init(shell: any Shell, picker: CommandLinePicker, context: CodeLaunchContext, groupSelector: ProjectGroupSelector, desktopPath: String? = nil) {
         self.shell = shell
         self.picker = picker
         self.context = context
@@ -194,11 +195,11 @@ private extension ProjectHandler {
             throw CodeLaunchError.missingGitRepository
         }
         
-        let branchNames = try shell.run(makeGitCommand(.listLocalBranches, path: folder.path))
+        let branchNames = try shell.bash(makeGitCommand(.listLocalBranches, path: folder.path))
             .split(separator: "\n")
             .map({ $0.trimmingCharacters(in: .whitespaces) })
         
-        let mergedOutput = try shell.run(makeGitCommand(.listMergedBranches(branchName: "main"), path: folder.path))
+        let mergedOutput = try shell.bash(makeGitCommand(.listMergedBranches(branchName: "main"), path: folder.path))
         let mergedBranches = Set(mergedOutput.split(separator: "\n").map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) }))
         
         return try branchNames.map { branchName in
@@ -213,7 +214,7 @@ private extension ProjectHandler {
     
     func getSyncStatus(for branch: String, comparingBranch: String? = nil, at path: String) throws -> BranchSyncStatus {
         let remoteBranch = "origin/\(comparingBranch ?? branch)"
-        let comparisonResult = try shell.run(makeGitCommand(.compareBranchAndRemote(local: branch, remote: remoteBranch), path: path)).trimmingCharacters(in: .whitespacesAndNewlines)
+        let comparisonResult = try shell.bash(makeGitCommand(.compareBranchAndRemote(local: branch, remote: remoteBranch), path: path)).trimmingCharacters(in: .whitespacesAndNewlines)
         let changes = comparisonResult.split(separator: "\t").map(String.init)
         
         guard changes.count == 2 else {

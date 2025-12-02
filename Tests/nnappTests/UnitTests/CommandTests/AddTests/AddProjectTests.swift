@@ -26,13 +26,11 @@ final class AddProjectTests: MainActorBaseAddTests {
 // MARK: - Unit Tests
 extension AddProjectTests {
     @Test("Throws an error if no group is selected")
-    func throwsErrorWhenNoGroupSelected() throws {
+    func throwsErrorWhenNoGroupSelected() {
         do {
             try runProjectCommand()
-            Issue.record("expected an error to be thrown")
-        } catch {
-            // Expected error
-        }
+            Issue.record("expected an error but none were thrown")
+        } catch { }
     }
     
     @Test("Throws error if path from arg finds folder without a project type.")
@@ -42,9 +40,14 @@ extension AddProjectTests {
 
         do {
             try runProjectCommand(factory, path: nonProjectFolder.path, group: existingGroupName)
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .noProjectInFolder)
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .noProjectInFolder:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     
@@ -61,9 +64,15 @@ extension AddProjectTests {
 
         do {
             try runProjectCommand(factory, path: tempProjectFolder.path, group: existingGroupName)
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .projectNameTaken)
+
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .projectNameTaken:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
 
@@ -80,9 +89,14 @@ extension AddProjectTests {
 
         do {
             try runProjectCommand(factory, path: tempProjectFolder.path, group: existingGroupName, shortcut: "dup")
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .shortcutTaken)
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .shortcutTaken:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     

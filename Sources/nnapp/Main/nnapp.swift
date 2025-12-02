@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import NnShellKit
 import SwiftPicker
 import ArgumentParser
 
@@ -32,7 +33,7 @@ struct Nnapp: ParsableCommand {
 
 // MARK: - Essential Factory Methods
 extension Nnapp {
-    static func makeShell() -> Shell {
+    static func makeShell() -> any Shell {
         return contextFactory.makeShell()
     }
     
@@ -79,12 +80,35 @@ extension Nnapp {
         
         return .init(shell: shell, picker: picker, context: context, groupSelector: groupSelector)
     }
+    
+    static func makeOpenManager() throws -> OpenProjectHandler {
+        let shell = makeShell()
+        let picker = makePicker()
+        let context = try makeContext()
+        let ideLauncher = makeIDELauncher(shell: shell, picker: picker)
+        let terminalManager = makeTerminalManager(shell: shell, context: context)
+        let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
+        
+        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher)
+    }
+    
+    static func makeIDELauncher(shell: Shell, picker: CommandLinePicker) -> IDELauncher {
+        return .init(shell: shell, picker: picker)
+    }
+    
+    static func makeTerminalManager(shell: Shell, context: CodeLaunchContext) -> TerminalManager {
+        return .init(shell: shell, context: context)
+    }
+    
+    static func makeURLLauncher(shell: Shell, picker: CommandLinePicker) -> URLLauncher {
+        return .init(shell: shell, picker: picker)
+    }
 }
 
 
 // MARK: - Dependencies
 protocol ContextFactory {
-    func makeShell() -> Shell
+    func makeShell() -> any Shell
     func makePicker() -> CommandLinePicker
     func makeContext() throws -> CodeLaunchContext
     func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector

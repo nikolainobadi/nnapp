@@ -23,13 +23,18 @@ final class CreateCategoryTests: MainActorBaseCreateTests {
 extension CreateCategoryTests {
     @Test("Throws an error when a folder already exists in the parent directory with same name")
     func throwsErrorWhenFolderAlreadyExists() throws {
-        let _ = try tempFolder.createSubfolder(named: categoryName)
-
+        _ = try tempFolder.createSubfolder(named: categoryName)
+        
         do {
             try runCategoryCommand()
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .categoryPathTaken)
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .categoryPathTaken:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     
@@ -41,12 +46,17 @@ extension CreateCategoryTests {
         let category = makeCategory(name: categoryName, path: existingCategoryFolder.path)
 
         try context.saveCategory(category)
-
+        
         do {
             try runCategoryCommand(factory: factory)
-            Issue.record("expected an error to be thrown")
-        } catch let launchError as CodeLaunchError {
-            #expect(launchError == .categoryNameTaken)
+            Issue.record("expected an error but none were thrown")
+        } catch let codeLaunchError as CodeLaunchError {
+            switch codeLaunchError {
+            case .categoryNameTaken:
+                break
+            default:
+                Issue.record("unexpected error")
+            }
         }
     }
     
@@ -58,7 +68,7 @@ extension CreateCategoryTests {
         try runCategoryCommand(factory: factory, info: info)
 
         let updatedFolder = try Folder(path: parentPath)
-
+        
         #expect(updatedFolder.containsSubfolder(named: categoryName))
     }
     

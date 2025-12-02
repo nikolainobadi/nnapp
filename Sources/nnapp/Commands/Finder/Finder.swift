@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/28/25.
 //
 
+import NnShellKit
 import ArgumentParser
 
 /// Opens a Category, Group, or Project folder in Finder based on name or shortcut.
@@ -26,7 +27,7 @@ extension Nnapp {
             let shell = Nnapp.makeShell()
             let folderPath = try getFolderPath(name: name, folderType: folderType)
 
-            try shell.runAndPrint("open -a Finder \(folderPath)")
+            try shell.runAndPrint(bash: "open -a Finder \(folderPath)")
         }
     }
 }
