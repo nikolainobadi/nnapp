@@ -155,8 +155,7 @@ extension ProjectHandlerTests {
             true, // is this gh url correct?
             true // would you like to make this main project for group?
         ]
-        let mockPicker = MockSwiftPicker(permissionResult: .init(type: .ordered(responses)))
-        let (sut, context) = try makeSUT(picker: mockPicker)
+        let (sut, context) = try makeSUT(defaultInputValue: "", permissionResponses: responses)
         let group = try setupTestGroup(context: context)
         let projectFolder = try createSwiftPackage(named: projectName, in: tempFolder)
         let shortcut = "testshortcut"
@@ -243,8 +242,7 @@ extension ProjectHandlerTests {
 extension ProjectHandlerTests {
     @Test("Removes project by name")
     func removesProjectByName() throws {
-        let mockPicker = MockSwiftPicker(permissionResult: .init(type: .ordered([true])))
-        let (sut, context) = try makeSUT(picker: mockPicker)
+        let (sut, context) = try makeSUT(permissionResponses: [true])
         let group = try setupTestGroup(context: context)
         let project = makeProject(name: projectName, shortcut: "testcut")
         
@@ -261,8 +259,7 @@ extension ProjectHandlerTests {
     
     @Test("Removes project by shortcut")
     func removesProjectByShortcut() throws {
-        let mockPicker = MockSwiftPicker(permissionResult: .init(type: .ordered([true])))
-        let (sut, context) = try makeSUT(picker: mockPicker)
+        let (sut, context) = try makeSUT(permissionResponses: [true])
         let group = try setupTestGroup(context: context)
         let shortcut = "testcut"
         let project = makeProject(name: projectName, shortcut: shortcut)
@@ -323,7 +320,7 @@ extension ProjectHandlerTests {
 
 // MARK: - Helper Methods
 private extension ProjectHandlerTests {
-    func makeSUT(picker: MockSwiftPicker? = nil, shell: MockShell? = nil, permissionResponses: [Bool] = [], desktopPath: String? = nil) throws -> (sut: ProjectHandler, context: CodeLaunchContext) {
+    func makeSUT(shell: MockShell? = nil, defaultInputValue: String = "shortcut", permissionResponses: [Bool] = [], desktopPath: String? = nil) throws -> (sut: ProjectHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let existingCategoryFolder = try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName)
@@ -331,8 +328,8 @@ private extension ProjectHandlerTests {
         
         try context.saveCategory(category)
         
-        let picker = picker ?? MockSwiftPicker(
-            inputResult: .init(defaultValue: "shortcut"),
+        let picker = MockSwiftPicker(
+            inputResult: .init(defaultValue: defaultInputValue),
             permissionResult: .init(type: .ordered(permissionResponses)),
             selectionResult: .init(defaultSingle: .index(0))
         )
