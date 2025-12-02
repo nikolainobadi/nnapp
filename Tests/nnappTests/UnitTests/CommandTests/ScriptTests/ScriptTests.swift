@@ -45,9 +45,9 @@ struct ScriptTests {
         #expect(output.contains("No launch script configured"))
     }
 
-    @Test("Deletes existing launch script after confirmation", .disabled()) // TODO: - 
+    @Test("Deletes existing launch script after confirmation")
     func deleteScript() throws {
-        let picker = MockSwiftPicker()
+        let picker = MockSwiftPicker(permissionResult: .init(defaultValue: true))
         let factory = MockContextFactory(picker: picker)
         let context = try factory.makeContext()
         context.saveLaunchScript("echo remove")
@@ -55,7 +55,7 @@ struct ScriptTests {
         let output = try runCommand(factory, subcommand: .delete)
         #expect(context.loadLaunchScript() == nil)
         #expect(output.contains("Launch script deleted"))
-        #expect(picker.capturedPrompts.contains(where: { $0.contains("Delete the existing launch script?") }))
+        #expect(picker.capturedPermissionPrompts.contains(where: { $0.contains("Delete the existing launch script?") }))
     }
 }
 
