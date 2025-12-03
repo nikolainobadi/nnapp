@@ -72,7 +72,7 @@ extension MockContextFactory: ContextFactory {
         return branchSyncChecker ?? MockBranchSyncChecker()
     }
 
-    func makeBranchStatusNotifier() -> any BranchStatusNotifier {
+    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
         return branchStatusNotifier ?? MockBranchStatusNotifier()
     }
 }

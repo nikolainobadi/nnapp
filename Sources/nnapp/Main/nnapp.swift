@@ -89,7 +89,7 @@ extension Nnapp {
         let terminalManager = makeTerminalManager(shell: shell, context: context)
         let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
         let branchSyncChecker = makeBranchSyncChecker(shell: shell)
-        let branchStatusNotifier = makeBranchStatusNotifier()
+        let branchStatusNotifier = makeBranchStatusNotifier(shell: shell)
 
         return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher, branchSyncChecker: branchSyncChecker, branchStatusNotifier: branchStatusNotifier)
     }
@@ -110,8 +110,8 @@ extension Nnapp {
         return contextFactory.makeBranchSyncChecker(shell: shell)
     }
 
-    static func makeBranchStatusNotifier() -> any BranchStatusNotifier {
-        return contextFactory.makeBranchStatusNotifier()
+    static func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
+        return contextFactory.makeBranchStatusNotifier(shell: shell)
     }
 }
 
@@ -124,5 +124,5 @@ protocol ContextFactory {
     func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector
     func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker
-    func makeBranchStatusNotifier() -> any BranchStatusNotifier
+    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier
 }

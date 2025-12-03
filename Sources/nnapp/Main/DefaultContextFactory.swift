@@ -50,7 +50,8 @@ final class DefaultContextFactory: ContextFactory {
     }
 
     /// Creates a notifier for alerting about branch sync status.
-    func makeBranchStatusNotifier() -> any BranchStatusNotifier {
-        return DefaultBranchStatusNotifier()
+    /// - Parameter shell: The shell adapter for executing system commands.
+    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
+        return DefaultBranchStatusNotifier(shell: shell)
     }
 }

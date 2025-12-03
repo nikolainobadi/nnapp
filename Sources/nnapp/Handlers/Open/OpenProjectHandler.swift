@@ -85,6 +85,8 @@ extension OpenProjectHandler {
 
         if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
             branchStatusNotifier.notify(status: status, for: project)
+        } else {
+            print("\(project.name) is up to date")
         }
     }
 }
