@@ -88,8 +88,10 @@ extension Nnapp {
         let ideLauncher = makeIDELauncher(shell: shell, picker: picker)
         let terminalManager = makeTerminalManager(shell: shell, context: context)
         let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
-        
-        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher)
+        let branchSyncChecker = makeBranchSyncChecker(shell: shell)
+        let branchStatusNotifier = makeBranchStatusNotifier(shell: shell)
+
+        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher, branchSyncChecker: branchSyncChecker, branchStatusNotifier: branchStatusNotifier)
     }
     
     static func makeIDELauncher(shell: Shell, picker: CommandLinePicker) -> IDELauncher {
@@ -103,14 +105,24 @@ extension Nnapp {
     static func makeURLLauncher(shell: Shell, picker: CommandLinePicker) -> URLLauncher {
         return .init(shell: shell, picker: picker)
     }
+
+    static func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
+        return contextFactory.makeBranchSyncChecker(shell: shell)
+    }
+
+    static func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
+        return contextFactory.makeBranchStatusNotifier(shell: shell)
+    }
 }
 
 
 // MARK: - Dependencies
 protocol ContextFactory {
     func makeShell() -> any Shell
-    func makePicker() -> CommandLinePicker
+    func makePicker() -> any CommandLinePicker
     func makeContext() throws -> CodeLaunchContext
-    func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> GroupCategorySelector
-    func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> ProjectGroupSelector
+    func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector
+    func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector
+    func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker
+    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier
 }

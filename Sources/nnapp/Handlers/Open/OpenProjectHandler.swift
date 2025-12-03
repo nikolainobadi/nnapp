@@ -14,7 +14,9 @@ struct OpenProjectHandler {
     private let ideLauncher: IDELauncher
     private let terminalManager: TerminalManager
     private let urlLauncher: URLLauncher
-    
+    private let branchSyncChecker: any BranchSyncChecker
+    private let branchStatusNotifier: any BranchStatusNotifier
+
     /// Initializes a new handler for project opening operations.
     /// - Parameters:
     ///   - picker: Utility for prompting user input and selections.
@@ -22,12 +24,16 @@ struct OpenProjectHandler {
     ///   - ideLauncher: Component for launching IDEs and cloning projects.
     ///   - terminalManager: Component for terminal operations.
     ///   - urlLauncher: Component for opening URLs and links.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher) {
+    ///   - branchSyncChecker: Component for checking branch sync status.
+    ///   - branchStatusNotifier: Component for notifying about branch status.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher, branchSyncChecker: any BranchSyncChecker, branchStatusNotifier: any BranchStatusNotifier) {
         self.picker = picker
         self.context = context
         self.ideLauncher = ideLauncher
         self.terminalManager = terminalManager
         self.urlLauncher = urlLauncher
+        self.branchSyncChecker = branchSyncChecker
+        self.branchStatusNotifier = branchStatusNotifier
     }
 }
 
@@ -73,12 +79,15 @@ extension OpenProjectHandler {
         guard let folderPath = project.folderPath else {
             throw CodeLaunchError.missingProject
         }
-        
+
         try ideLauncher.openInIDE(project, launchType: launchType)
         terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
-        
-        if let terminalOption, terminalOption == .onlyTerminal {
-            return
+
+        if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
+            print("found status, preparing to notify")
+            branchStatusNotifier.notify(status: status, for: project)
+        } else {
+            print("\(project.name) is up to date")
         }
     }
 }
@@ -91,10 +100,24 @@ extension OpenProjectHandler {
     func openRemoteURL(for project: LaunchProject) throws {
         try urlLauncher.openRemoteURL(remote: project.remote)
     }
-    
+
     /// Opens one of the project's custom links, prompting if multiple exist.
     /// - Parameter project: The project whose link to open.
     func openProjectLink(for project: LaunchProject) throws {
         try urlLauncher.openProjectLink(links: project.links)
     }
+}
+
+
+// MARK: - Dependencies
+enum LaunchBranchStatus {
+    case behind, diverged
+}
+
+protocol BranchSyncChecker {
+    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
+}
+
+protocol BranchStatusNotifier {
+    func notify(status: LaunchBranchStatus, for project: LaunchProject)
 }

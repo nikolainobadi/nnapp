@@ -42,4 +42,16 @@ final class DefaultContextFactory: ContextFactory {
         let categorySelector = makeGroupCategorySelector(picker: picker, context: context)
         return GroupHandler(picker: picker, context: context, categorySelector: categorySelector)
     }
+
+    /// Creates a branch sync checker for detecting if branches are behind remote.
+    /// - Parameter shell: The shell adapter for executing Git commands.
+    func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
+        return DefaultBranchSyncChecker(shell: shell)
+    }
+
+    /// Creates a notifier for alerting about branch sync status.
+    /// - Parameter shell: The shell adapter for executing system commands.
+    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
+        return DefaultBranchStatusNotifier(shell: shell)
+    }
 }
