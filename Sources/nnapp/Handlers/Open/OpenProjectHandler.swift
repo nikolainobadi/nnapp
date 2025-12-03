@@ -14,7 +14,8 @@ struct OpenProjectHandler {
     private let ideLauncher: IDELauncher
     private let terminalManager: TerminalManager
     private let urlLauncher: URLLauncher
-    
+    private let branchSyncChecker: any BranchSyncChecker
+
     /// Initializes a new handler for project opening operations.
     /// - Parameters:
     ///   - picker: Utility for prompting user input and selections.
@@ -22,12 +23,14 @@ struct OpenProjectHandler {
     ///   - ideLauncher: Component for launching IDEs and cloning projects.
     ///   - terminalManager: Component for terminal operations.
     ///   - urlLauncher: Component for opening URLs and links.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher) {
+    ///   - branchSyncChecker: Component for checking branch sync status.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher, branchSyncChecker: any BranchSyncChecker) {
         self.picker = picker
         self.context = context
         self.ideLauncher = ideLauncher
         self.terminalManager = terminalManager
         self.urlLauncher = urlLauncher
+        self.branchSyncChecker = branchSyncChecker
     }
 }
 
@@ -73,9 +76,11 @@ extension OpenProjectHandler {
         guard let folderPath = project.folderPath else {
             throw CodeLaunchError.missingProject
         }
-        
+
         try ideLauncher.openInIDE(project, launchType: launchType)
         terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
+
+        branchSyncChecker.checkBranchSyncStatus(for: project)
     }
 }
 
@@ -87,10 +92,19 @@ extension OpenProjectHandler {
     func openRemoteURL(for project: LaunchProject) throws {
         try urlLauncher.openRemoteURL(remote: project.remote)
     }
-    
+
     /// Opens one of the project's custom links, prompting if multiple exist.
     /// - Parameter project: The project whose link to open.
     func openProjectLink(for project: LaunchProject) throws {
         try urlLauncher.openProjectLink(links: project.links)
     }
+}
+
+
+// MARK: - Dependencies
+/// Checks if project branches are behind their remote counterparts.
+protocol BranchSyncChecker {
+    /// Checks if the current branch or main branch is behind the remote and notifies the user.
+    /// - Parameter project: The project to check.
+    func checkBranchSyncStatus(for project: LaunchProject)
 }
