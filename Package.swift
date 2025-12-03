@@ -17,7 +17,7 @@ let package = Package(
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
         .package(url: "https://github.com/nikolainobadi/NnGitKit.git", from: "0.6.0"),
         .package(url: "https://github.com/nikolainobadi/NnShellKit.git", from: "2.0.0"),
-        .package(url: "https://github.com/nikolainobadi/NnSwiftDataKit", from: "0.5.0"),
+        .package(url: "https://github.com/nikolainobadi/NnSwiftDataKit", branch: "main"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
         .package(url: "https://github.com/nikolainobadi/SwiftPickerKit.git", from: "0.6.0"),
     ],
