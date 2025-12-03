@@ -77,10 +77,17 @@ extension Nnapp {
         let picker = Nnapp.makePicker()
         let context = try Nnapp.makeContext()
         let groupSelector = makeProjectGroupSelector(picker: picker, context: context)
-        
+
         return .init(shell: shell, picker: picker, context: context, groupSelector: groupSelector)
     }
-    
+
+    static func makeListHandler() throws -> ListHandler {
+        let picker = makePicker()
+        let context = try makeContext()
+
+        return .init(picker: picker, context: context)
+    }
+
     static func makeOpenManager() throws -> OpenProjectHandler {
         let shell = makeShell()
         let picker = makePicker()
