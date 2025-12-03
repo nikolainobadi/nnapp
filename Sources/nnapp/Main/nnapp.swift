@@ -89,8 +89,9 @@ extension Nnapp {
         let terminalManager = makeTerminalManager(shell: shell, context: context)
         let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
         let branchSyncChecker = makeBranchSyncChecker(shell: shell)
+        let branchStatusNotifier = makeBranchStatusNotifier()
 
-        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher, branchSyncChecker: branchSyncChecker)
+        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher, branchSyncChecker: branchSyncChecker, branchStatusNotifier: branchStatusNotifier)
     }
     
     static func makeIDELauncher(shell: Shell, picker: CommandLinePicker) -> IDELauncher {
@@ -107,6 +108,10 @@ extension Nnapp {
 
     static func makeBranchSyncChecker(shell: Shell) -> BranchSyncChecker {
         return DefaultBranchSyncChecker(shell: shell)
+    }
+
+    static func makeBranchStatusNotifier() -> BranchStatusNotifier {
+        return DefaultBranchStatusNotifier()
     }
 }
 

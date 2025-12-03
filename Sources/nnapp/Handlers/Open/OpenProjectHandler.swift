@@ -15,6 +15,7 @@ struct OpenProjectHandler {
     private let terminalManager: TerminalManager
     private let urlLauncher: URLLauncher
     private let branchSyncChecker: any BranchSyncChecker
+    private let branchStatusNotifier: any BranchStatusNotifier
 
     /// Initializes a new handler for project opening operations.
     /// - Parameters:
@@ -24,13 +25,15 @@ struct OpenProjectHandler {
     ///   - terminalManager: Component for terminal operations.
     ///   - urlLauncher: Component for opening URLs and links.
     ///   - branchSyncChecker: Component for checking branch sync status.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher, branchSyncChecker: any BranchSyncChecker) {
+    ///   - branchStatusNotifier: Component for notifying about branch status.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher, branchSyncChecker: any BranchSyncChecker, branchStatusNotifier: any BranchStatusNotifier) {
         self.picker = picker
         self.context = context
         self.ideLauncher = ideLauncher
         self.terminalManager = terminalManager
         self.urlLauncher = urlLauncher
         self.branchSyncChecker = branchSyncChecker
+        self.branchStatusNotifier = branchStatusNotifier
     }
 }
 
@@ -81,8 +84,7 @@ extension OpenProjectHandler {
         terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
 
         if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
-            let statusMessage = status == .behind ? "behind" : "diverged"
-            print("⚠️  Project branch is \(statusMessage) the remote branch".yellow)
+            branchStatusNotifier.notify(status: status, for: project)
         }
     }
 }
@@ -111,4 +113,8 @@ enum LaunchBranchStatus {
 
 protocol BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
+}
+
+protocol BranchStatusNotifier {
+    func notify(status: LaunchBranchStatus, for project: LaunchProject)
 }
