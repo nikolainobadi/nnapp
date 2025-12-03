@@ -76,10 +76,6 @@ extension OpenProjectHandler {
         
         try ideLauncher.openInIDE(project, launchType: launchType)
         terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
-        
-        if let terminalOption, terminalOption == .onlyTerminal {
-            return
-        }
     }
 }
 
