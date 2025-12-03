@@ -12,7 +12,12 @@ extension Nnapp {
     struct List: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Display a list of all Categories, Groups, and Projects registered with CodeLaunch",
-            subcommands: [Category.self, Group.self, Project.self, Link.self]
+            subcommands: [
+                Category.self,
+                Group.self,
+                Project.self,
+                Link.self
+            ]
         )
         
         func run() throws {
@@ -27,74 +32,11 @@ extension Nnapp {
                 return
             }
 
-            let rootNodes = categories.map { LaunchTreeNode.category($0) }
+            let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: false) })
+            let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", rootItems: rootNodes, showPromptText: false)
 
-            let selection = picker.treeNavigation(
-                "Browse CodeLaunch Hierarchy",
-                rootItems: rootNodes,
-                allowSelectingFolders: true,
-            )
-
-            // Display detailed information about the selected item
             if let selectedNode = selection {
                 displayNodeDetails(selectedNode)
-            }
-        }
-
-        private func displayNodeDetails(_ node: LaunchTreeNode) {
-            print("")
-
-            switch node {
-            case .category(let category):
-                displayCategoryDetails(category)
-            case .group(let group):
-                displayGroupDetails(group)
-            case .project(let project):
-                displayProjectDetails(project)
-            }
-
-            print("")
-        }
-
-        private func displayCategoryDetails(_ category: LaunchCategory) {
-            printHeader(category.name)
-            print("path: \(category.path)")
-            print("group count: \(category.groups.count)", terminator: "\n\n")
-
-            if !category.groups.isEmpty {
-                for group in category.groups {
-                    print("\u{2022} \(group.name.bold.addingShortcut(group.shortcut))")
-
-                    if !group.projects.isEmpty {
-                        for project in group.projects {
-                            print("  - \(project.name.bold.addingShortcut(project.shortcut))")
-                        }
-                    }
-                }
-            }
-        }
-
-        private func displayGroupDetails(_ group: LaunchGroup) {
-            printHeader(group.name)
-            print("category: \(group.category?.name ?? "NOT ASSIGNED")")
-            print("group path: \(group.path ?? "NOT ASSIGNED")")
-            print("project count: \(group.projects.count)", terminator: "\n\n")
-
-            if !group.projects.isEmpty {
-                for project in group.projects {
-                    print("  - \(project.name.bold.addingShortcut(project.shortcut))")
-                }
-            }
-        }
-
-        private func displayProjectDetails(_ project: LaunchProject) {
-            printHeader(project.name)
-            print("group: \(project.group?.name ?? "NOT ASSIGNED")")
-            print("shortcut: \(project.shortcut ?? "NOT ASSIGNED")")
-            print("project type: \(project.type.name)")
-
-            if let remote = project.remote {
-                print("remote repository: \(remote.name) - \(remote.urlString)")
             }
         }
     }
@@ -259,8 +201,69 @@ extension Nnapp.List {
 }
 
 
+// MARK: - Private Methods
+private extension Nnapp.List {
+    func displayNodeDetails(_ node: LaunchTreeNode) {
+        print("")
+
+        switch node {
+        case .category(let category, _):
+            displayCategoryDetails(category)
+        case .group(let group, _):
+            displayGroupDetails(group)
+        case .project(let project, _):
+            displayProjectDetails(project)
+        }
+
+        print("")
+    }
+
+    func displayCategoryDetails(_ category: LaunchCategory) {
+        printHeader(category.name)
+        print("path: \(category.path)")
+        print("group count: \(category.groups.count)", terminator: "\n\n")
+
+        if !category.groups.isEmpty {
+            for group in category.groups {
+                print("\u{2022} \(group.name.bold.addingShortcut(group.shortcut))")
+
+                if !group.projects.isEmpty {
+                    for project in group.projects {
+                        print("  - \(project.name.bold.addingShortcut(project.shortcut))")
+                    }
+                }
+            }
+        }
+    }
+
+    func displayGroupDetails(_ group: LaunchGroup) {
+        printHeader(group.name)
+        print("category: \(group.category?.name ?? "NOT ASSIGNED")")
+        print("group path: \(group.path ?? "NOT ASSIGNED")")
+        print("project count: \(group.projects.count)", terminator: "\n\n")
+
+        if !group.projects.isEmpty {
+            for project in group.projects {
+                print("  - \(project.name.bold.addingShortcut(project.shortcut))")
+            }
+        }
+    }
+
+    func displayProjectDetails(_ project: LaunchProject) {
+        printHeader(project.name)
+        print("group: \(project.group?.name ?? "NOT ASSIGNED")")
+        print("shortcut: \(project.shortcut ?? "NOT ASSIGNED")")
+        print("project type: \(project.type.name)")
+
+        if let remote = project.remote {
+            print("remote repository: \(remote.name) - \(remote.urlString)")
+        }
+    }
+}
+
+
 // MARK: - Extension Dependencies
-fileprivate extension String {
+private extension String {
     func addingShortcut(_ shortcut: String?) -> String {
         guard let shortcut else {
             return self
@@ -272,21 +275,21 @@ fileprivate extension String {
 
 
 // MARK: - Tree Navigation Node
-fileprivate enum LaunchTreeNode: TreeNodePickerItem {
-    case category(LaunchCategory)
-    case group(LaunchGroup)
-    case project(LaunchProject)
+private enum LaunchTreeNode: TreeNodePickerItem {
+    case category(LaunchCategory, selectable: Bool)
+    case group(LaunchGroup, selectable: Bool)
+    case project(LaunchProject, selectable: Bool)
 
     var displayName: String {
         switch self {
-        case .category(let category):
+        case .category(let category, _):
             return category.name
-        case .group(let group):
+        case .group(let group, _):
             if let shortcut = group.shortcut {
                 return "\(group.name) [\(shortcut)]"
             }
             return group.name
-        case .project(let project):
+        case .project(let project, _):
             if let shortcut = project.shortcut {
                 return "\(project.name) [\(shortcut)]"
             }
@@ -296,9 +299,9 @@ fileprivate enum LaunchTreeNode: TreeNodePickerItem {
 
     var hasChildren: Bool {
         switch self {
-        case .category(let category):
+        case .category(let category, _):
             return !category.groups.isEmpty
-        case .group(let group):
+        case .group(let group, _):
             return !group.projects.isEmpty
         case .project:
             return false
@@ -307,10 +310,10 @@ fileprivate enum LaunchTreeNode: TreeNodePickerItem {
 
     func loadChildren() -> [LaunchTreeNode] {
         switch self {
-        case .category(let category):
-            return category.groups.map { .group($0) }
-        case .group(let group):
-            return group.projects.map { .project($0) }
+        case .category(let category, let selectable):
+            return category.groups.map { .group($0, selectable: selectable) }
+        case .group(let group, let selectable):
+            return group.projects.map { .project($0, selectable: selectable) }
         case .project:
             return []
         }
@@ -319,10 +322,10 @@ fileprivate enum LaunchTreeNode: TreeNodePickerItem {
     var metadata: TreeNodeMetadata? {
         switch self {
         case .category:
-            return TreeNodeMetadata(icon: "📁")
+            return .init(icon: "🗂️")
         case .group:
-            return TreeNodeMetadata(icon: "📦")
-        case .project(let project):
+            return .init(icon: "📁")
+        case .project(let project, _):
             let icon: String
             switch project.type {
             case .project:
@@ -330,15 +333,24 @@ fileprivate enum LaunchTreeNode: TreeNodePickerItem {
             case .package:
                 icon = "📦"
             case .workspace:
-                icon = "🗂️"
+                icon = "🧰"
             }
-            return TreeNodeMetadata(icon: icon)
+            return .init(icon: icon)
+        }
+    }
+
+    var isSelectable: Bool {
+        switch self {
+        case .category(_, let selectable),
+             .group(_, let selectable),
+             .project(_, let selectable):
+            return selectable
         }
     }
 }
 
 
 // MARK: - Helpers Print Methods
-fileprivate func printHeader(_ title: String) {
+private func printHeader(_ title: String) {
     print("\n---------- \(title.bold.underline) ----------", terminator: "\n\n")
 }
