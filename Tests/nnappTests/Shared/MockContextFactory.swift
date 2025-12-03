@@ -68,6 +68,10 @@ extension MockContextFactory: ContextFactory {
         return context
     }
 
+    func makeConsoleOutput() -> any ConsoleOutput {
+        return MockConsoleOutput()
+    }
+
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
         return branchSyncChecker ?? MockBranchSyncChecker()
     }

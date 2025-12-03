@@ -84,8 +84,9 @@ extension Nnapp {
     static func makeListHandler() throws -> ListHandler {
         let picker = makePicker()
         let context = try makeContext()
+        let console = contextFactory.makeConsoleOutput()
 
-        return .init(picker: picker, context: context)
+        return .init(picker: picker, context: context, console: console)
     }
 
     static func makeOpenManager() throws -> OpenProjectHandler {
@@ -128,6 +129,7 @@ protocol ContextFactory {
     func makeShell() -> any Shell
     func makePicker() -> any CommandLinePicker
     func makeContext() throws -> CodeLaunchContext
+    func makeConsoleOutput() -> any ConsoleOutput
     func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector
     func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker

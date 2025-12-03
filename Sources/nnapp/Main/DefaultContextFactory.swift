@@ -26,6 +26,11 @@ final class DefaultContextFactory: ContextFactory {
         return try CodeLaunchContext()
     }
 
+    /// Creates a console output adapter for displaying information to the user.
+    func makeConsoleOutput() -> any ConsoleOutput {
+        return DefaultConsoleOutput()
+    }
+
     /// Returns a selector for choosing a group category during group setup.
     /// - Parameters:
     ///   - picker: A user input prompt utility.

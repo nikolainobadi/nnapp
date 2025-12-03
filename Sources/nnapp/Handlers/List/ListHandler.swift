@@ -11,14 +11,17 @@ import SwiftPickerKit
 struct ListHandler {
     private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
+    private let console: any ConsoleOutput
 
     /// Initializes a new handler for list operations.
     /// - Parameters:
     ///   - picker: Utility for prompting user input and selections.
     ///   - context: Data context for loading categories, groups, and projects.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext) {
+    ///   - console: Console output adapter for displaying information.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, console: any ConsoleOutput) {
         self.picker = picker
         self.context = context
+        self.console = console
     }
 }
 
@@ -30,9 +33,9 @@ extension ListHandler {
         let categories = try context.loadCategories()
         
         if categories.isEmpty {
-            print("\n---------- CodeLaunch ----------", terminator: "\n\n")
-            print("No Categories")
-            print("")
+            console.printHeader("CodeLaunch")
+            console.printLine("No Categories")
+            console.printLine("")
             return
         }
         
@@ -60,25 +63,26 @@ extension ListHandler {
             selectedCategory = try picker.requiredSingleSelection("Select a Category", items: categories)
         }
 
-        printHeader(selectedCategory.name)
+        console.printHeader(selectedCategory.name)
         displayCategoryDetails(selectedCategory)
-        print("")
+        console.printLine("")
     }
 
     /// Displays detailed information about a category.
     /// - Parameter category: The category to display.
     func displayCategoryDetails(_ category: LaunchCategory) {
-        printHeader(category.name)
-        print("path: \(category.path)")
-        print("group count: \(category.groups.count)", terminator: "\n\n")
+        console.printHeader(category.name)
+        console.printLine("path: \(category.path)")
+        console.printLine("group count: \(category.groups.count)")
+        console.printLine("")
 
         if !category.groups.isEmpty {
             for group in category.groups {
-                print("\u{2022} \(group.name.bold.addingShortcut(group.shortcut))")
+                console.printLine("\u{2022} \(group.name.bold.addingShortcut(group.shortcut))")
 
                 if !group.projects.isEmpty {
                     for project in group.projects {
-                        print("  - \(project.name.bold.addingShortcut(project.shortcut))")
+                        console.printLine("  - \(project.name.bold.addingShortcut(project.shortcut))")
                     }
                 }
             }
@@ -101,22 +105,23 @@ extension ListHandler {
             selectedGroup = try picker.requiredSingleSelection("Select a Group", items: groups)
         }
 
-        printHeader(selectedGroup.name)
+        console.printHeader(selectedGroup.name)
         displayGroupDetails(selectedGroup)
-        print("")
+        console.printLine("")
     }
 
     /// Displays detailed information about a group.
     /// - Parameter group: The group to display.
     func displayGroupDetails(_ group: LaunchGroup) {
-        printHeader(group.name)
-        print("category: \(group.category?.name ?? "NOT ASSIGNED")")
-        print("group path: \(group.path ?? "NOT ASSIGNED")")
-        print("project count: \(group.projects.count)", terminator: "\n\n")
+        console.printHeader(group.name)
+        console.printLine("category: \(group.category?.name ?? "NOT ASSIGNED")")
+        console.printLine("group path: \(group.path ?? "NOT ASSIGNED")")
+        console.printLine("project count: \(group.projects.count)")
+        console.printLine("")
 
         if !group.projects.isEmpty {
             for project in group.projects {
-                print("  - \(project.name.bold.addingShortcut(project.shortcut))")
+                console.printLine("  - \(project.name.bold.addingShortcut(project.shortcut))")
             }
         }
     }
@@ -137,21 +142,21 @@ extension ListHandler {
             selectedProject = try picker.requiredSingleSelection("Select a Project", items: projects)
         }
 
-        printHeader(selectedProject.name)
+        console.printHeader(selectedProject.name)
         displayProjectDetails(selectedProject)
-        print("")
+        console.printLine("")
     }
 
     /// Displays detailed information about a project.
     /// - Parameter project: The project to display.
     func displayProjectDetails(_ project: LaunchProject) {
-        printHeader(project.name)
-        print("group: \(project.group?.name ?? "NOT ASSIGNED")")
-        print("shortcut: \(project.shortcut ?? "NOT ASSIGNED")")
-        print("project type: \(project.type.name)")
+        console.printHeader(project.name)
+        console.printLine("group: \(project.group?.name ?? "NOT ASSIGNED")")
+        console.printLine("shortcut: \(project.shortcut ?? "NOT ASSIGNED")")
+        console.printLine("project type: \(project.type.name)")
 
         if let remote = project.remote {
-            print("remote repository: \(remote.name) - \(remote.urlString)")
+            console.printLine("remote repository: \(remote.name) - \(remote.urlString)")
         }
 
         // TODO: - display links
@@ -166,15 +171,15 @@ extension ListHandler {
         let existingNames = context.loadProjectLinkNames()
 
         if existingNames.isEmpty {
-            print("No saved Project Link names")
+            console.printLine("No saved Project Link names")
         } else {
-            printHeader("Project Link Names")
+            console.printHeader("Project Link Names")
 
             for name in existingNames {
-                print(name)
+                console.printLine(name)
             }
 
-            print("")
+            console.printLine("")
         }
     }
 }
@@ -183,7 +188,7 @@ extension ListHandler {
 // MARK: - Private Methods
 private extension ListHandler {
     func displayNodeDetails(_ node: LaunchTreeNode) {
-        print("")
+        console.printLine("")
 
         switch node {
         case .category(let category, _):
@@ -194,14 +199,8 @@ private extension ListHandler {
             displayProjectDetails(project)
         }
 
-        print("")
+        console.printLine("")
     }
-}
-
-
-// MARK: - Dependencies
-private func printHeader(_ title: String) {
-    print("\n---------- \(title.bold.underline) ----------", terminator: "\n\n")
 }
 
 
