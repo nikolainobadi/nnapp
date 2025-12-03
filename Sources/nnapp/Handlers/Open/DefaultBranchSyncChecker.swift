@@ -1,5 +1,5 @@
 //
-//  BranchSyncChecker.swift
+//  DefaultBranchSyncChecker.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/26/25.
@@ -10,11 +10,10 @@ import NnShellKit
 import GitShellKit
 import GitCommandGen
 
-// MARK: - Default Implementation
 struct DefaultBranchSyncChecker {
     private let shell: any Shell
     private let gitShell: GitShellAdapter
-    
+
     init(shell: any Shell) {
         self.shell = shell
         self.gitShell = .init(shell: shell)
@@ -24,38 +23,48 @@ struct DefaultBranchSyncChecker {
 
 // MARK: - BranchSyncChecker
 extension DefaultBranchSyncChecker: BranchSyncChecker {
-    func checkBranchSyncStatus(for project: LaunchProject) {
+    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
         // Skip if project doesn't have a remote
         guard project.remote != nil else {
-            return
+            return nil
         }
 
         // Skip if project folder doesn't exist
         guard let folderPath = project.folderPath, let folder = try? Folder(path: folderPath) else {
-            return
+            return nil
         }
 
         // Skip if Git repo doesn't exist or has no remote
         guard (try? gitShell.localGitExists(at: folder.path)) == true, (try? gitShell.remoteExists(path: folder.path)) == true else {
-            return
+            return nil
         }
 
         // Get current branch name
         guard let currentBranch = try? shell.bash(makeGitCommand(.getCurrentBranchName, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
-            return
+            return nil
         }
 
         // Check current branch sync status
-        if let currentStatus = try? getSyncStatus(for: currentBranch, at: folder.path), (currentStatus == .behind || currentStatus == .diverged) {
-            print("⚠️  Current branch '\(currentBranch)' is \(currentStatus.rawValue) the remote branch".yellow)
+        if let currentStatus = try? getSyncStatus(for: currentBranch, at: folder.path) {
+            if currentStatus == .behind {
+                return .behind
+            } else if currentStatus == .diverged {
+                return .diverged
+            }
         }
 
         // Check main branch sync status if not already on main
         if currentBranch != "main" {
-            if let mainStatus = try? getSyncStatus(for: "main", at: folder.path), (mainStatus == .behind || mainStatus == .diverged) {
-                print("⚠️  Main branch is \(mainStatus.rawValue) the remote branch".yellow)
+            if let mainStatus = try? getSyncStatus(for: "main", at: folder.path) {
+                if mainStatus == .behind {
+                    return .behind
+                } else if mainStatus == .diverged {
+                    return .diverged
+                }
             }
         }
+
+        return nil
     }
 }
 

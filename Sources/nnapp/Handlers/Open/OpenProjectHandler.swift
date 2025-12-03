@@ -80,7 +80,10 @@ extension OpenProjectHandler {
         try ideLauncher.openInIDE(project, launchType: launchType)
         terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
 
-        branchSyncChecker.checkBranchSyncStatus(for: project)
+        if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
+            let statusMessage = status == .behind ? "behind" : "diverged"
+            print("⚠️  Project branch is \(statusMessage) the remote branch".yellow)
+        }
     }
 }
 
@@ -102,9 +105,10 @@ extension OpenProjectHandler {
 
 
 // MARK: - Dependencies
-/// Checks if project branches are behind their remote counterparts.
+enum LaunchBranchStatus {
+    case behind, diverged
+}
+
 protocol BranchSyncChecker {
-    /// Checks if the current branch or main branch is behind the remote and notifies the user.
-    /// - Parameter project: The project to check.
-    func checkBranchSyncStatus(for project: LaunchProject)
+    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
 }
