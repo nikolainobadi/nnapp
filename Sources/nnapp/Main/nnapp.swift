@@ -89,6 +89,15 @@ extension Nnapp {
         return .init(picker: picker, context: context, console: console)
     }
 
+    static func makeFinderHandler() throws -> FinderHandler {
+        let shell = makeShell()
+        let picker = makePicker()
+        let context = try makeContext()
+        let console = contextFactory.makeConsoleOutput()
+
+        return .init(shell: shell, picker: picker, context: context, console: console)
+    }
+
     static func makeOpenManager() throws -> OpenProjectHandler {
         let shell = makeShell()
         let picker = makePicker()

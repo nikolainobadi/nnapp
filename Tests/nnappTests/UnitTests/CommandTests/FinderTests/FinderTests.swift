@@ -12,19 +12,19 @@ import SwiftPickerTesting
 
 @MainActor
 struct FinderTests {
-    @Test("Opens Category folder when only -c is passed as arg", arguments: [nil, "categoryName"])
+    @Test("Opens Category folder with category subcommand", arguments: [nil, "categoryName"])
     func opensCategoryFolder(name: String?) throws {
         let (factory, shell) = makeTestObjects()
         let context = try factory.makeContext()
         let categoryName = name ?? "categoryName"
         let category = makeCategory(name: categoryName)
-        
+
         try context.saveCategory(category)
-        try runCommand(factory, name: name, folderType: .category)
+        try runCategoryCommand(factory, name: name)
         try assertShell(shell, contains: category.path)
     }
-    
-    @Test("Opens Group folder when -g is passed as arg", arguments: [
+
+    @Test("Opens Group folder with group subcommand", arguments: [
         GroupAndProjectTestInfo(),
         GroupAndProjectTestInfo(name: "groupName"),
         GroupAndProjectTestInfo(name: "groupName", shortcut: "groupShortcut", useShortcut: true),
@@ -34,14 +34,14 @@ struct FinderTests {
         let context = try factory.makeContext()
         let category = makeCategory()
         let group = makeGroup(name: info.name ?? "groupName", shortcut: info.shortcut)
-        
+
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
-        try runCommand(factory, name: info.nameArg, folderType: .group)
+        try runGroupCommand(factory, name: info.nameArg)
         try assertShell(shell, contains: group.path)
     }
-    
-    @Test("Opens Project folder when -p is passed as arg", arguments: [
+
+    @Test("Opens Project folder with project subcommand", arguments: [
         GroupAndProjectTestInfo(),
         GroupAndProjectTestInfo(name: "projectName"),
         GroupAndProjectTestInfo(name: "projectName", shortcut: "projectShortcut", useShortcut: true),
@@ -52,11 +52,11 @@ struct FinderTests {
         let category = makeCategory()
         let group = makeGroup()
         let project = makeProject(name: info.name ?? "projectName", shortcut: info.shortcut)
-        
+
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
         try context.saveProject(project, in: group)
-        try runCommand(factory, name: info.nameArg, folderType: .project)
+        try runProjectCommand(factory, name: info.nameArg)
         try assertShell(shell, contains: group.path)
     }
 }
@@ -68,23 +68,41 @@ extension FinderTests {
         let shell = MockShell()
         let picker = picker ?? MockSwiftPicker(selectionResult: .init(defaultSingle: .index(0)))
         let factory = MockContextFactory(shell: shell, picker: picker)
-        
+
         return (factory, shell)
     }
 }
 
 
-// MARK: - Run
+// MARK: - Run Commands
 private extension FinderTests {
-    func runCommand(_ factory: MockContextFactory, name: String? = nil, folderType: LaunchFolderType = .project) throws {
-        var args = ["finder"]
-        
+    func runCategoryCommand(_ factory: MockContextFactory, name: String? = nil) throws {
+        var args = ["finder", "category"]
+
         if let name {
             args.append(name)
         }
-        
-        args.append("-\(folderType.argCharacter)")
-        
+
+        try Nnapp.testRun(contextFactory: factory, args: args)
+    }
+
+    func runGroupCommand(_ factory: MockContextFactory, name: String? = nil) throws {
+        var args = ["finder", "group"]
+
+        if let name {
+            args.append(name)
+        }
+
+        try Nnapp.testRun(contextFactory: factory, args: args)
+    }
+
+    func runProjectCommand(_ factory: MockContextFactory, name: String? = nil) throws {
+        var args = ["finder", "project"]
+
+        if let name {
+            args.append(name)
+        }
+
         try Nnapp.testRun(contextFactory: factory, args: args)
     }
 }
@@ -94,7 +112,7 @@ private extension FinderTests {
 private extension FinderTests {
     func assertShell(_ shell: MockShell, contains path: String?) throws {
         let path = try #require(path)
-        
+
         #expect(shell.executedCommands.count == 1)
         #expect(shell.executedCommand(containing: path))
     }
@@ -107,22 +125,15 @@ extension FinderTests {
         let name: String?
         let shortcut: String?
         let useShortcut: Bool
-        
+
         var nameArg: String? {
             return useShortcut ? shortcut : name
         }
-        
+
         init(name: String? = nil, shortcut: String? = nil, useShortcut: Bool = false) {
             self.name = name
             self.shortcut = shortcut
             self.useShortcut = useShortcut
         }
-    }
-}
-
-// MARK: - Extension Dependencies
-private extension LaunchFolderType {
-    var argCharacter: Character {
-        return rawValue.first!
     }
 }
