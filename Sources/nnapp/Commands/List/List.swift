@@ -6,6 +6,7 @@
 //
 
 import ArgumentParser
+import SwiftPickerKit
 
 extension Nnapp {
     struct List: ParsableCommand {
@@ -15,37 +16,86 @@ extension Nnapp {
         )
         
         func run() throws {
+            let picker = makePicker()
             let context = try makeContext()
-            
             let categories = try context.loadCategories()
-            
-            print("\n---------- CodeLaunch ----------", terminator: "\n\n")
-            
+
             if categories.isEmpty {
+                print("\n---------- CodeLaunch ----------", terminator: "\n\n")
                 print("No Categories")
-            } else {
-                for category in categories {
-                    print(category.name.bold.underline)
-                    
-                    if category.groups.isEmpty {
-                        print("")
-                    } else {
-                        for group in category.groups {
-                            print("\u{2022} \(group.name.bold.addingShortcut(group.shortcut))")
-                            
-                            if group.projects.isEmpty {
-                                print("")
-                            } else {
-                                for project in group.projects {
-                                    print("  - \(project.name.bold.addingShortcut(project.shortcut))")
-                                }
-                            }
+                print("")
+                return
+            }
+
+            let rootNodes = categories.map { LaunchTreeNode.category($0) }
+
+            let selection = picker.treeNavigation(
+                "Browse CodeLaunch Hierarchy",
+                rootItems: rootNodes,
+                allowSelectingFolders: true,
+            )
+
+            // Display detailed information about the selected item
+            if let selectedNode = selection {
+                displayNodeDetails(selectedNode)
+            }
+        }
+
+        private func displayNodeDetails(_ node: LaunchTreeNode) {
+            print("")
+
+            switch node {
+            case .category(let category):
+                displayCategoryDetails(category)
+            case .group(let group):
+                displayGroupDetails(group)
+            case .project(let project):
+                displayProjectDetails(project)
+            }
+
+            print("")
+        }
+
+        private func displayCategoryDetails(_ category: LaunchCategory) {
+            printHeader(category.name)
+            print("path: \(category.path)")
+            print("group count: \(category.groups.count)", terminator: "\n\n")
+
+            if !category.groups.isEmpty {
+                for group in category.groups {
+                    print("\u{2022} \(group.name.bold.addingShortcut(group.shortcut))")
+
+                    if !group.projects.isEmpty {
+                        for project in group.projects {
+                            print("  - \(project.name.bold.addingShortcut(project.shortcut))")
                         }
                     }
                 }
             }
-            
-            print("")
+        }
+
+        private func displayGroupDetails(_ group: LaunchGroup) {
+            printHeader(group.name)
+            print("category: \(group.category?.name ?? "NOT ASSIGNED")")
+            print("group path: \(group.path ?? "NOT ASSIGNED")")
+            print("project count: \(group.projects.count)", terminator: "\n\n")
+
+            if !group.projects.isEmpty {
+                for project in group.projects {
+                    print("  - \(project.name.bold.addingShortcut(project.shortcut))")
+                }
+            }
+        }
+
+        private func displayProjectDetails(_ project: LaunchProject) {
+            printHeader(project.name)
+            print("group: \(project.group?.name ?? "NOT ASSIGNED")")
+            print("shortcut: \(project.shortcut ?? "NOT ASSIGNED")")
+            print("project type: \(project.type.name)")
+
+            if let remote = project.remote {
+                print("remote repository: \(remote.name) - \(remote.urlString)")
+            }
         }
     }
 }
@@ -217,6 +267,73 @@ fileprivate extension String {
         }
         
         return "\(self), shortcut: \(shortcut)"
+    }
+}
+
+
+// MARK: - Tree Navigation Node
+fileprivate enum LaunchTreeNode: TreeNodePickerItem {
+    case category(LaunchCategory)
+    case group(LaunchGroup)
+    case project(LaunchProject)
+
+    var displayName: String {
+        switch self {
+        case .category(let category):
+            return category.name
+        case .group(let group):
+            if let shortcut = group.shortcut {
+                return "\(group.name) [\(shortcut)]"
+            }
+            return group.name
+        case .project(let project):
+            if let shortcut = project.shortcut {
+                return "\(project.name) [\(shortcut)]"
+            }
+            return project.name
+        }
+    }
+
+    var hasChildren: Bool {
+        switch self {
+        case .category(let category):
+            return !category.groups.isEmpty
+        case .group(let group):
+            return !group.projects.isEmpty
+        case .project:
+            return false
+        }
+    }
+
+    func loadChildren() -> [LaunchTreeNode] {
+        switch self {
+        case .category(let category):
+            return category.groups.map { .group($0) }
+        case .group(let group):
+            return group.projects.map { .project($0) }
+        case .project:
+            return []
+        }
+    }
+
+    var metadata: TreeNodeMetadata? {
+        switch self {
+        case .category:
+            return TreeNodeMetadata(icon: "📁")
+        case .group:
+            return TreeNodeMetadata(icon: "📦")
+        case .project(let project):
+            let icon: String
+            switch project.type {
+            case .project:
+                icon = "📄"
+            case .package:
+                icon = "📦"
+            case .workspace:
+                icon = "🗂️"
+            }
+            return TreeNodeMetadata(icon: icon)
+        }
     }
 }
 
