@@ -19,12 +19,16 @@ final class MockContextFactory {
     private let throwCategorySelectorError: Bool
     private var context: CodeLaunchContext?
     private let uniqueId: String
-    
-    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false) {
+    private let branchSyncChecker: (any BranchSyncChecker)?
+    private let branchStatusNotifier: (any BranchStatusNotifier)?
+
+    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, branchStatusNotifier: (any BranchStatusNotifier)? = nil) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
         self.uniqueId = UUID().uuidString
+        self.branchSyncChecker = branchSyncChecker
+        self.branchStatusNotifier = branchStatusNotifier
     }
 }
 
@@ -51,17 +55,25 @@ extension MockContextFactory: ContextFactory {
         if let context {
             return context
         }
-        
+
         let defaults = makeDefaults()
         let config = ModelConfiguration(
             "TestModel-\(uniqueId)",
             isStoredInMemoryOnly: true
         )
         let context = try CodeLaunchContext(config: config, defaults: defaults)
-        
+
         self.context = context
-        
+
         return context
+    }
+
+    func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
+        return branchSyncChecker ?? MockBranchSyncChecker()
+    }
+
+    func makeBranchStatusNotifier() -> any BranchStatusNotifier {
+        return branchStatusNotifier ?? MockBranchStatusNotifier()
     }
 }
 
@@ -72,7 +84,33 @@ private extension MockContextFactory {
         let testSuiteName = "testSuiteDefaults-\(uniqueId)"
         let userDefaults = UserDefaults(suiteName: testSuiteName)!
         userDefaults.removePersistentDomain(forName: testSuiteName)
-        
+
         return userDefaults
+    }
+}
+
+
+// MARK: - Mocks
+final class MockBranchSyncChecker: BranchSyncChecker {
+    private(set) var checkCallCount = 0
+    private(set) var lastProject: LaunchProject?
+    var result: LaunchBranchStatus?
+
+    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
+        checkCallCount += 1
+        lastProject = project
+        return result
+    }
+}
+
+final class MockBranchStatusNotifier: BranchStatusNotifier {
+    private(set) var notifyCallCount = 0
+    private(set) var lastStatus: LaunchBranchStatus?
+    private(set) var lastProject: LaunchProject?
+
+    func notify(status: LaunchBranchStatus, for project: LaunchProject) {
+        notifyCallCount += 1
+        lastStatus = status
+        lastProject = project
     }
 }
