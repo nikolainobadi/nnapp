@@ -24,15 +24,20 @@ extension DefaultBranchStatusNotifier: BranchStatusNotifier {
 
         switch status {
         case .behind:
-            message = "\(project.name) is behind the remote branch"
+            message = "\(project.name) is BEHIND the remote branch"
         case .diverged:
-            message = "\(project.name) has diverged from the remote branch"
+            message = "\(project.name) has DIVERGED from the remote branch"
         }
 
         let script = """
         display notification "\(message)" with title "\(title)" sound name "default"
         """
 
-        _ = try? shell.runAppleScript(script: script)
+        print("preparing to notify with message:", message)
+        do {
+            let _ = try shell.runAppleScript(script: script)
+        } catch {
+            print("unable to send notification", error.localizedDescription)
+        }
     }
 }

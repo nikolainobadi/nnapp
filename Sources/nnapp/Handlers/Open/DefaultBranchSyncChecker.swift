@@ -26,21 +26,32 @@ extension DefaultBranchSyncChecker: BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
         // Skip if project doesn't have a remote
         guard project.remote != nil else {
+            print("no remote")
             return nil
         }
 
         // Skip if project folder doesn't exist
         guard let folderPath = project.folderPath, let folder = try? Folder(path: folderPath) else {
+            print("could not find folder")
             return nil
         }
 
         // Skip if Git repo doesn't exist or has no remote
         guard (try? gitShell.localGitExists(at: folder.path)) == true, (try? gitShell.remoteExists(path: folder.path)) == true else {
+            print("no local or remote repo")
+            return nil
+        }
+        
+        let originResult = try? gitShell.runGitCommandWithOutput(.fetchOrigin, path: folder.path)
+        
+        if originResult == nil {
+            print("failed to fetch origin for \(project.name)")
             return nil
         }
 
         // Get current branch name
         guard let currentBranch = try? shell.bash(makeGitCommand(.getCurrentBranchName, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
+            print("could not find current branch")
             return nil
         }
 
@@ -51,6 +62,8 @@ extension DefaultBranchSyncChecker: BranchSyncChecker {
             } else if currentStatus == .diverged {
                 return .diverged
             }
+        } else {
+            print("could not get sync status")
         }
 
         // Check main branch sync status if not already on main

@@ -9,6 +9,6 @@ import NnShellKit
 
 extension Shell {
     func runAppleScript(script: String) throws -> String {
-        return try run("osascript", args: ["-e", script])
+        return try run("/usr/bin/osascript", args: ["-e", script])
     }
 }

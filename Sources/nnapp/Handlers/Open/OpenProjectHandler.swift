@@ -84,6 +84,7 @@ extension OpenProjectHandler {
         terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
 
         if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
+            print("found status, preparing to notify")
             branchStatusNotifier.notify(status: status, for: project)
         } else {
             print("\(project.name) is up to date")

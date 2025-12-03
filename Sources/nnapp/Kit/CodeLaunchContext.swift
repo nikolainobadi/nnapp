@@ -32,7 +32,7 @@ final class CodeLaunchContext {
             configuration = config
             userDefaults = defaults
         } else {
-            let (config, defaults) = try configureSwiftDataContainer(appGroupId: appGroupId)
+            let (config, defaults) = try makeAppGroupConfiguration(appGroupId: appGroupId)
             
             configuration = config
             userDefaults = defaults
