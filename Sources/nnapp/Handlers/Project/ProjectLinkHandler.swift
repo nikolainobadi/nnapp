@@ -27,7 +27,7 @@ struct ProjectLinkHandler {
 extension ProjectLinkHandler {
     /// Recursively prompts the user to add custom links and returns all captured entries.
     /// - Returns: An array of `ProjectLink` objects created from user input.
-    func getOtherLinks() -> [ProjectLink] {
+    func getOtherLinks() -> [SwiftDataProjectLink] {
         guard picker.getPermission("Would you like to add a custom link?"), let name = getName() else {
             return []
         }

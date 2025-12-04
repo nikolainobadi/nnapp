@@ -23,7 +23,7 @@ struct DefaultBranchSyncChecker {
 
 // MARK: - BranchSyncChecker
 extension DefaultBranchSyncChecker: BranchSyncChecker {
-    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
+    func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus? {
         // Skip if project doesn't have a remote
         guard project.remote != nil else {
             print("no remote")

@@ -19,7 +19,7 @@ final class MockGroupSelector {
 
 // MARK: - Selector
 extension MockGroupSelector: ProjectGroupSelector {
-    func getGroup(named name: String?) throws -> LaunchGroup {
+    func getGroup(named name: String?) throws -> SwiftDataLaunchGroup {
         guard let group = try context.loadGroups().first else {
             throw NSError(domain: "Test", code: 0)
         }

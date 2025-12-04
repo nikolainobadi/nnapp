@@ -55,7 +55,7 @@ extension ProjectHandler {
         let selectedGroup = try groupSelector.getGroup(named: group)
         let projectFolder = try selectProjectFolder(path: path, group: selectedGroup, fromDesktop: fromDesktop)
         let info = try selectProjectInfo(folder: projectFolder.folder, shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
-        let project = LaunchProject(name: info.name, shortcut: info.shortcut, type: projectFolder.type, remote: info.remote, links: info.otherLinks)
+        let project = SwiftDataLaunchProject(name: info.name, shortcut: info.shortcut, type: projectFolder.type, remote: info.remote, links: info.otherLinks)
         
         if isMainProject || (selectedGroup.shortcut == nil && picker.getPermission("Is this the main project of \(selectedGroup.name)?")) {
             selectedGroup.shortcut = info.shortcut
@@ -85,13 +85,13 @@ extension ProjectHandler {
 
 // MARK: - Private Methods
 private extension ProjectHandler {
-    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
+    func selectProjectFolder(path: String?, group: SwiftDataLaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
         let folderSelector = ProjectFolderSelector(picker: picker, folderBrowser: folderBrowser, desktopPath: desktopPath)
         
         return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
     }
     
-    func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
+    func selectProjectInfo(folder: Folder, shortcut: String?, group: SwiftDataLaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
         let infoSelector = ProjectInfoSelector(picker: picker, gitShell: gitShell, context: context)
         
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
@@ -121,7 +121,7 @@ private extension ProjectHandler {
 
 // MARK: - Dependencies
 protocol ProjectGroupSelector {
-    func getGroup(named name: String?) throws -> LaunchGroup
+    func getGroup(named name: String?) throws -> SwiftDataLaunchGroup
 }
 
 
@@ -138,7 +138,7 @@ extension ProjectHandler {
         try trashFolder(folder)
     }
     
-    private func getProject(name: String?, shortcut: String?, selectionPrompt: String) throws -> LaunchProject {
+    private func getProject(name: String?, shortcut: String?, selectionPrompt: String) throws -> SwiftDataLaunchProject {
         let projects = try context.loadProjects()
         
         if let name {

@@ -8,9 +8,9 @@
 import SwiftPickerKit
 
 enum LaunchTreeNode {
-    case category(LaunchCategory, selectable: Bool)
-    case group(LaunchGroup, selectable: Bool)
-    case project(LaunchProject, selectable: Bool)
+    case category(SwiftDataLaunchCategory, selectable: Bool)
+    case group(SwiftDataLaunchGroup, selectable: Bool)
+    case project(SwiftDataLaunchProject, selectable: Bool)
 }
 
 

@@ -8,19 +8,19 @@
 import Files
 import SwiftPickerKit
 
-extension LaunchCategory: DisplayablePickerItem {
+extension SwiftDataLaunchCategory: DisplayablePickerItem {
     public var displayName: String {
         return name
     }
 }
 
-extension LaunchGroup: DisplayablePickerItem {
+extension SwiftDataLaunchGroup: DisplayablePickerItem {
     public var displayName: String {
         return name
     }
 }
 
-extension LaunchProject: DisplayablePickerItem {
+extension SwiftDataLaunchProject: DisplayablePickerItem {
     public var displayName: String {
         return name
     }
@@ -38,7 +38,7 @@ extension ProjectFolder: DisplayablePickerItem {
     }
 }
 
-extension ProjectLink: DisplayablePickerItem {
+extension SwiftDataProjectLink: DisplayablePickerItem {
     public var displayName: String {
         return "\(name.bold) - \(urlString)"
     }

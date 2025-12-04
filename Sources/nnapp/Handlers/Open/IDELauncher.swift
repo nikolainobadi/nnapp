@@ -33,7 +33,7 @@ extension IDELauncher {
     /// - Parameters:
     ///   - project: The project to open.
     ///   - launchType: Whether to open in Xcode or VSCode.
-    func openInIDE(_ project: LaunchProject, launchType: LaunchType) throws {
+    func openInIDE(_ project: SwiftDataLaunchProject, launchType: LaunchType) throws {
         guard let folderPath = project.folderPath, let filePath = project.filePath else {
             throw CodeLaunchError.missingProject
         }
@@ -45,7 +45,7 @@ extension IDELauncher {
     }
     
     /// Clones the project repo if it doesn't exist locally and a remote is available.
-    private func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
+    private func cloneProjectIfNecessary(_ project: SwiftDataLaunchProject, folderPath: String, filePath: String) throws {
         do {
             _ = try Folder(path: folderPath) // already exists
         } catch {

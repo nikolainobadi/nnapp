@@ -56,7 +56,7 @@ extension ListHandler {
     /// - Parameter name: Optional category name. If nil, prompts user to select.
     func selectAndDisplayCategory(name: String?) throws {
         let categories = try context.loadCategories()
-        let selectedCategory: LaunchCategory
+        let selectedCategory: SwiftDataLaunchCategory
 
         if let name, let category = categories.first(where: { name.matches($0.name) }) {
             selectedCategory = category
@@ -71,7 +71,7 @@ extension ListHandler {
 
     /// Displays detailed information about a category.
     /// - Parameter category: The category to display.
-    func displayCategoryDetails(_ category: LaunchCategory) {
+    func displayCategoryDetails(_ category: SwiftDataLaunchCategory) {
         console.printHeader(category.name)
         console.printLine("path: \(category.path)")
         console.printLine("group count: \(category.groups.count)")
@@ -98,7 +98,7 @@ extension ListHandler {
     /// - Parameter name: Optional group name or shortcut. If nil, prompts user to select.
     func selectAndDisplayGroup(name: String?) throws {
         let groups = try context.loadGroups()
-        let selectedGroup: LaunchGroup
+        let selectedGroup: SwiftDataLaunchGroup
 
         if let name, let group = groups.first(where: { name.matches($0.name) || name.matches($0.shortcut) }) {
             selectedGroup = group
@@ -113,7 +113,7 @@ extension ListHandler {
 
     /// Displays detailed information about a group.
     /// - Parameter group: The group to display.
-    func displayGroupDetails(_ group: LaunchGroup) {
+    func displayGroupDetails(_ group: SwiftDataLaunchGroup) {
         console.printHeader(group.name)
         console.printLine("category: \(group.category?.name ?? "NOT ASSIGNED")")
         console.printLine("group path: \(group.path ?? "NOT ASSIGNED")")
@@ -135,7 +135,7 @@ extension ListHandler {
     /// - Parameter name: Optional project name or shortcut. If nil, prompts user to select.
     func selectAndDisplayProject(name: String?) throws {
         let projects = try context.loadProjects()
-        let selectedProject: LaunchProject
+        let selectedProject: SwiftDataLaunchProject
 
         if let name, let project = projects.first(where: { name.matches($0.name) || name.matches($0.shortcut) }) {
             selectedProject = project
@@ -150,7 +150,7 @@ extension ListHandler {
 
     /// Displays detailed information about a project.
     /// - Parameter project: The project to display.
-    func displayProjectDetails(_ project: LaunchProject) {
+    func displayProjectDetails(_ project: SwiftDataLaunchProject) {
         console.printHeader(project.name)
         console.printLine("group: \(project.group?.name ?? "NOT ASSIGNED")")
         console.printLine("shortcut: \(project.shortcut ?? "NOT ASSIGNED")")

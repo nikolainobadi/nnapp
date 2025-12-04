@@ -36,7 +36,7 @@ extension ProjectFolderSelector {
     ///   - group: The group the project will belong to (used for default folder lookup).
     ///   - fromDesktop: Whether to filter and select from valid projects on the Desktop.
     /// - Returns: A validated `ProjectFolder` containing the resolved folder and type.
-    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
+    func selectProjectFolder(path: String?, group: SwiftDataLaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
         if let path, let folder = try? Folder(path: path) {
             let projectType = try getProjectType(folder: folder)
             return .init(folder: folder, type: projectType)
@@ -81,7 +81,7 @@ extension ProjectFolderSelector {
 // MARK: - Private Methods
 private extension ProjectFolderSelector {
     /// Determines the project type (e.g. package, project, workspace) by inspecting the folder contents.
-    func getProjectType(folder: Folder) throws -> ProjectType {
+    func getProjectType(folder: Folder) throws -> SwiftDataProjectType {
         if folder.containsFile(named: "Package.swift") {
             return .package
         }
@@ -95,7 +95,7 @@ private extension ProjectFolderSelector {
     }
 
     /// Returns a list of valid project subfolders within the group folder that are not already registered.
-    func getAvailableSubfolders(group: LaunchGroup, folder: Folder) -> [ProjectFolder] {
+    func getAvailableSubfolders(group: SwiftDataLaunchGroup, folder: Folder) -> [ProjectFolder] {
         return folder.subfolders.compactMap { subFolder in
             guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
                   let projectType = try? getProjectType(folder: subFolder) else {

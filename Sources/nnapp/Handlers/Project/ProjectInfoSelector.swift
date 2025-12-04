@@ -38,7 +38,7 @@ extension ProjectInfoSelector {
     ///   - group: The group this project will belong to.
     ///   - isMainProject: Indicates whether this project is the group's primary launch target.
     /// - Returns: A `ProjectInfo` struct with the collected input.
-    func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
+    func selectProjectInfo(folder: Folder, shortcut: String?, group: SwiftDataLaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
         try validateName(folder.name)
         let shortcut = try getShortcut(shortcut: shortcut, group: group, isMainProject: isMainProject)
         try validateShortcut(shortcut)
@@ -75,7 +75,7 @@ private extension ProjectInfoSelector {
     }
     
     /// Prompts for or determines the project shortcut, optionally syncing with the group shortcut.
-    func getShortcut(shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> String? {
+    func getShortcut(shortcut: String?, group: SwiftDataLaunchGroup, isMainProject: Bool) throws -> String? {
         if let shortcut { return shortcut }
 
         let prompt = "Enter the shortcut to launch this project."
@@ -90,7 +90,7 @@ private extension ProjectInfoSelector {
     }
 
     /// Retrieves the remote GitHub URL for the folder, if available and confirmed by the user.
-    func getRemote(folder: Folder) -> ProjectLink? {
+    func getRemote(folder: Folder) -> SwiftDataProjectLink? {
         guard let githubURL = try? gitShell.getGitHubURL(at: folder.path),
               picker.getPermission("Is this the correct remote url: \(githubURL)?") else {
             return nil
@@ -101,10 +101,18 @@ private extension ProjectInfoSelector {
     }
 
     /// Launches a prompt flow for adding additional custom links (e.g. Firebase, website).
-    func getOtherLinks() -> [ProjectLink] {
+    func getOtherLinks() -> [SwiftDataProjectLink] {
         let linkOptions = context.loadProjectLinkNames()
         let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions)
         
         return handler.getOtherLinks()
     }
+}
+
+
+// MARK: - Dependencies
+protocol ProjectInfoLoader {
+    func loadProjectLinkNames() -> [String]
+    func loadGroups() throws -> [SwiftDataLaunchGroup]
+    func loadProjects() throws -> [SwiftDataLaunchProject]
 }

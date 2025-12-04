@@ -26,7 +26,7 @@ struct URLLauncher {
 
 // MARK: - URL Operations
 extension URLLauncher {
-    func openRemoteURL(remote: ProjectLink?) throws {
+    func openRemoteURL(remote: SwiftDataProjectLink?) throws {
         guard let remote else {
             throw CodeLaunchError.missingGitRepository
         }
@@ -35,8 +35,8 @@ extension URLLauncher {
         try shell.runAndPrint(bash: "open \(remote.urlString)")
     }
     
-    func openProjectLink(links: [ProjectLink]) throws {
-        var selection: ProjectLink?
+    func openProjectLink(links: [SwiftDataProjectLink]) throws {
+        var selection: SwiftDataProjectLink?
         
         switch links.count {
         case 0:

@@ -367,7 +367,7 @@ let package = Package(
         return packageFolder
     }
     
-    func setupTestGroup(context: CodeLaunchContext) throws -> LaunchGroup {
+    func setupTestGroup(context: CodeLaunchContext) throws -> SwiftDataLaunchGroup {
         let group = makeGroup(name: existingGroupName)
         let category = try #require(try context.loadCategories().first)
         

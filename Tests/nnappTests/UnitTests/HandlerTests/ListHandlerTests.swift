@@ -149,7 +149,7 @@ extension ListHandlerTests {
         let (sut, console, context) = try makeSUT()
         let category = makeCategory(name: "TestCat", path: tempFolder.path)
         let group = makeGroup(name: "MyGroup")
-        let remote = ProjectLink(name: "origin", urlString: "https://github.com/test/repo.git")
+        let remote = SwiftDataProjectLink(name: "origin", urlString: "https://github.com/test/repo.git")
         let project = makeProject(name: "MyProject", remote: remote)
 
         try context.saveCategory(category)

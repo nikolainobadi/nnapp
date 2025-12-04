@@ -18,7 +18,7 @@ struct DefaultBranchStatusNotifier {
 
 // MARK: - BranchStatusNotifier
 extension DefaultBranchStatusNotifier: BranchStatusNotifier {
-    func notify(status: LaunchBranchStatus, for project: LaunchProject) {
+    func notify(status: LaunchBranchStatus, for project: SwiftDataLaunchProject) {
         let title = "Branch Status Alert"
         let message: String
 

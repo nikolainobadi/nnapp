@@ -5,13 +5,13 @@
 //  Created by Nikolai Nobadi on 3/28/25.
 //
 
+import Files
 import SwiftData
 import Foundation
 import NnShellKit
 import SwiftPickerKit
 import NnShellTesting
 import SwiftPickerTesting
-import Files
 @testable import nnapp
 
 final class MockContextFactory {
@@ -104,10 +104,10 @@ private extension MockContextFactory {
 // MARK: - Mocks
 final class MockBranchSyncChecker: BranchSyncChecker {
     private(set) var checkCallCount = 0
-    private(set) var lastProject: LaunchProject?
+    private(set) var lastProject: SwiftDataLaunchProject?
     var result: LaunchBranchStatus?
 
-    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
+    func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus? {
         checkCallCount += 1
         lastProject = project
         return result
@@ -117,9 +117,9 @@ final class MockBranchSyncChecker: BranchSyncChecker {
 final class MockBranchStatusNotifier: BranchStatusNotifier {
     private(set) var notifyCallCount = 0
     private(set) var lastStatus: LaunchBranchStatus?
-    private(set) var lastProject: LaunchProject?
+    private(set) var lastProject: SwiftDataLaunchProject?
 
-    func notify(status: LaunchBranchStatus, for project: LaunchProject) {
+    func notify(status: LaunchBranchStatus, for project: SwiftDataLaunchProject) {
         notifyCallCount += 1
         lastStatus = status
         lastProject = project

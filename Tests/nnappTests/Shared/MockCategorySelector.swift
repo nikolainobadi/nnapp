@@ -19,7 +19,7 @@ final class MockCategorySelector {
 
 // MARK: - Selector
 extension MockCategorySelector: GroupCategorySelector {
-    func getCategory(named name: String?) throws -> LaunchCategory {
+    func getCategory(named name: String?) throws -> SwiftDataLaunchCategory {
         guard let category = try context.loadCategories().first else {
             throw NSError(domain: "Test", code: 0)
         }

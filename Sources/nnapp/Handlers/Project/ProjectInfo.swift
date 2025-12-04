@@ -9,6 +9,6 @@
 struct ProjectInfo {
     let name: String
     let shortcut: String?
-    let remote: ProjectLink?
-    let otherLinks: [ProjectLink]
+    let remote: SwiftDataProjectLink?
+    let otherLinks: [SwiftDataProjectLink]
 }

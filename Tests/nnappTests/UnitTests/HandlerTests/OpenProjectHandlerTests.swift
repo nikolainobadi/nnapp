@@ -127,7 +127,7 @@ private extension OpenProjectHandlerTests {
         return try groupFolder.createSubfolder(named: projectName)
     }
 
-    func makeTestProject() throws -> LaunchProject {
+    func makeTestProject() throws -> SwiftDataLaunchProject {
         let factory = try makeContextFactory()
         let context = try factory.makeContext()
         let categoryFolder = try tempFolder.subfolder(named: categoryName)
@@ -158,13 +158,13 @@ private extension OpenProjectHandlerTests {
     final class MockBranchSyncChecker: BranchSyncChecker {
         private let result: LaunchBranchStatus?
         private(set) var checkCallCount = 0
-        private(set) var lastProject: LaunchProject?
+        private(set) var lastProject: SwiftDataLaunchProject?
 
         init(result: LaunchBranchStatus?) {
             self.result = result
         }
 
-        func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
+        func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus? {
             checkCallCount += 1
             lastProject = project
             return result
@@ -174,9 +174,9 @@ private extension OpenProjectHandlerTests {
     final class MockBranchStatusNotifier: BranchStatusNotifier {
         private(set) var notifyCallCount = 0
         private(set) var lastStatus: LaunchBranchStatus?
-        private(set) var lastProject: LaunchProject?
+        private(set) var lastProject: SwiftDataLaunchProject?
 
-        func notify(status: LaunchBranchStatus, for project: LaunchProject) {
+        func notify(status: LaunchBranchStatus, for project: SwiftDataLaunchProject) {
             notifyCallCount += 1
             lastStatus = status
             lastProject = project

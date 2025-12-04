@@ -45,7 +45,7 @@ extension OpenProjectHandler {
     ///   - shortcut: Optional shortcut to identify the project or group.
     ///   - useGroupShortcut: Whether to treat the shortcut as a group identifier.
     /// - Returns: The selected `LaunchProject`.
-    func selectProject(shortcut: String?, useGroupShortcut: Bool) throws -> LaunchProject {
+    func selectProject(shortcut: String?, useGroupShortcut: Bool) throws -> SwiftDataLaunchProject {
         let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut of the app you would like to open")
         
         if useGroupShortcut {
@@ -75,7 +75,7 @@ extension OpenProjectHandler {
     ///   - project: The project to open.
     ///   - launchType: Whether to open in Xcode or VSCode.
     ///   - terminalOption: Controls terminal launch behavior.
-    func openInIDE(_ project: LaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
+    func openInIDE(_ project: SwiftDataLaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
         guard let folderPath = project.folderPath else {
             throw CodeLaunchError.missingProject
         }
@@ -97,13 +97,13 @@ extension OpenProjectHandler {
 extension OpenProjectHandler {
     /// Opens the remote repository URL in the browser.
     /// - Parameter project: The project whose remote URL to open.
-    func openRemoteURL(for project: LaunchProject) throws {
+    func openRemoteURL(for project: SwiftDataLaunchProject) throws {
         try urlLauncher.openRemoteURL(remote: project.remote)
     }
 
     /// Opens one of the project's custom links, prompting if multiple exist.
     /// - Parameter project: The project whose link to open.
-    func openProjectLink(for project: LaunchProject) throws {
+    func openProjectLink(for project: SwiftDataLaunchProject) throws {
         try urlLauncher.openProjectLink(links: project.links)
     }
 }
@@ -115,9 +115,9 @@ enum LaunchBranchStatus {
 }
 
 protocol BranchSyncChecker {
-    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
+    func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus?
 }
 
 protocol BranchStatusNotifier {
-    func notify(status: LaunchBranchStatus, for project: LaunchProject)
+    func notify(status: LaunchBranchStatus, for project: SwiftDataLaunchProject)
 }

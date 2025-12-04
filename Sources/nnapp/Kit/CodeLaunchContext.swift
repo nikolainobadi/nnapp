@@ -24,6 +24,7 @@ final class CodeLaunchContext {
     ///   - config: Optional SwiftData model configuration.
     ///   - defaults: Optional UserDefaults, typically injected for testing or previews.
     init(config: ModelConfiguration? = nil, defaults: UserDefaults? = nil) throws {
+        // TODO: - this should be refactored to user NnswiftDataKit's new test init
         let appGroupId = "R8SJ24LQF3.com.nobadi.codelaunch"
         var userDefaults: UserDefaults
         var configuration: ModelConfiguration
@@ -38,7 +39,8 @@ final class CodeLaunchContext {
             userDefaults = defaults
         }
         
-        let container = try ModelContainer(for: LaunchCategory.self, configurations: configuration)
+        let container = try ModelContainer(for: .init(versionedSchema: FirstSchema.self), configurations: configuration)
+//        let container = try ModelContainer(for: SwiftDataLaunchCategory.self, configurations: configuration)
         
         self.defaults = userDefaults
         self.context = .init(container)
@@ -50,19 +52,19 @@ final class CodeLaunchContext {
 extension CodeLaunchContext {
     /// Loads all saved launch categories from the SwiftData context.
     /// - Returns: An array of `LaunchCategory` objects.
-    func loadCategories() throws -> [LaunchCategory] {
+    func loadCategories() throws -> [SwiftDataLaunchCategory] {
         return try load()
     }
     
     /// Loads all saved launch groups from the SwiftData context.
     /// - Returns: An array of `LaunchGroup` objects.
-    func loadGroups() throws -> [LaunchGroup] {
+    func loadGroups() throws -> [SwiftDataLaunchGroup] {
         return try load()
     }
     
     /// Loads all saved launch projects from the SwiftData context.
     /// - Returns: An array of `LaunchProject` objects.
-    func loadProjects() throws -> [LaunchProject] {
+    func loadProjects() throws -> [SwiftDataLaunchProject] {
         return try load()
     }
     
@@ -88,7 +90,7 @@ extension CodeLaunchContext {
 extension CodeLaunchContext {
     /// Persists a new launch category to the SwiftData context.
     /// - Parameter category: The category to save.
-    func saveCategory(_ category: LaunchCategory) throws {
+    func saveCategory(_ category: SwiftDataLaunchCategory) throws {
         context.insert(category)
         try context.save()
     }
@@ -97,7 +99,7 @@ extension CodeLaunchContext {
     /// - Parameters:
     ///   - group: The group to save.
     ///   - category: The parent category to associate with.
-    func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
+    func saveGroup(_ group: SwiftDataLaunchGroup, in category: SwiftDataLaunchCategory) throws {
         context.insert(group)
         group.category = category
         category.groups.append(group)
@@ -109,7 +111,7 @@ extension CodeLaunchContext {
     /// - Parameters:
     ///   - project: The project to save.
     ///   - group: The parent group to associate with.
-    func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws {
+    func saveProject(_ project: SwiftDataLaunchProject, in group: SwiftDataLaunchGroup) throws {
         context.insert(project)
         project.group = group
         group.projects.append(project)
@@ -135,7 +137,7 @@ extension CodeLaunchContext {
 extension CodeLaunchContext {
     /// Deletes a category and all associated groups and projects.
     /// - Parameter category: The category to delete.
-    func deleteCategory(_ category: LaunchCategory) throws {
+    func deleteCategory(_ category: SwiftDataLaunchCategory) throws {
         for group in category.groups {
             try deleteGroup(group, skipSave: true)
         }
@@ -148,7 +150,7 @@ extension CodeLaunchContext {
     /// - Parameters:
     ///   - group: The group to delete.
     ///   - skipSave: If true, defers saving the context (used when part of a batch operation).
-    func deleteGroup(_ group: LaunchGroup, skipSave: Bool = false) throws {
+    func deleteGroup(_ group: SwiftDataLaunchGroup, skipSave: Bool = false) throws {
         for project in group.projects {
             try deleteProject(project, skipSave: true)
         }
@@ -164,7 +166,7 @@ extension CodeLaunchContext {
     /// - Parameters:
     ///   - project: The project to delete.
     ///   - skipSave: If true, defers saving the context (used when part of a batch operation).
-    func deleteProject(_ project: LaunchProject, skipSave: Bool = false) throws {
+    func deleteProject(_ project: SwiftDataLaunchProject, skipSave: Bool = false) throws {
         context.delete(project)
 
         if !skipSave {
