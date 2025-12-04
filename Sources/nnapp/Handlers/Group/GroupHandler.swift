@@ -110,7 +110,11 @@ extension GroupHandler {
         if let name, let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
             groupToDelete = group
         } else {
-            groupToDelete = try picker.requiredSingleSelection("Select a group to delete", items: groups)
+            groupToDelete = try picker.requiredSingleSelection(
+                "Select a group to delete",
+                items: groups,
+                layout: .twoColumnDynamic { makeGroupDetail(for: $0) }
+            )
         }
 
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
@@ -252,7 +256,7 @@ private extension GroupHandler {
     /// Selects a folder to use for group import, optionally from disk or from subfolders.
     func selectGroupFolderToImport(path: String?, category: LaunchCategory) throws -> Folder {
         if let path {
-            return try Folder(path: path)
+            return try .init(path: path)
         }
 
         let categoryFolder = try Folder(path: category.path)
@@ -265,6 +269,19 @@ private extension GroupHandler {
         }
 
         return try folderBrowser.browseForFolder(prompt: "Browse to select a folder to import as a Group")
+    }
+
+    func makeGroupDetail(for group: LaunchGroup) -> String {
+        let categoryName = group.category?.name ?? "Not assigned"
+        let path = group.path?.yellow ?? "path not set"
+        let shortcut = group.shortcut ?? "None"
+
+        return """
+        project count: \(group.projects.count)
+        shortcut: \(shortcut)
+        category: \(categoryName)
+        path: \(path)
+        """
     }
 }
 
