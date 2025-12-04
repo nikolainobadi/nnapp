@@ -84,10 +84,15 @@ extension CategoryHandler {
         if let name, let category = categories.first(where: { $0.name.lowercased() == name.lowercased() }) {
             categoryToDelete = category
         } else {
-            categoryToDelete = try picker.requiredSingleSelection("Select a category to remove", items: categories)
+            categoryToDelete = try picker.requiredSingleSelection(
+                "Select a category to remove",
+                items: categories,
+                layout: .twoColumnDynamic { makeCategoryDetail(for: $0) },
+                newScreen: true,
+                showSelectedItemText: true
+            )
         }
 
-        // TODO: - maybe display group count with project count
         try picker.requiredPermission("Are you sure want to remove \(categoryToDelete.name.yellow)?")
         try context.deleteCategory(categoryToDelete)
     }
@@ -143,5 +148,16 @@ private extension CategoryHandler {
         } else {
             return try folderBrowser.browseForFolder(prompt: prompt)
         }
+    }
+
+    func makeCategoryDetail(for category: LaunchCategory) -> String {
+        let groupCount = category.groups.count
+        let totalProjects = category.groups.reduce(0) { $0 + $1.projects.count }
+
+        return """
+        group count: \(groupCount)
+        total project count: \(totalProjects)
+        local path: \(category.path.yellow)
+        """
     }
 }
