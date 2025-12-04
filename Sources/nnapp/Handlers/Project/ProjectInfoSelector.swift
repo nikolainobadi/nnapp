@@ -50,7 +50,7 @@ extension ProjectInfoSelector {
 }
 
 
-// MARK: - Validation
+// MARK: - Private Methods
 private extension ProjectInfoSelector {
     /// Ensures the project name is unique within the persistence context.
     func validateName(_ name: String) throws {
@@ -73,11 +73,7 @@ private extension ProjectInfoSelector {
             }
         }
     }
-}
-
-
-// MARK: - Private Methods
-private extension ProjectInfoSelector {
+    
     /// Prompts for or determines the project shortcut, optionally syncing with the group shortcut.
     func getShortcut(shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> String? {
         if let shortcut { return shortcut }
@@ -108,6 +104,7 @@ private extension ProjectInfoSelector {
     func getOtherLinks() -> [ProjectLink] {
         let linkOptions = context.loadProjectLinkNames()
         let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions)
+        
         return handler.getOtherLinks()
     }
 }
