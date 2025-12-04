@@ -9,6 +9,7 @@ import Files
 import Foundation
 import NnShellKit
 import GitShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Handles creation, removal, and eviction of `LaunchProject` objects.

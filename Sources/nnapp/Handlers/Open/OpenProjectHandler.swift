@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Coordinates project opening operations by delegating to specialized components.

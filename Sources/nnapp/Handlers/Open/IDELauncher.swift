@@ -9,6 +9,7 @@ import Files
 import Foundation
 import NnShellKit
 import GitShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Handles launching projects in IDEs (Xcode/VSCode) and cloning repositories when needed.

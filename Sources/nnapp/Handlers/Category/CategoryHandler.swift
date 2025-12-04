@@ -6,6 +6,7 @@
 //
 
 import Files
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Handles creation, import, selection, and deletion of `LaunchCategory` objects.

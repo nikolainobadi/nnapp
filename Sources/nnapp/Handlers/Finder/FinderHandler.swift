@@ -6,6 +6,7 @@
 //
 
 import NnShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Coordinates opening folders in Finder for categories, groups, and projects.

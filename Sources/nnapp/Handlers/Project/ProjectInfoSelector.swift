@@ -7,6 +7,7 @@
 
 import Files
 import GitShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Handles interactive input for project metadata such as name, shortcut, and links.

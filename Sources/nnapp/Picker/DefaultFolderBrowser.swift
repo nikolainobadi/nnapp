@@ -7,6 +7,7 @@
 
 import Files
 import Foundation
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Provides a reusable folder browsing experience backed by `SwiftPickerKit` tree navigation.

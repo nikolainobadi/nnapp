@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import CodeLaunchKit
 import ArgumentParser
 
 /// Adds a new Category, Group, Project, or Link from an existing folder on disk.

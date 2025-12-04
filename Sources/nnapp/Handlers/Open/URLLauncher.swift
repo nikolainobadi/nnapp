@@ -6,6 +6,7 @@
 //
 
 import NnShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Handles opening URLs including remote repositories and project links.
