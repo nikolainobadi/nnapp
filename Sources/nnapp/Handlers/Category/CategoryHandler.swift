@@ -41,7 +41,7 @@ extension CategoryHandler {
         if let path {
             folder = try Folder(path: path)
         } else {
-            folder = try folderBrowser.browseForFolder(prompt: "Select a folder to import as a Category", startPath: nil)
+            folder = try folderBrowser.browseForFolder(prompt: "Select a folder to import as a Category")
         }
 
         try validateName(folder.name, categories: categories)
@@ -63,8 +63,13 @@ extension CategoryHandler {
 
         try validateName(name, categories: categories)
 
-        let path = try parentPath ?? picker.getRequiredInput("Enter the path to the folder where \(name.yellow) should be created.")
-        let parentFolder = try Folder(path: path)
+        let parentFolder: Folder
+
+        if let parentPath {
+            parentFolder = try Folder(path: parentPath)
+        } else {
+            parentFolder = try folderBrowser.browseForFolder(prompt: "Select the folder where \(name.yellow) should be created")
+        }
 
         try validateParentFolder(parentFolder, categoryName: name)
         let categoryFolder = try parentFolder.createSubfolder(named: name)
