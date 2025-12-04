@@ -42,7 +42,8 @@ extension FinderHandler {
         }
 
         let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
-        let selection = picker.treeNavigation("Browse and select folder to open", rootItems: rootNodes, showPromptText: false)
+        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
+        let selection = picker.treeNavigation("Browse and select folder to open", root: root, newScreen: true, showPromptText: false)
 
         guard let selectedNode = selection else {
             console.printLine("No selection made.")

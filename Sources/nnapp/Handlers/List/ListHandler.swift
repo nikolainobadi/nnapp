@@ -40,7 +40,8 @@ extension ListHandler {
         }
         
         let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: false) })
-        let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", rootItems: rootNodes, showPromptText: false)
+        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
+        let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: root, newScreen: true, showPromptText: false)
         
         if let selectedNode = selection {
             displayNodeDetails(selectedNode)
