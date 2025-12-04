@@ -11,7 +11,7 @@
 
 Think of it as a personalized project launcher with just enough metadata to keep your Swift workspace tidy and quickly accessible.
 
-**Stability Notice (v0.5.2)**
+**Stability Notice (v0.6.0)**
 `nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.  
 Currently, `nnapp` is designed to work specifically with **iTerm**, but I'll add support for vanilla **Terminal** (and possible others) for the official release.
 Breaking changes are possible before reaching v1.0.0.  
@@ -21,13 +21,14 @@ Your feedback and suggestions are welcome as the project continues to improve!
 ## Features
 
 - Create, import, or remove **Categories**, **Groups**, and **Projects**
+- Browse for folders interactively (tree navigation) instead of typing paths for categories, groups, and projects
 - Launch Xcode or VSCode with optional terminal workflows
 - Open remote repositories or linked documentation instantly
 - Automatically clone projects from Git remotes if missing locally
 - Manage custom quick-launch shortcuts and set main projects for groups
 - Stores metadata using `SwiftData` and `UserDefaults`
-- Shell integration via `SwiftShell`
-- Fully interactive CLI built on `ArgumentParser`
+- Shell integration via `NnShellKit`
+- Fully interactive CLI built on `ArgumentParser` and `SwiftPickerKit`
 
 ---
 
@@ -83,6 +84,12 @@ nnapp --help
   nnapp remove group "Mobile"
   ```
 
+- Browse for a project folder when no path is provided:
+  ```sh
+  nnapp add project --group Mobile
+  ```
+  If the project is not under the group folder, an interactive browser opens to pick any folder.
+
 - List all registered entities:
   ```sh
   nnapp list
@@ -96,10 +103,12 @@ The project follows a clean, protocol-driven structure:
 
 - `CodeLaunchContext`: Core model and persistence handler
 - `Handlers`: Orchestrate logic per domain (category, group, project)
+- `FolderBrowser`: Shared tree-navigation browser used for folder selection
 - `Shell`: Abstracted shell interaction
-- `SwiftPicker`: Handles interactive prompts and selections
+- `SwiftPickerKit`: Handles interactive prompts and selections
+- `NnShellKit` + `GitShellKit`: Shell and Git abstractions
 - `SwiftData`: For structured, lightweight local storage
-- `NnGitKit`: For convenient Git interactions
+- `NnGitKit`: For convenient Git interactions (where needed)
 
 Each entity (`Category`, `Group`, `Project`) is managed via a declarative `@Model` and persists automatically using SwiftData.
 
@@ -118,20 +127,21 @@ For more details and advanced usage, refer to the [Documentation](./docs/Documen
 ## Acknowledgments
 
 ### Third-Party Libraries
-- [`SwiftShell`](https://github.com/kareman/SwiftShell) — for shell execution
-- [`ArgumentParser`](https://github.com/apple/swift-argument-parser) — for CLI parsing
-- [`Files`](https://github.com/JohnSundell/Files) — for filesystem handling
+- [`ArgumentParser`](https://github.com/apple/swift-argument-parser) — CLI parsing
+- [`Files`](https://github.com/JohnSundell/Files) — filesystem handling
 
 ### My Swift Packages
+- [`SwiftPickerKit`](https://github.com/nikolainobadi/SwiftPickerKit) — interactive prompts and tree navigation
+- [`NnShellKit`](https://github.com/nikolainobadi/NnShellKit) — shell abstraction
+- [`GitShellKit`](https://github.com/nikolainobadi/GitShellKit) — Git command helpers
 - [`NnGitKit`](https://github.com/nikolainobadi/NnGitKit) — Git commands abstraction
-- [`SwiftPicker`](https://github.com/nikolainobadi/SwiftPicker) — interactive CLI prompts
-- [`NnSwiftDataKit](https://github.com/nikolainobadi/NnSwiftDataKit) - shared SwiftData setup
+- [`NnSwiftDataKit`](https://github.com/nikolainobadi/NnSwiftDataKit) — shared SwiftData setup
 
 ---
 
 ## About This Project
 
-`nnapp` was created to simplify the chaos of managing local and remote Swift/Xcode projects. Whether you're working on open-source libraries, client apps, or personal projects, this tool gives you a structured and scriptable way to organize and launch them — without the hassle of opening Finder or remembering folder paths.
+`nnapp` is what I built after getting annoyed one too many times with a messy desktop and forgotten rebases. I prefer the command line for version control and general navigation, so I wanted a way to launch Xcode or VS Code alongside a terminal without hunting through folders. Since I bounce between devices it also keeps me from running into merge conflicts by sending a notification when a project is behind its remote branch. I can link project related websites as well and open them instantly. It is a small tool that lets me be lazy in all the right ways so I can stay focused on building things.
 
 ---
 

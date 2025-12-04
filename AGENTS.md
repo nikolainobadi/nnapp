@@ -2,6 +2,7 @@
 
 ## Project Structure & Module Organization
 - SwiftPM layout: code lives in `Sources/nnapp` with domains grouped by folder (`Commands`, `Handlers`, `Kit`, `Picker`, `Shell`, `Main`). Keep new types close to their domain to preserve discoverability.
+- Folder browsing lives in `Sources/nnapp/Picker` (`FolderBrowser`, `DefaultFolderBrowser`) and is injected into handlers via factories.
 - Tests sit in `Tests/nnappTests/UnitTests`, organized by command or handler. Shared test helpers (mock pickers, context factories, temp folder helpers) are under `Tests/nnappTests/Shared`.
 - Resources (e.g., `Resources/Info.plist`) stay minimal; prefer code-first configuration where possible.
 
@@ -20,6 +21,7 @@
 ## Testing Guidelines
 - Use XCTest with the existing naming pattern (`*Tests.swift`). Mirror production folders when adding new suites (e.g., `CommandTests/CreateTests`).
 - Prefer deterministic tests with the shared mocks (`MockConsoleOutput`, `MockPicker`, `MainActorTempFolderDatasource`) to avoid filesystem drift.
+- Use `MockFolderBrowser` when asserting folder selection flows; inject through handler initializers/factories.
 - When adding behaviors that touch Git or the shell, isolate side effects behind protocols and mock them in tests.
 
 ## Commit & Pull Request Guidelines
@@ -46,6 +48,7 @@
 - Clear, predictable argument handling
 - Minimal logging to stdout/stderr
 - Use `NnShellKit` for shell execution; prefer absolute program paths
+- Favor interactive folder browsing (via `FolderBrowser` and SwiftPickerKit tree navigation) over manual path entry for categories, groups, and projects; keep optional path args working.
 
 ## CLI Testing
 - Behavior-driven tests for command logic
