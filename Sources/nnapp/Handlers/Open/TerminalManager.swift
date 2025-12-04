@@ -24,7 +24,7 @@ struct TerminalManager {
 }
 
 
-// MARK: - Terminal Operations
+// MARK: - Actions
 extension TerminalManager {
     /// Opens the project folder in a new terminal window, if not already open.
     /// - Parameters:
@@ -50,10 +50,14 @@ extension TerminalManager {
         script.append(" && clear")
         runScriptInNewTerminalWindow(script: script)
     }
-    
+}
+
+
+// MARK: - Private Methods
+private extension TerminalManager {
     /// Runs the given shell script in a new iTerm tab, if iTerm is available.
     /// - Parameter script: A shell command string to execute.
-    private func runScriptInNewTerminalWindow(script: String) {
+    func runScriptInNewTerminalWindow(script: String) {
         if let termProgram = ProcessInfo.processInfo.environment["TERM_PROGRAM"], termProgram == "iTerm.app" {
             let appleScript = """
                 tell application "iTerm"
@@ -71,7 +75,7 @@ extension TerminalManager {
     
     /// Retrieves all session working directory paths currently open in iTerm.
     /// - Returns: An array of folder paths for open terminal sessions.
-    private func getITermSessionPaths() throws -> [String] {
+    func getITermSessionPaths() throws -> [String] {
         let script = """
         tell application "iTerm"
             set sessionPaths to {}

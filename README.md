@@ -5,13 +5,34 @@
 ![Platform](https://img.shields.io/badge/platform-macOS%2014-blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgray)
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Category Commands](#category-commands)
+  - [Group Commands](#group-commands)
+  - [Project Commands](#project-commands)
+  - [Link Commands](#link-commands)
+  - [Opening Projects](#opening-projects)
+  - [Finder Commands](#finder-commands)
+  - [Script Commands](#script-commands)
+  - [Listing Resources](#listing-resources)
+- [Architecture Notes](#architecture-notes)
+- [Documentation](#documentation)
+- [Acknowledgments](#acknowledgments)
+- [About This Project](#about-this-project)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Overview
 
 **nnapp** is a command-line utility designed to manage and launch Xcode projects and Swift packages with ease. It organizes your local development environment into **Categories**, **Groups**, and **Projects**, supporting both local file system operations and Git integrations.
 
 Think of it as a personalized project launcher with just enough metadata to keep your Swift workspace tidy and quickly accessible.
 
-**Stability Notice (v0.5.2)**
+**Stability Notice (v0.6.0)**
 `nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.  
 Currently, `nnapp` is designed to work specifically with **iTerm**, but I'll add support for vanilla **Terminal** (and possible others) for the official release.
 Breaking changes are possible before reaching v1.0.0.  
@@ -21,13 +42,18 @@ Your feedback and suggestions are welcome as the project continues to improve!
 ## Features
 
 - Create, import, or remove **Categories**, **Groups**, and **Projects**
+- Browse for folders interactively (tree navigation) instead of typing paths for categories, groups, and projects
 - Launch Xcode or VSCode with optional terminal workflows
 - Open remote repositories or linked documentation instantly
 - Automatically clone projects from Git remotes if missing locally
+- **Branch status monitoring** - automatically checks if local projects are behind or diverged from remote, with desktop notifications
 - Manage custom quick-launch shortcuts and set main projects for groups
+- **Script management** - define custom launch scripts for terminal workflows
+- **Project links** - store and open named URLs (docs, analytics, repos, etc.) associated with projects
+- **Finder integration** - quickly open any category, group, or project folder in Finder
 - Stores metadata using `SwiftData` and `UserDefaults`
-- Shell integration via `SwiftShell`
-- Fully interactive CLI built on `ArgumentParser`
+- Shell integration via `NnShellKit`
+- Fully interactive CLI built on `ArgumentParser` and `SwiftPickerKit`
 
 ---
 
@@ -50,42 +76,198 @@ After installation, run:
 nnapp --help
 ```
 
-### Example Commands
+### Category Commands
 
-- Create a new category:
+- **Create a new category:**
   ```sh
   nnapp create category "Platform"
   ```
 
-- Add a new project:
+- **Import an existing folder as a category:**
   ```sh
-  nnapp add project --path ~/dev/MyApp --group Mobile
+  nnapp add category --path ~/dev/MyCategory
+  ```
+  Omit `--path` to browse interactively.
+
+- **Remove a category** (unregisters but doesn't delete the folder):
+  ```sh
+  nnapp remove category "Platform"
   ```
 
-- Add a project from the Desktop:
+### Group Commands
+
+- **Create a new group:**
   ```sh
-  nnapp add project --from-desktop --group Mobile
+  nnapp create group "Mobile" --category "Platform"
   ```
 
-- Set a project as the main project for its group:
+- **Import an existing folder as a group:**
+  ```sh
+  nnapp add group --path ~/dev/MyGroup --category "Platform"
+  ```
+
+- **Remove a group:**
+  ```sh
+  nnapp remove group "Mobile"
+  ```
+
+- **Set a main project for a group:**
   ```sh
   nnapp set-main-project "Mobile"
   ```
   This synchronizes the project and group shortcuts for quick terminal access.
 
-- Open project in Xcode with terminal:
+### Project Commands
+
+- **Add a project:**
+  ```sh
+  nnapp add project --path ~/dev/MyApp --group Mobile
+  ```
+
+- **Add a project from Desktop:**
+  ```sh
+  nnapp add project --from-desktop --group Mobile
+  ```
+  Automatically filters to valid Xcode projects and Swift packages.
+
+- **Add a project with a shortcut:**
+  ```sh
+  nnapp add project --path ~/dev/MyApp --group Mobile --shortcut abc
+  ```
+
+- **Add a project as the main project:**
+  ```sh
+  nnapp add project --path ~/dev/MyApp --group Mobile --main-project
+  ```
+
+- **Remove a project:**
+  ```sh
+  nnapp remove project "MyApp"
+  ```
+
+- **Browse for a project folder** (interactive mode):
+  ```sh
+  nnapp add project --group Mobile
+  ```
+  If the project is not under the group folder, an interactive browser opens to pick any folder.
+
+### Link Commands
+
+- **Add a named link to a project:**
+  ```sh
+  nnapp add link "Firebase"
+  ```
+  Store reusable link names like "Docs", "Analytics", "Repo" for consistent metadata.
+
+- **Remove a link name:**
+  ```sh
+  nnapp remove link "Firebase"
+  ```
+
+- **List all saved link names:**
+  ```sh
+  nnapp list link
+  ```
+
+### Opening Projects
+
+- **Open project in Xcode with terminal** (default):
   ```sh
   nnapp open abc
   ```
 
-- Remove a group:
+- **Open in VSCode:**
   ```sh
-  nnapp remove group "Mobile"
+  nnapp open abc -v
   ```
 
-- List all registered entities:
+- **Open IDE only** (no terminal):
+  ```sh
+  nnapp open abc --no-terminal
+  ```
+
+- **Open terminal only:**
+  ```sh
+  nnapp open abc --terminal
+  ```
+
+- **Open remote repository:**
+  ```sh
+  nnapp open abc -r
+  ```
+
+- **Open project link:**
+  ```sh
+  nnapp open abc -l
+  ```
+  Select from saved links associated with the project.
+
+- **Open using group shortcut:**
+  ```sh
+  nnapp open xyz -g
+  ```
+  Opens the main project for the group with shortcut "xyz".
+
+### Finder Commands
+
+- **Open category folder in Finder:**
+  ```sh
+  nnapp finder category "Platform"
+  ```
+
+- **Open group folder in Finder:**
+  ```sh
+  nnapp finder group "Mobile"
+  ```
+
+- **Open project folder in Finder:**
+  ```sh
+  nnapp finder project "MyApp"
+  ```
+
+- **Browse and open any folder:**
+  ```sh
+  nnapp finder
+  ```
+
+### Script Commands
+
+- **Display current launch script:**
+  ```sh
+  nnapp script show
+  ```
+
+- **Set a launch script:**
+  ```sh
+  nnapp script set "clear && git status"
+  ```
+  This script runs in the terminal when opening a project.
+
+- **Delete launch script:**
+  ```sh
+  nnapp script delete
+  ```
+
+### Listing Resources
+
+- **List all registered entities** (interactive browser):
   ```sh
   nnapp list
+  ```
+
+- **List specific category details:**
+  ```sh
+  nnapp list category "Platform"
+  ```
+
+- **List specific group details:**
+  ```sh
+  nnapp list group "Mobile"
+  ```
+
+- **List specific project details:**
+  ```sh
+  nnapp list project "MyApp"
   ```
 
 ---
@@ -95,11 +277,16 @@ nnapp --help
 The project follows a clean, protocol-driven structure:
 
 - `CodeLaunchContext`: Core model and persistence handler
-- `Handlers`: Orchestrate logic per domain (category, group, project)
-- `Shell`: Abstracted shell interaction
-- `SwiftPicker`: Handles interactive prompts and selections
-- `SwiftData`: For structured, lightweight local storage
-- `NnGitKit`: For convenient Git interactions
+- `Handlers`: Orchestrate logic per domain (category, group, project, open, finder, script)
+- `FolderBrowser`: Shared tree-navigation browser used for interactive folder selection
+- `IDELauncher`: Manages Xcode/VSCode launching with automatic Git cloning
+- `TerminalManager`: iTerm integration and custom script execution
+- `BranchSyncChecker`: Monitors Git branch status against remotes
+- `BranchStatusNotifier`: Desktop notifications for branch sync alerts
+- `Shell`: Abstracted shell interaction via `NnShellKit`
+- `SwiftPickerKit`: Handles interactive prompts, selections, and tree navigation
+- `SwiftData`: Structured, lightweight local storage with `@Model` decorators
+- `NnGitKit`: Git operations and repository management
 
 Each entity (`Category`, `Group`, `Project`) is managed via a declarative `@Model` and persists automatically using SwiftData.
 
@@ -107,31 +294,43 @@ Each entity (`Category`, `Group`, `Project`) is managed via a declarative `@Mode
 
 ## Documentation
 
+For a complete command reference with all flags, options, and detailed explanations, see [Documentation.md](./docs/Documentation.md).
+
+The formal documentation includes:
+- Comprehensive command reference with all flags and options
+- Detailed explanation of key concepts (main projects, links, branch monitoring)
+- Configuration and exit codes
+- Advanced usage patterns
+
+**Developer Documentation:**
 - Inline documentation is provided via comments and docstrings
 - Source code is organized for discoverability
 - See each command's `run()` method and its related `Handler` for usage flow
-
-For more details and advanced usage, refer to the [Documentation](./docs/Documentation.md)
 
 ---
 
 ## Acknowledgments
 
 ### Third-Party Libraries
-- [`SwiftShell`](https://github.com/kareman/SwiftShell) — for shell execution
-- [`ArgumentParser`](https://github.com/apple/swift-argument-parser) — for CLI parsing
-- [`Files`](https://github.com/JohnSundell/Files) — for filesystem handling
+- [`ArgumentParser`](https://github.com/apple/swift-argument-parser) — CLI parsing
+- [`Files`](https://github.com/JohnSundell/Files) — filesystem handling
 
 ### My Swift Packages
-- [`NnGitKit`](https://github.com/nikolainobadi/NnGitKit) — Git commands abstraction
-- [`SwiftPicker`](https://github.com/nikolainobadi/SwiftPicker) — interactive CLI prompts
-- [`NnSwiftDataKit](https://github.com/nikolainobadi/NnSwiftDataKit) - shared SwiftData setup
+- [`SwiftPickerKit`](https://github.com/nikolainobadi/SwiftPickerKit) — interactive prompts and tree navigation
+- [`NnShellKit`](https://github.com/nikolainobadi/NnShellKit) — shell abstraction
+- [`NnGitKit`](https://github.com/nikolainobadi/NnGitKit) — Git operations abstraction
+- [`NnSwiftDataKit`](https://github.com/nikolainobadi/NnSwiftDataKit) — shared SwiftData setup
 
 ---
 
 ## About This Project
 
-`nnapp` was created to simplify the chaos of managing local and remote Swift/Xcode projects. Whether you're working on open-source libraries, client apps, or personal projects, this tool gives you a structured and scriptable way to organize and launch them — without the hassle of opening Finder or remembering folder paths.
+`nnapp` is what I built after getting annoyed one too many times with a messy desktop and forgotten rebases. I prefer the command line for version control and general navigation, so I wanted a way to launch Xcode or VS Code alongside a terminal without hunting through folders. Since I bounce between devices, the branch status monitoring keeps me from running into merge conflicts by alerting me when a project is behind its remote. I can link project-related websites and open them instantly with a simple command. It is a small tool that lets me be lazy in all the right ways so I can stay focused on building things.
+
+### Future Features
+
+- **Evict command** — Delete project folders locally while maintaining metadata, allowing easy recloning on next launch. (Implemented but disabled in v0.6.0)
+- **Terminal app support** — Expand beyond iTerm to support vanilla Terminal and potentially other terminal emulators
 
 ---
 

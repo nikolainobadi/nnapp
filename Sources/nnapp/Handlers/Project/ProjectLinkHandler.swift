@@ -7,10 +7,15 @@
 
 import SwiftPickerKit
 
+/// Handles interactive prompting for custom project links beyond the primary remote.
 struct ProjectLinkHandler {
     private let picker: any CommandLinePicker
     private let linkOptions: [String]
     
+    /// Initializes the handler used to collect additional project links.
+    /// - Parameters:
+    ///   - picker: Utility used for user prompts and permissions.
+    ///   - linkOptions: Pre-existing link names to present as quick selections.
     init(picker: any CommandLinePicker, linkOptions: [String]) {
         self.picker = picker
         self.linkOptions = linkOptions
@@ -20,6 +25,8 @@ struct ProjectLinkHandler {
 
 // MARK: - Action
 extension ProjectLinkHandler {
+    /// Recursively prompts the user to add custom links and returns all captured entries.
+    /// - Returns: An array of `ProjectLink` objects created from user input.
     func getOtherLinks() -> [ProjectLink] {
         guard picker.getPermission("Would you like to add a custom link?"), let name = getName() else {
             return []
@@ -38,6 +45,8 @@ extension ProjectLinkHandler {
 
 // MARK: - Private Methods
 private extension ProjectLinkHandler {
+    /// Retrieves a link name using either pre-configured options or freeform input.
+    /// - Returns: The selected or entered name, or `nil` if the user cancels.
     func getName() -> String? {
         let nameInputPrompt = "Enter the name (NOT url) of your new link. (exmple: website, Firebase Firestore, etc)"
         

@@ -14,16 +14,19 @@ struct GroupHandler {
     private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
     private let categorySelector: any GroupCategorySelector
+    private let folderBrowser: any FolderBrowser
 
     /// Initializes a new handler for managing groups within a selected category.
     /// - Parameters:
     ///   - picker: Utility for prompting user input.
     ///   - context: Data context for persistence and fetching.
     ///   - categorySelector: Used to determine the group’s parent category.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext, categorySelector: any GroupCategorySelector) {
+    ///   - folderBrowser: Utility for browsing and selecting folders.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, categorySelector: any GroupCategorySelector, folderBrowser: any FolderBrowser) {
         self.picker = picker
         self.context = context
         self.categorySelector = categorySelector
+        self.folderBrowser = folderBrowser
     }
 }
 
@@ -107,10 +110,13 @@ extension GroupHandler {
         if let name, let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
             groupToDelete = group
         } else {
-            groupToDelete = try picker.requiredSingleSelection("Select a group to delete", items: groups)
+            groupToDelete = try picker.requiredSingleSelection(
+                "Select a group to delete",
+                items: groups,
+                layout: .twoColumnDynamic { makeGroupDetail(for: $0) }
+            )
         }
 
-        // TODO: - maybe display project count
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
         try context.deleteGroup(groupToDelete)
     }
@@ -245,13 +251,12 @@ private extension GroupHandler {
         }
         
         try folder.move(to: categoryFolder)
-        
     }
 
     /// Selects a folder to use for group import, optionally from disk or from subfolders.
     func selectGroupFolderToImport(path: String?, category: LaunchCategory) throws -> Folder {
         if let path {
-            return try Folder(path: path)
+            return try .init(path: path)
         }
 
         let categoryFolder = try Folder(path: category.path)
@@ -260,14 +265,25 @@ private extension GroupHandler {
         }
 
         if !availableFolders.isEmpty, picker.getPermission("Would you like to select a subfolder of \(categoryFolder.name)?") {
-            return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
+            return try picker.requiredSingleSelection("Select a folder", items: availableFolders, showSelectedItemText: false)
         }
 
-        let path = try picker.getRequiredInput("Enter the path to your folder for your new Group.")
-        return try Folder(path: path)
+        return try folderBrowser.browseForFolder(prompt: "Browse to select a folder to import as a Group")
+    }
+
+    func makeGroupDetail(for group: LaunchGroup) -> String {
+        let categoryName = group.category?.name ?? "Not assigned"
+        let path = group.path?.yellow ?? "path not set"
+        let shortcut = group.shortcut ?? "None"
+
+        return """
+        project count: \(group.projects.count)
+        shortcut: \(shortcut)
+        category: \(categoryName)
+        path: \(path)
+        """
     }
 }
-
 
 
 // MARK: - Dependencies

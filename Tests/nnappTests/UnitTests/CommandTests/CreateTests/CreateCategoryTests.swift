@@ -64,7 +64,9 @@ extension CreateCategoryTests {
     @Test("Creates a new folder for the new category", arguments: TestInfo.testOptions)
     func createCategoryFolder(info: TestInfo) throws {
         let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info))))
-        let factory = MockContextFactory(picker: picker)
+        let folderBrowser = MockFolderBrowser()
+        folderBrowser.folderToReturn = tempFolder
+        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
 
         try runCategoryCommand(factory: factory, info: info)
 
@@ -75,8 +77,10 @@ extension CreateCategoryTests {
     
     @Test("Saves the new category", arguments: TestInfo.testOptions)
     func savesNewCategory(info: TestInfo) throws {
-        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info)))) 
-        let factory = MockContextFactory(picker: picker)
+        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info))))
+        let folderBrowser = MockFolderBrowser()
+        folderBrowser.folderToReturn = tempFolder
+        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
         
         try runCategoryCommand(factory: factory, info: info)
         
@@ -113,10 +117,6 @@ private extension CreateCategoryTests {
         
         if info.name == .input {
             inputs.append(categoryName)
-        }
-        
-        if info.otherArg == .input {
-            inputs.append(tempFolder.path)
         }
         
         return inputs

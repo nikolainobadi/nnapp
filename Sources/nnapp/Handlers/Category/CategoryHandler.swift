@@ -11,16 +11,19 @@ import SwiftPickerKit
 /// Handles creation, import, selection, and deletion of `LaunchCategory` objects.
 /// Used by commands to manage high-level category folders and associated model persistence.
 struct CategoryHandler {
-    private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
+    private let picker: any CommandLinePicker
+    private let folderBrowser: any FolderBrowser
 
     /// Initializes a new handler for managing categories.
     /// - Parameters:
     ///   - picker: User-facing selection and input utility.
     ///   - context: The persistence context for loading and saving models.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext) {
+    ///   - folderBrowser: Folder browsing utility. Defaults to `DefaultFolderBrowser`.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, folderBrowser: any FolderBrowser) {
         self.picker = picker
         self.context = context
+        self.folderBrowser = folderBrowser
     }
 }
 
@@ -33,13 +36,14 @@ extension CategoryHandler {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
         let categories = try context.loadCategories()
-        let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
-        let folder = try Folder(path: path)
+        let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
 
         try validateName(folder.name, categories: categories)
+        
         let category = LaunchCategory(name: folder.name, path: folder.path)
 
         try context.saveCategory(category)
+        
         return category
     }
 
@@ -55,14 +59,15 @@ extension CategoryHandler {
 
         try validateName(name, categories: categories)
 
-        let path = try parentPath ?? picker.getRequiredInput("Enter the path to the folder where \(name.yellow) should be created.")
-        let parentFolder = try Folder(path: path)
+        let parentFolder = try selectFolder(path: parentPath, browsePrompt: "Select the folder where \(name.yellow) should be created")
 
         try validateParentFolder(parentFolder, categoryName: name)
+        
         let categoryFolder = try parentFolder.createSubfolder(named: name)
         let category = LaunchCategory(name: name, path: categoryFolder.path)
 
         try context.saveCategory(category)
+        
         return category
     }
 }
@@ -79,10 +84,13 @@ extension CategoryHandler {
         if let name, let category = categories.first(where: { $0.name.lowercased() == name.lowercased() }) {
             categoryToDelete = category
         } else {
-            categoryToDelete = try picker.requiredSingleSelection("Select a category to remove", items: categories)
+            categoryToDelete = try picker.requiredSingleSelection(
+                "Select a category to remove",
+                items: categories,
+                layout: .twoColumnDynamic { makeCategoryDetail(for: $0) }
+            )
         }
 
-        // TODO: - maybe display group count with project count
         try picker.requiredPermission("Are you sure want to remove \(categoryToDelete.name.yellow)?")
         try context.deleteCategory(categoryToDelete)
     }
@@ -104,9 +112,9 @@ extension CategoryHandler: GroupCategorySelector {
             try picker.requiredPermission("Could not find a category named \(name.yellow). Would you like to add it?")
         }
 
-        switch try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases) {
+        switch try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases, showSelectedItemText: false) {
         case .select:
-            return try picker.requiredSingleSelection("Select a Category", items: categories)
+            return try picker.requiredSingleSelection("Select a Category", items: categories, showSelectedItemText: false)
         case .create:
             return try createCategory(name: name, parentPath: nil)
         case .import:
@@ -130,5 +138,24 @@ private extension CategoryHandler {
         if folder.subfolders.contains(where: { $0.name.matches(categoryName) }) {
             throw CodeLaunchError.categoryPathTaken
         }
+    }
+    
+    func selectFolder(path: String?, browsePrompt prompt: String) throws -> Folder {
+        if let path {
+            return try .init(path: path)
+        } else {
+            return try folderBrowser.browseForFolder(prompt: prompt)
+        }
+    }
+
+    func makeCategoryDetail(for category: LaunchCategory) -> String {
+        let groupCount = category.groups.count
+        let totalProjects = category.groups.reduce(0) { $0 + $1.projects.count }
+
+        return """
+        group count: \(groupCount)
+        total project count: \(totalProjects)
+        local path: \(category.path.yellow)
+        """
     }
 }

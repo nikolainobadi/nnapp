@@ -13,7 +13,12 @@ extension Nnapp {
     struct Remove: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Unregister a Category, Group, or Project from the database.",
-            subcommands: [Category.self, Group.self, Project.self, Link.self]
+            subcommands: [
+                Category.self,
+                Group.self,
+                Project.self,
+                Link.self
+            ]
         )
     }
 }
@@ -34,7 +39,8 @@ extension Nnapp.Remove {
         func run() throws {
             let picker = Nnapp.makePicker()
             let context = try Nnapp.makeContext()
-            let handler = CategoryHandler(picker: picker, context: context)
+            let browser = Nnapp.makeFolderBrowser(picker: picker)
+            let handler = CategoryHandler(picker: picker, context: context, folderBrowser: browser)
 
             try handler.removeCategory(name: name)
         }

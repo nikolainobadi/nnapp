@@ -320,7 +320,7 @@ extension ProjectHandlerTests {
 
 // MARK: - Helper Methods
 private extension ProjectHandlerTests {
-    func makeSUT(shell: MockShell? = nil, defaultInputValue: String = "shortcut", permissionResponses: [Bool] = [], desktopPath: String? = nil) throws -> (sut: ProjectHandler, context: CodeLaunchContext) {
+    func makeSUT(shell: MockShell? = nil, defaultInputValue: String = "shortcut", permissionResponses: [Bool] = [], desktopPath: String? = nil, folderBrowser: MockFolderBrowser = MockFolderBrowser()) throws -> (sut: ProjectHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let existingCategoryFolder = try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName)
@@ -336,7 +336,7 @@ private extension ProjectHandlerTests {
         let groupSelector = MockGroupSelector(context: context)
         
         let shell = shell ?? MockShell()
-        let sut = ProjectHandler(shell: shell, picker: picker, context: context, groupSelector: groupSelector, desktopPath: desktopPath)
+        let sut = ProjectHandler(shell: shell, picker: picker, context: context, groupSelector: groupSelector, desktopPath: desktopPath, folderBrowser: folderBrowser)
         
         return (sut, context)
     }

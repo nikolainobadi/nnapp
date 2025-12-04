@@ -13,7 +13,12 @@ extension Nnapp {
     struct Add: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Register a Category, Group, or Project from an existing folder on your computer.",
-            subcommands: [Category.self, Group.self, Project.self, Link.self]
+            subcommands: [
+                Category.self,
+                Group.self,
+                Project.self,
+                Link.self
+            ]
         )
     }
 }

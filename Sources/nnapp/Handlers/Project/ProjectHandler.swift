@@ -19,6 +19,7 @@ struct ProjectHandler {
     private let context: CodeLaunchContext
     private let gitShell: GitShellAdapter
     private let groupSelector: any ProjectGroupSelector
+    private let folderBrowser: any FolderBrowser
     private let desktopPath: String?
     
     /// Initializes a new handler for managing projects.
@@ -28,12 +29,14 @@ struct ProjectHandler {
     ///   - context: SwiftData-backed persistence layer.
     ///   - groupSelector: Logic for resolving a group during project creation.
     ///   - desktopPath: Optional custom desktop path for testing purposes.
-    init(shell: any Shell, picker: any CommandLinePicker, context: CodeLaunchContext, groupSelector: any ProjectGroupSelector, desktopPath: String? = nil) {
+    ///   - folderBrowser: Utility for browsing and selecting folders.
+    init(shell: any Shell, picker: any CommandLinePicker, context: CodeLaunchContext, groupSelector: any ProjectGroupSelector, desktopPath: String? = nil, folderBrowser: any FolderBrowser) {
         self.shell = shell
         self.picker = picker
         self.context = context
         self.gitShell = .init(shell: shell)
         self.groupSelector = groupSelector
+        self.folderBrowser = folderBrowser
         self.desktopPath = desktopPath
     }
 }
@@ -83,7 +86,7 @@ extension ProjectHandler {
 // MARK: - Private Methods
 private extension ProjectHandler {
     func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
-        let folderSelector = ProjectFolderSelector(picker: picker, desktopPath: desktopPath)
+        let folderSelector = ProjectFolderSelector(picker: picker, folderBrowser: folderBrowser, desktopPath: desktopPath)
         
         return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
     }
