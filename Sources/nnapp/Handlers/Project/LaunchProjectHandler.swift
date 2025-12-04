@@ -49,4 +49,8 @@ private extension LaunchProjectHandler {
     }
 }
 
+
 // MARK: - Dependencies
+protocol LaunchProjectGroupSelector {
+    func selectGroup(name: String?) throws -> LaunchGroup
+}

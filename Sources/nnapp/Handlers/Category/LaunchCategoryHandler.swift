@@ -68,7 +68,16 @@ extension LaunchCategoryHandler {
 
 // MARK: - LaunchGroupCategorySelector
 extension LaunchCategoryHandler: LaunchGroupCategorySelector {
-    func getCategory(named name: String?) throws -> LaunchCategory {
+    func getCategory(group: LaunchGroup) -> LaunchCategory? {
+        guard let categories = try? loadAllCategories() else {
+            return nil
+        }
+        
+        return categories.first(where: { category in
+            category.groups.contains(where: { $0.name.matches(group.name) })
+        })
+    }
+    func selectCategory(named name: String?) throws -> LaunchCategory {
         let categories = try loadAllCategories()
         
         if let name {
@@ -79,13 +88,13 @@ extension LaunchCategoryHandler: LaunchGroupCategorySelector {
             try picker.requiredPermission("Could not find a category named \(name.yellow). Would you like to add it?")
         }
         
-        switch try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases, showSelectedItemText: false) {
-        case .select:
-            return try picker.requiredSingleSelection("Select a Category", items: categories, showSelectedItemText: false)
-        case .create:
-            return try createNewCategory(named: name, parentPath: nil)
+        switch try selectAssignCategoryType() {
         case .import:
             return try importCategory(path: nil)
+        case .create:
+            return try createNewCategory(named: name, parentPath: nil)
+        case .select:
+            return try picker.requiredSingleSelection("Select a Category", items: categories, showSelectedItemText: false)
         }
     }
 }
@@ -99,6 +108,10 @@ private extension LaunchCategoryHandler {
     
     func selectFolder(path: String?, browsePrompt: String) throws -> Folder {
         return try folderBrowser.browseForFolder(prompt: browsePrompt, startPath: path)
+    }
+    
+    func selectAssignCategoryType() throws -> AssignCategoryType {
+        return try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases, showSelectedItemText: false)
     }
     
     func validateName(_ name: String, categories: [LaunchCategory]) throws -> String {
