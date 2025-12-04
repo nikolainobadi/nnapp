@@ -13,14 +13,17 @@ import SwiftPickerKit
 struct CategoryHandler {
     private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
+    private let folderBrowser: any FolderBrowser
 
     /// Initializes a new handler for managing categories.
     /// - Parameters:
     ///   - picker: User-facing selection and input utility.
     ///   - context: The persistence context for loading and saving models.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext) {
+    ///   - folderBrowser: Folder browsing utility. Defaults to `DefaultFolderBrowser`.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, folderBrowser: any FolderBrowser) {
         self.picker = picker
         self.context = context
+        self.folderBrowser = folderBrowser
     }
 }
 
@@ -33,8 +36,13 @@ extension CategoryHandler {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
         let categories = try context.loadCategories()
-        let path = try path ?? picker.getRequiredInput("Enter the path to the folder you want to use.")
-        let folder = try Folder(path: path)
+        let folder: Folder
+
+        if let path {
+            folder = try Folder(path: path)
+        } else {
+            folder = try folderBrowser.browseForFolder(prompt: "Select a folder to import as a Category", startPath: nil)
+        }
 
         try validateName(folder.name, categories: categories)
         let category = LaunchCategory(name: folder.name, path: folder.path)

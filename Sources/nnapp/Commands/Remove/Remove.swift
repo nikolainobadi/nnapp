@@ -39,7 +39,8 @@ extension Nnapp.Remove {
         func run() throws {
             let picker = Nnapp.makePicker()
             let context = try Nnapp.makeContext()
-            let handler = CategoryHandler(picker: picker, context: context)
+            let browser = Nnapp.makeFolderBrowser(picker: picker)
+            let handler = CategoryHandler(picker: picker, context: context, folderBrowser: browser)
 
             try handler.removeCategory(name: name)
         }

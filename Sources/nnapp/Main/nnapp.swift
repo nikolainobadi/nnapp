@@ -52,6 +52,10 @@ extension Nnapp {
     static func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
         return contextFactory.makeProjectGroupSelector(picker: picker, context: context)
     }
+
+    static func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {
+        return contextFactory.makeFolderBrowser(picker: picker)
+    }
 }
 
 
@@ -60,8 +64,9 @@ extension Nnapp {
     static func makeCategoryHandler() throws -> CategoryHandler {
         let picker = makePicker()
         let context = try makeContext()
+        let folderBrowser = makeFolderBrowser(picker: picker)
         
-        return .init(picker: picker, context: context)
+        return .init(picker: picker, context: context, folderBrowser: folderBrowser)
     }
     
     static func makeGroupHandler() throws -> GroupHandler {
@@ -139,6 +144,7 @@ protocol ContextFactory {
     func makePicker() -> any CommandLinePicker
     func makeContext() throws -> CodeLaunchContext
     func makeConsoleOutput() -> any ConsoleOutput
+    func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser
     func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector
     func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker
