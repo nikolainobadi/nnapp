@@ -11,8 +11,8 @@ import SwiftPickerKit
 /// Handles creation, import, selection, and deletion of `LaunchCategory` objects.
 /// Used by commands to manage high-level category folders and associated model persistence.
 struct CategoryHandler {
-    private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
+    private let picker: any CommandLinePicker
     private let folderBrowser: any FolderBrowser
 
     /// Initializes a new handler for managing categories.
@@ -36,18 +36,14 @@ extension CategoryHandler {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
         let categories = try context.loadCategories()
-        let folder: Folder
-
-        if let path {
-            folder = try Folder(path: path)
-        } else {
-            folder = try folderBrowser.browseForFolder(prompt: "Select a folder to import as a Category")
-        }
+        let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
 
         try validateName(folder.name, categories: categories)
+        
         let category = LaunchCategory(name: folder.name, path: folder.path)
 
         try context.saveCategory(category)
+        
         return category
     }
 
@@ -63,19 +59,15 @@ extension CategoryHandler {
 
         try validateName(name, categories: categories)
 
-        let parentFolder: Folder
-
-        if let parentPath {
-            parentFolder = try Folder(path: parentPath)
-        } else {
-            parentFolder = try folderBrowser.browseForFolder(prompt: "Select the folder where \(name.yellow) should be created")
-        }
+        let parentFolder = try selectFolder(path: parentPath, browsePrompt: "Select the folder where \(name.yellow) should be created")
 
         try validateParentFolder(parentFolder, categoryName: name)
+        
         let categoryFolder = try parentFolder.createSubfolder(named: name)
         let category = LaunchCategory(name: name, path: categoryFolder.path)
 
         try context.saveCategory(category)
+        
         return category
     }
 }
@@ -142,6 +134,14 @@ private extension CategoryHandler {
     func validateParentFolder(_ folder: Folder, categoryName: String) throws {
         if folder.subfolders.contains(where: { $0.name.matches(categoryName) }) {
             throw CodeLaunchError.categoryPathTaken
+        }
+    }
+    
+    func selectFolder(path: String?, browsePrompt prompt: String) throws -> Folder {
+        if let path {
+            return try .init(path: path)
+        } else {
+            return try folderBrowser.browseForFolder(prompt: prompt)
         }
     }
 }
