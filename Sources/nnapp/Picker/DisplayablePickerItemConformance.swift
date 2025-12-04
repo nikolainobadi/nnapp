@@ -16,6 +16,13 @@ extension LaunchCategory: DisplayablePickerItem {
     }
 }
 
+// MARK: - LaunchGroup
+extension LaunchGroup: DisplayablePickerItem {
+    public var displayName: String {
+        return name
+    }
+}
+
 extension SwiftDataLaunchCategory: DisplayablePickerItem {
     public var displayName: String {
         return name
