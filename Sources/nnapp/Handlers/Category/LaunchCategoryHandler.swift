@@ -5,13 +5,20 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
+import Files
 import CodeLaunchKit
 import SwiftPickerKit
 
 struct LaunchCategoryHandler {
     private let store: any CategoryStore
     private let picker: any CommandLinePicker
-    private let folderBrowser: any CategoryFolderBrowser
+    private let folderBrowser: any FolderBrowser
+    
+    init(store: any CategoryStore, picker: any CommandLinePicker, folderBrowser: any FolderBrowser) {
+        self.store = store
+        self.picker = picker
+        self.folderBrowser = folderBrowser
+    }
 }
 
 
@@ -65,8 +72,8 @@ private extension LaunchCategoryHandler {
         return try store.loadCategories()
     }
     
-    func selectFolder(path: String?, browsePrompt: String) throws -> MyFolder {
-        return try folderBrowser.selectFolder(path: path, browsePrompt: browsePrompt)
+    func selectFolder(path: String?, browsePrompt: String) throws -> Folder {
+        return try folderBrowser.browseForFolder(prompt: browsePrompt, startPath: path)
     }
     
     func validateName(_ name: String, categories: [LaunchCategory]) throws -> String {
@@ -77,7 +84,7 @@ private extension LaunchCategoryHandler {
         return name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
-    func selectParentFolder(path: String?, categoryName: String) throws -> MyFolder {
+    func selectParentFolder(path: String?, categoryName: String) throws -> Folder {
         let folder = try selectFolder(path: path, browsePrompt: "Select the folder where \(categoryName.yellow) should be created")
         
         try validateParentFolder(folder, categoryName: categoryName)
@@ -85,12 +92,14 @@ private extension LaunchCategoryHandler {
         return folder
     }
     
-    func validateParentFolder(_ folder: MyFolder, categoryName: String) throws {
-        fatalError() // TODO: -
+    func validateParentFolder(_ folder: Folder, categoryName: String) throws {
+        if folder.subfolders.contains(where: { $0.name.matches(categoryName) }) {
+            throw CodeLaunchError.categoryPathTaken
+        }
     }
     
-    func createSubfolder(named name: String, in parentFolder: MyFolder) throws -> MyFolder {
-        fatalError() // TODO: -
+    func createSubfolder(named name: String, in parentFolder: Folder) throws -> Folder {
+        return try parentFolder.createSubfolderIfNeeded(withName: name)
     }
     
     func saveCategory(_ category: LaunchCategory) throws -> LaunchCategory {
@@ -111,17 +120,8 @@ private extension LaunchCategoryHandler {
 }
 
 // MARK: - Dependencies
-protocol CategoryFolderBrowser {
-    func selectFolder(path: String?, browsePrompt: String) throws -> MyFolder
-}
-
 protocol CategoryStore {
     func loadCategories() throws -> [LaunchCategory]
     func saveCategory(_ category: LaunchCategory) throws
     func deleteCategory(_ category: LaunchCategory) throws
-}
-
-struct MyFolder {
-    let name: String
-    let path: String
 }

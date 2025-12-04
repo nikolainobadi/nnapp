@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
+import Files
 import CodeLaunchKit
 import SwiftPickerKit
 
@@ -43,7 +44,7 @@ private extension LaunchProjectHandler {
         fatalError() // TODO: -
     }
     
-    func selectProjectFolder(path: String?, group: LaunchGroup) throws -> MyFolder {
+    func selectProjectFolder(path: String?, group: LaunchGroup) throws -> Folder {
         fatalError() // TODO: -
     }
 }

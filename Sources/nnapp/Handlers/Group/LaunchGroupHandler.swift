@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
+import Files
 import CodeLaunchKit
 import SwiftPickerKit
 
@@ -78,7 +79,7 @@ private extension LaunchGroupHandler {
         fatalError() // TODO: -
     }
     
-    func selectGroupFolder(path: String?, category: LaunchCategory) throws -> MyFolder {
+    func selectGroupFolder(path: String?, category: LaunchCategory) throws -> Folder {
         fatalError() // TODO: -
     }
     
