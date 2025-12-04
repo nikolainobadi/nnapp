@@ -39,7 +39,9 @@ final class AddCategoryTests: MainActorBaseAddTests {
         let categoryFolderToImport = try tempFolder.createSubfolder(named: "newCategory")
         let path = categoryFolderToImport.path
         let picker = MockSwiftPicker(inputResult: .init(type: .ordered(useArg ? [] : [path])))
-        let factory = MockContextFactory(picker: picker)
+        let folderBrowser = MockFolderBrowser()
+        folderBrowser.folderToReturn = categoryFolderToImport
+        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
         let context = try factory.makeContext()
         
         try runCommand(factory, argType: .category(path: useArg ? path : nil))

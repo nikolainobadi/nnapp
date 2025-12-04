@@ -11,6 +11,7 @@ import NnShellKit
 import SwiftPickerKit
 import NnShellTesting
 import SwiftPickerTesting
+import Files
 @testable import nnapp
 
 final class MockContextFactory {
@@ -21,14 +22,16 @@ final class MockContextFactory {
     private let uniqueId: String
     private let branchSyncChecker: (any BranchSyncChecker)?
     private let branchStatusNotifier: (any BranchStatusNotifier)?
+    private let folderBrowser: any FolderBrowser
 
-    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, branchStatusNotifier: (any BranchStatusNotifier)? = nil) {
+    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, branchStatusNotifier: (any BranchStatusNotifier)? = nil, folderBrowser: (any FolderBrowser)? = nil) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
         self.uniqueId = UUID().uuidString
         self.branchSyncChecker = branchSyncChecker
         self.branchStatusNotifier = branchStatusNotifier
+        self.folderBrowser = folderBrowser ?? MockFolderBrowser()
     }
 }
 
@@ -70,6 +73,10 @@ extension MockContextFactory: ContextFactory {
 
     func makeConsoleOutput() -> any ConsoleOutput {
         return MockConsoleOutput()
+    }
+
+    func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {
+        return folderBrowser
     }
 
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
@@ -116,5 +123,29 @@ final class MockBranchStatusNotifier: BranchStatusNotifier {
         notifyCallCount += 1
         lastStatus = status
         lastProject = project
+    }
+}
+
+final class MockFolderBrowser: FolderBrowser {
+    private(set) var browseCallCount = 0
+    private(set) var capturedPrompt: String?
+    private(set) var capturedStartPath: String?
+    var folderToReturn: Folder?
+    var error: Error?
+
+    func browseForFolder(prompt: String, startPath: String?) throws -> Folder {
+        browseCallCount += 1
+        capturedPrompt = prompt
+        capturedStartPath = startPath
+
+        if let error {
+            throw error
+        }
+
+        if let folderToReturn {
+            return folderToReturn
+        }
+
+        return try Folder.temporary.createSubfolder(named: "MockFolderBrowser-\(UUID().uuidString)")
     }
 }
