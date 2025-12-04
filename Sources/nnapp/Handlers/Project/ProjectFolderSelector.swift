@@ -12,12 +12,17 @@ import SwiftPickerKit
 /// Determines the `ProjectType` by inspecting folder contents.
 struct ProjectFolderSelector {
     private let picker: any CommandLinePicker
+    private let folderBrowser: any FolderBrowser
     private let desktopPath: String
 
     /// Initializes a new folder selector using the provided user input picker.
-    /// - Parameter picker: Utility for interactive user prompts.
-    init(picker: any CommandLinePicker, desktopPath: String? = nil) {
+    /// - Parameters:
+    ///   - picker: Utility for interactive user prompts.
+    ///   - folderBrowser: Utility for browsing and selecting folders.
+    ///   - desktopPath: Optional desktop path override for testing.
+    init(picker: any CommandLinePicker, folderBrowser: any FolderBrowser, desktopPath: String? = nil) {
         self.picker = picker
+        self.folderBrowser = folderBrowser
         self.desktopPath = desktopPath ?? Folder.home.path.appendingPathComponent("Desktop")
     }
 }
@@ -62,8 +67,10 @@ extension ProjectFolderSelector {
             return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
         }
 
-        let path = try picker.getRequiredInput("Enter the path to the folder you want to use.")
-        let folder = try Folder(path: path)
+        let folder = try folderBrowser.browseForFolder(
+            prompt: "Browse to select a folder to use for your Project",
+            startPath: groupPath
+        )
         let projectType = try getProjectType(folder: folder)
 
         return .init(folder: folder, type: projectType)
