@@ -2,7 +2,7 @@
 
 ## Introduction
 
-**nnapp** is a command-line utility designed to manage and launch Xcode projects and Swift packageswith ease. It structures your development environment into **Categories**, **Groups**, and **Projects**, each with associated metadata. Whether you’re launching via Xcode, VSCode, or terminal, `nnapp` lets you organize, search, and open your projects faster than ever.
+**nnapp** is a command-line utility designed to manage and launch Xcode projects and Swift packages with ease. It structures your development environment into **Categories**, **Groups**, and **Projects**, each with associated metadata. Whether you’re launching via Xcode, VSCode, or terminal, `nnapp` lets you organize, search, and open your projects faster than ever. Folder selection uses interactive browsing (tree navigation) so you rarely need to type paths; direct path flags still work when provided.
 
 ---
 
@@ -29,6 +29,18 @@ Add a new project to a group:
 
 ```bash
 nnapp add project --path ~/dev/MyApp --group Mobile
+```
+
+Add a project from the Desktop:
+
+```bash
+nnapp add project --from-desktop --group Mobile
+```
+
+Add a project by browsing for a folder (no path provided):
+
+```bash
+nnapp add project --group Mobile
 ```
 
 Open a project in Xcode and terminal:
@@ -92,6 +104,17 @@ Register an existing folder as a new Category, Group, Project, or Link.
 | `link`     | Add a reusable Project Link name (e.g., Docs, Firebase) |
 
 All arguments are optional — if omitted, `nnapp` will prompt you interactively.
+Folder selection for categories, groups, and projects uses interactive browsing when paths are not provided.
+
+#### Project flags
+
+| Flag | Description |
+|------|-------------|
+| `--path` | Absolute path to the project folder (bypasses browsing) |
+| `--group` | Name of the group to register the project under |
+| `--from-desktop` | Browse only projects detected on the Desktop |
+
+If no path is provided, `nnapp` opens an interactive folder browser (tree navigation), starting from the group folder when available.
 
 #### Example
 
@@ -117,6 +140,7 @@ Create new folders and register them as Categories or Groups.
 | `group`    | Creates a new Group folder under an existing Category |
 
 Arguments can be omitted — `nnapp` will request input interactively.
+Folder selection uses the interactive browser when a path is not supplied.
 
 #### Example
 
@@ -197,18 +221,16 @@ Opens a project in an IDE, terminal, or web browser.
 ### finder
 
 ```bash
-nnapp finder <name> [-c|-g|-p]
+nnapp finder
+nnapp finder category [name]
+nnapp finder group [name or shortcut]
+nnapp finder project [name or shortcut]
 ```
 
 Opens a Category, Group, or Project folder in Finder.
 
-#### Flags
-
-| Flag        | Description         |
-|-------------|---------------------|
-| `-c`        | Open a Category     |
-| `-g`        | Open a Group        |
-| `-p`        | Open a Project (default) |
+- `nnapp finder` launches an interactive tree browser (Categories → Groups → Projects) to pick any folder.
+- Subcommands jump directly to a specific type; when no name is provided, you select from a list.
 
 ---
 
