@@ -18,5 +18,9 @@ public struct LaunchCategory {
 }
 
 
-
-
+// MARK: - Helpers
+public extension LaunchCategory {
+    static func new(name: String, path: String, groups: [LaunchGroup] = []) -> LaunchCategory {
+        return .init(name: name, path: path, groups: groups)
+    }
+}
