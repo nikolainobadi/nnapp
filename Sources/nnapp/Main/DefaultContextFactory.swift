@@ -51,7 +51,8 @@ final class DefaultContextFactory: ContextFactory {
     ///   - context: The persistence context for data access.
     func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
         let categorySelector = makeGroupCategorySelector(picker: picker, context: context)
-        return GroupHandler(picker: picker, context: context, categorySelector: categorySelector)
+        let folderBrowser = makeFolderBrowser(picker: picker)
+        return GroupHandler(picker: picker, context: context, categorySelector: categorySelector, folderBrowser: folderBrowser)
     }
 
     /// Creates a branch sync checker for detecting if branches are behind remote.

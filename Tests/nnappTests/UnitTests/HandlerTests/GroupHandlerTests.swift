@@ -99,6 +99,17 @@ extension GroupHandlerTests {
         #expect(importedGroup.name == existingGroupName)
         #expect(categoryFolder.containsSubfolder(named: existingGroupName))
     }
+
+    @Test("Browses for folder when no path is provided")
+    func browsesForFolderWhenNoPathProvided() throws {
+        let folderBrowser = MockFolderBrowser()
+        let (sut, _) = try makeSUT(permissionResponses: [false], folderBrowser: folderBrowser)
+
+        _ = try sut.importGroup(path: nil, category: existingCategoryName)
+
+        #expect(folderBrowser.browseCallCount == 1)
+        #expect(folderBrowser.capturedPrompt == "Browse to select a folder to import as a Group")
+    }
 }
 
 
@@ -499,7 +510,7 @@ extension GroupHandlerTests {
 
 // MARK: - Helper Methods
 private extension GroupHandlerTests {
-    func makeSUT(inputResponses: [String] = [], permissionResponses: [Bool] = []) throws -> (sut: GroupHandler, context: CodeLaunchContext) {
+    func makeSUT(inputResponses: [String] = [], permissionResponses: [Bool] = [], folderBrowser: MockFolderBrowser = MockFolderBrowser()) throws -> (sut: GroupHandler, context: CodeLaunchContext) {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let existingCategoryFolder = try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName)
@@ -513,7 +524,7 @@ private extension GroupHandlerTests {
             selectionResult: .init(defaultSingle: .index(0))
         )
         let mockCategorySelector = MockCategorySelector(context: context)
-        let sut = GroupHandler(picker: mockPicker, context: context, categorySelector: mockCategorySelector)
+        let sut = GroupHandler(picker: mockPicker, context: context, categorySelector: mockCategorySelector, folderBrowser: folderBrowser)
 
         return (sut, context)
     }

@@ -73,8 +73,9 @@ extension Nnapp {
         let picker = makePicker()
         let context = try makeContext()
         let categorySelector = makeGroupCategorySelector(picker: picker, context: context)
+        let folderBrowser = makeFolderBrowser(picker: picker)
         
-        return .init(picker: picker, context: context, categorySelector: categorySelector)
+        return .init(picker: picker, context: context, categorySelector: categorySelector, folderBrowser: folderBrowser)
     }
     
     static func makeProjectHandler() throws -> ProjectHandler {

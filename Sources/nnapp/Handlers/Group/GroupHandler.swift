@@ -14,16 +14,19 @@ struct GroupHandler {
     private let picker: any CommandLinePicker
     private let context: CodeLaunchContext
     private let categorySelector: any GroupCategorySelector
+    private let folderBrowser: any FolderBrowser
 
     /// Initializes a new handler for managing groups within a selected category.
     /// - Parameters:
     ///   - picker: Utility for prompting user input.
     ///   - context: Data context for persistence and fetching.
     ///   - categorySelector: Used to determine the group’s parent category.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext, categorySelector: any GroupCategorySelector) {
+    ///   - folderBrowser: Utility for browsing and selecting folders.
+    init(picker: any CommandLinePicker, context: CodeLaunchContext, categorySelector: any GroupCategorySelector, folderBrowser: any FolderBrowser) {
         self.picker = picker
         self.context = context
         self.categorySelector = categorySelector
+        self.folderBrowser = folderBrowser
     }
 }
 
@@ -110,7 +113,6 @@ extension GroupHandler {
             groupToDelete = try picker.requiredSingleSelection("Select a group to delete", items: groups)
         }
 
-        // TODO: - maybe display project count
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
         try context.deleteGroup(groupToDelete)
     }
@@ -245,7 +247,6 @@ private extension GroupHandler {
         }
         
         try folder.move(to: categoryFolder)
-        
     }
 
     /// Selects a folder to use for group import, optionally from disk or from subfolders.
@@ -263,11 +264,9 @@ private extension GroupHandler {
             return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
         }
 
-        let path = try picker.getRequiredInput("Enter the path to your folder for your new Group.")
-        return try Folder(path: path)
+        return try folderBrowser.browseForFolder(prompt: "Browse to select a folder to import as a Group")
     }
 }
-
 
 
 // MARK: - Dependencies
