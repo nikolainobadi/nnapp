@@ -13,7 +13,12 @@ extension Nnapp {
     struct Remove: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Unregister a Category, Group, or Project from the database.",
-            subcommands: [Category.self, Group.self, Project.self, Link.self]
+            subcommands: [
+                Category.self,
+                Group.self,
+                Project.self,
+                Link.self
+            ]
         )
     }
 }
