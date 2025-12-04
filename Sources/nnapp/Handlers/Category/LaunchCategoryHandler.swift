@@ -66,6 +66,31 @@ extension LaunchCategoryHandler {
 }
 
 
+// MARK: - LaunchGroupCategorySelector
+extension LaunchCategoryHandler: LaunchGroupCategorySelector {
+    func getCategory(named name: String?) throws -> LaunchCategory {
+        let categories = try loadAllCategories()
+        
+        if let name {
+            if let category = categories.first(where: { $0.name.matches(name) }) {
+                return category
+            }
+            
+            try picker.requiredPermission("Could not find a category named \(name.yellow). Would you like to add it?")
+        }
+        
+        switch try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases, showSelectedItemText: false) {
+        case .select:
+            return try picker.requiredSingleSelection("Select a Category", items: categories, showSelectedItemText: false)
+        case .create:
+            return try createNewCategory(named: name, parentPath: nil)
+        case .import:
+            return try importCategory(path: nil)
+        }
+    }
+}
+
+
 // MARK: - Private Methods
 private extension LaunchCategoryHandler {
     func loadAllCategories() throws -> [LaunchCategory] {
