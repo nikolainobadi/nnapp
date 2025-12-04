@@ -8,6 +8,7 @@
 import SwiftData
 import Foundation
 import NnSwiftDataKit
+import CodeLaunchKit
 
 /// Manages loading, saving, and deleting Categories, Groups, and Projects from SwiftData and UserDefaults.
 /// Acts as the primary interface to CodeLaunch's persistent state.
@@ -187,31 +188,5 @@ private extension CodeLaunchContext {
     /// - Returns: An array of loaded models of the specified type.
     func load<Item: PersistentModel>() throws -> [Item] {
         return try context.fetch(FetchDescriptor<Item>())
-    }
-}
-
-
-
-// MARK: - Extension Dependencies
-extension String {
-    /// Appends a path component to the string, ensuring there is exactly one separating slash,
-    /// and returns a string that always ends with a trailing slash.
-    ///
-    /// - Parameter path: The path component to append.
-    /// - Returns: A combined path string ending with a `/`.
-    func appendingPathComponent(_ path: String) -> String {
-        let selfHasSlash = self.hasSuffix("/")
-        let pathHasSlash = path.hasPrefix("/")
-        
-        let combinedPath: String
-        if selfHasSlash && pathHasSlash {
-            combinedPath = self + String(path.dropFirst())
-        } else if !selfHasSlash && !pathHasSlash {
-            combinedPath = self + "/" + path
-        } else {
-            combinedPath = self + path
-        }
-        
-        return combinedPath.hasSuffix("/") ? combinedPath : combinedPath + "/"
     }
 }

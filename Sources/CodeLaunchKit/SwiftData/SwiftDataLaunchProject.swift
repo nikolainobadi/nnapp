@@ -5,13 +5,13 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
-typealias SwiftDataLaunchProject = FirstSchema.LaunchProject
-typealias SwiftDataProjectType = FirstSchema.ProjectType
-typealias SwiftDataProjectLink = FirstSchema.ProjectLink
+public typealias SwiftDataLaunchProject = FirstSchema.LaunchProject
+public typealias SwiftDataProjectType = FirstSchema.ProjectType
+public typealias SwiftDataProjectLink = FirstSchema.ProjectLink
 
 
 // MARK: - Helpers
-extension SwiftDataLaunchProject {
+public extension SwiftDataLaunchProject {
     /// Returns the expected file name for the project based on its type.
     var fileName: String {
         switch type {
@@ -52,7 +52,7 @@ extension SwiftDataLaunchProject {
 
 
 // MARK: - Extension Dependencies
-extension SwiftDataProjectType {
+public extension SwiftDataProjectType {
     /// A human-readable name for the project type.
     var name: String {
         switch self {
