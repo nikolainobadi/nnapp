@@ -294,11 +294,18 @@ Each entity (`Category`, `Group`, `Project`) is managed via a declarative `@Mode
 
 ## Documentation
 
+For a complete command reference with all flags, options, and detailed explanations, see [Documentation.md](./docs/Documentation.md).
+
+The formal documentation includes:
+- Comprehensive command reference with all flags and options
+- Detailed explanation of key concepts (main projects, links, branch monitoring)
+- Configuration and exit codes
+- Advanced usage patterns
+
+**Developer Documentation:**
 - Inline documentation is provided via comments and docstrings
 - Source code is organized for discoverability
 - See each command's `run()` method and its related `Handler` for usage flow
-
-For more details and advanced usage, refer to the [Documentation](./docs/Documentation.md)
 
 ---
 
