@@ -265,7 +265,7 @@ private extension GroupHandler {
         }
 
         if !availableFolders.isEmpty, picker.getPermission("Would you like to select a subfolder of \(categoryFolder.name)?") {
-            return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
+            return try picker.requiredSingleSelection("Select a folder", items: availableFolders, showSelectedItemText: false)
         }
 
         return try folderBrowser.browseForFolder(prompt: "Browse to select a folder to import as a Group")

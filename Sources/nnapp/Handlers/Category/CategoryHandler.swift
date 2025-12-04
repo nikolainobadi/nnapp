@@ -87,9 +87,7 @@ extension CategoryHandler {
             categoryToDelete = try picker.requiredSingleSelection(
                 "Select a category to remove",
                 items: categories,
-                layout: .twoColumnDynamic { makeCategoryDetail(for: $0) },
-                newScreen: true,
-                showSelectedItemText: true
+                layout: .twoColumnDynamic { makeCategoryDetail(for: $0) }
             )
         }
 
