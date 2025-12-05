@@ -38,6 +38,10 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, LaunchP
     public func loadProjectLinkNames() -> [String] {
         return context.loadProjectLinkNames()
     }
+
+    public func loadLaunchScript() -> String? {
+        return context.loadLaunchScript()
+    }
 }
 
 
@@ -93,6 +97,14 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, LaunchProj
         }
 
         try context.deleteProject(storedProject)
+    }
+
+    public func saveLaunchScript(_ script: String) {
+        context.saveLaunchScript(script)
+    }
+
+    public func deleteLaunchScript() {
+        context.deleteLaunchScript()
     }
 }
 

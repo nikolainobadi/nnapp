@@ -17,8 +17,8 @@ extension Nnapp {
         return .init(store: repository, picker: picker, folderBrowser: folderBrowser)
     }
     
-    static func makeGroupHandler() throws -> LaunchGroupHandler {
-        let picker = makePicker()
+    static func makeGroupHandler(picker: (any CommandLinePicker)? = nil) throws -> LaunchGroupHandler {
+        let picker = picker ?? makePicker()
         let repository = try makeRepository()
         let categorySelector = try makeCategoryHandler(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
@@ -30,7 +30,7 @@ extension Nnapp {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
-        let groupSelector = try makeGroupHandler()
+        let groupSelector = try makeGroupHandler(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
 
         return .init(shell: shell, desktopPath: nil, store: repository, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
@@ -54,38 +54,23 @@ extension Nnapp {
     }
 
     static func makeOpenManager() throws -> OpenProjectHandler {
-        fatalError() // TODO: - 
-//        let shell = makeShell()
-//        let picker = makePicker()
-//        let context = try makeContext()
-//        let ideLauncher = makeIDELauncher(shell: shell, picker: picker)
-//        let terminalManager = makeTerminalManager(shell: shell, context: context)
-//        let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
-//        let branchSyncChecker = makeBranchSyncChecker(shell: shell)
-//        let branchStatusNotifier = makeBranchStatusNotifier(shell: shell)
-//
-//        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher, branchSyncChecker: branchSyncChecker, branchStatusNotifier: branchStatusNotifier)
-    }
-    
-    static func makeIDELauncher(shell: Shell, picker: CommandLinePicker) -> IDELauncher {
-        return .init(shell: shell, picker: picker)
-    }
-    
-    static func makeTerminalManager(shell: Shell, loader: any ScriptLoader) -> TerminalManager {
-        return .init(shell: shell, loader: loader)
-    }
-    
-    static func makeURLLauncher(shell: Shell, picker: CommandLinePicker) -> URLLauncher {
-        return .init(shell: shell, picker: picker)
-    }
+        let shell = makeShell()
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let ideLauncher = IDELauncher(shell: shell, picker: picker)
+        let terminalManager = TerminalManager(shell: shell, loader: repository)
+        let urlLauncher = URLLauncher(shell: shell, picker: picker)
+        let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
+        let branchStatusNotifier = contextFactory.makeBranchStatusNotifier(shell: shell)
 
-    static func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
-        return contextFactory.makeBranchSyncChecker(shell: shell)
-    }
-
-    static func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
-        return contextFactory.makeBranchStatusNotifier(shell: shell)
+        return .init(
+            picker: picker,
+            loader: repository,
+            ideLauncher: ideLauncher,
+            terminalManager: terminalManager,
+            urlLauncher: urlLauncher,
+            branchSyncChecker: branchSyncChecker,
+            branchStatusNotifier: branchStatusNotifier
+        )
     }
 }
-
-import CodeLaunchKit
