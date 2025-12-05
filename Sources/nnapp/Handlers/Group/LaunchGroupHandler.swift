@@ -164,7 +164,8 @@ extension LaunchGroupHandler {
             shortcutToUse = try picker.getRequiredInput("Enter a shortcut for the main project and group:")
         }
 
-        // TODO: - 
+        print(shortcutToUse)
+        // TODO: -
         // Clear current main project's shortcut if it exists
 //        if let currentMain = currentMainProject {
 //            currentMain.shortcut = nil

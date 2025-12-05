@@ -86,8 +86,8 @@ extension Nnapp.Add {
         func run() throws {
             try Nnapp.makeProjectHandler().addProject(
                 path: path,
-                group: group,
                 shortcut: shortcut,
+                groupName: group,
                 isMainProject: isMainProject,
                 fromDesktop: fromDesktop
             )

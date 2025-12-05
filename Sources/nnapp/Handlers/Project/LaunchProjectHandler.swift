@@ -62,6 +62,15 @@ extension LaunchProjectHandler {
 }
 
 
+// MARK: - Evict (placeholder)
+extension LaunchProjectHandler {
+    func evictProject(name: String?, shortcut: String?) throws {
+        // TODO: - implement eviction flow (trash folder but keep registration)
+        throw CodeLaunchError.invalidInput
+    }
+}
+
+
 // MARK: - Private Methods
 private extension LaunchProjectHandler {
     func selectGroup(named name: String?) throws -> LaunchGroup {

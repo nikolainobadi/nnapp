@@ -26,14 +26,14 @@ extension Nnapp {
         return .init(store: context, picker: picker, folderBrowser: folderBrowser, categorySelector: categorySelector)
     }
     
-    static func makeProjectHandler() throws -> ProjectHandler {
-        let shell = Nnapp.makeShell()
-        let picker = Nnapp.makePicker()
-        let context = try Nnapp.makeContext()
-        let groupSelector = makeProjectGroupSelector(picker: picker, context: context)
+    static func makeProjectHandler() throws -> LaunchProjectHandler {
+        let shell = makeShell()
+        let picker = makePicker()
+        let context = try makeContextAdapter()
+        let groupSelector = try makeGroupHandler()
         let folderBrowser = makeFolderBrowser(picker: picker)
 
-        return .init(shell: shell, picker: picker, context: context, groupSelector: groupSelector, folderBrowser: folderBrowser)
+        return .init(shell: shell, desktopPath: nil, store: context, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
     }
 
     static func makeListHandler() throws -> ListHandler {
@@ -89,23 +89,3 @@ extension Nnapp {
 }
 
 import CodeLaunchKit
-
-extension CodeLaunchContextAdapter: CategoryStore {
-    func saveCategory(_ category: LaunchCategory) throws {
-        // TODO: -
-    }
-    
-    func deleteCategory(_ category: LaunchCategory) throws {
-        // TODO: -
-    }
-}
-
-extension CodeLaunchContextAdapter: LaunchGroupStore {
-    func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
-        // TODO: -
-    }
-    
-    func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws {
-        // TODO: -
-    }
-}
