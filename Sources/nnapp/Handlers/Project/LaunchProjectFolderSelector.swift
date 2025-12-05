@@ -9,9 +9,9 @@ import Files
 import CodeLaunchKit
 
 struct LaunchProjectFolderSelector {
+    private let desktopPath: String
     private let picker: any LaunchPicker
     private let folderBrowser: any FolderBrowser
-    private let desktopPath: String
 
     /// Initializes a new folder selector using the provided user input picker.
     /// - Parameters:

@@ -14,7 +14,7 @@ import SwiftPickerKit
 /// Provides fully configured dependencies for use across commands.
 final class DefaultContextFactory: ContextFactory {
     /// Creates a new instance of the default shell adapter.
-    func makeShell() -> any Shell {
+    func makeShell() -> any LaunchShell {
         return NnShell()
     }
 
@@ -46,13 +46,13 @@ final class DefaultContextFactory: ContextFactory {
 
     /// Creates a branch sync checker for detecting if branches are behind remote.
     /// - Parameter shell: The shell adapter for executing Git commands.
-    func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
+    func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {
         return DefaultBranchSyncChecker(shell: shell)
     }
 
     /// Creates a notifier for alerting about branch sync status.
     /// - Parameter shell: The shell adapter for executing system commands.
-    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
+    func makeBranchStatusNotifier(shell: any LaunchShell) -> any BranchStatusNotifier {
         return DefaultBranchStatusNotifier(shell: shell)
     }
 }

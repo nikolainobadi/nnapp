@@ -9,9 +9,9 @@ import NnShellKit
 import CodeLaunchKit
 
 struct DefaultBranchStatusNotifier {
-    private let shell: any Shell
+    private let shell: any LaunchShell
 
-    init(shell: any Shell) {
+    init(shell: any LaunchShell) {
         self.shell = shell
     }
 }

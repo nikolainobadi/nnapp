@@ -6,18 +6,17 @@
 //
 
 import Foundation
-import NnShellKit
 
 /// Manages terminal operations including iTerm integration and session management.
 struct TerminalHandler {
-    private let shell: any Shell
+    private let shell: any LaunchShell
     private let loader: any ScriptLoader
     
     /// Initializes a new terminal manager.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - context: Data context for loading launch scripts.
-    init(shell: any Shell, loader: any ScriptLoader) {
+    init(shell: any LaunchShell, loader: any ScriptLoader) {
         self.shell = shell
         self.loader = loader
     }

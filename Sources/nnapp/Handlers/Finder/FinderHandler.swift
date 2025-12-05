@@ -5,16 +5,15 @@
 //  Created by Nikolai Nobadi on 12/3/25.
 //
 
-import NnShellKit
 import CodeLaunchKit
 
 struct FinderHandler {
-    private let shell: any Shell
+    private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let console: any ConsoleOutput
     private let loader: any FinderInfoLoader
 
-    init(shell: any Shell, picker: any LaunchPicker, loader: any FinderInfoLoader, console: any ConsoleOutput) {
+    init(shell: any LaunchShell, picker: any LaunchPicker, loader: any FinderInfoLoader, console: any ConsoleOutput) {
         self.shell = shell
         self.picker = picker
         self.loader = loader

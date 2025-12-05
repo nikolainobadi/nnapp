@@ -5,7 +5,6 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import NnShellKit
 import CodeLaunchKit
 
 /// Coordinates project opening operations by delegating to specialized components.
@@ -21,7 +20,7 @@ struct OpenProjectHandler {
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(
-        shell: any Shell,
+        shell: any LaunchShell,
         picker: any LaunchPicker,
         loader: any Loader,
         branchSyncChecker: any BranchSyncChecker,

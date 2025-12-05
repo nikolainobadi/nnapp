@@ -5,16 +5,15 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import NnShellKit
 import GitShellKit
 import CodeLaunchKit
 
 struct IDELauncher {
-    private let shell: any Shell
+    private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
     
-    init(shell: any Shell, picker: any LaunchPicker, fileSystem: any FileSystem) {
+    init(shell: any LaunchShell, picker: any LaunchPicker, fileSystem: any FileSystem) {
         self.shell = shell
         self.picker = picker
         self.fileSystem = fileSystem

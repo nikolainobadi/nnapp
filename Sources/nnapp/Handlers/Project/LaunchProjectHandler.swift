@@ -6,29 +6,28 @@
 //
 
 import Files
-import NnShellKit
 import CodeLaunchKit
 
 struct LaunchProjectHandler {
-    private let shell: any Shell
     private let desktopPath: String?
-    private let store: any LaunchProjectStore
+    private let shell: any LaunchShell
     private let picker: any LaunchPicker
+    private let store: any LaunchProjectStore
     private let folderBrowser: any FolderBrowser
     private let groupSelector: any LaunchProjectGroupSelector
     
     init(
-        shell: any Shell,
-        desktopPath: String?,
+        shell: any LaunchShell,
         store: any LaunchProjectStore,
         picker: any LaunchPicker,
         folderBrowser: any FolderBrowser,
-        groupSelector: any LaunchProjectGroupSelector
+        groupSelector: any LaunchProjectGroupSelector,
+        desktopPath: String?
     ) {
         self.shell = shell
-        self.desktopPath = desktopPath
         self.store = store
         self.picker = picker
+        self.desktopPath = desktopPath
         self.folderBrowser = folderBrowser
         self.groupSelector = groupSelector
     }
@@ -83,8 +82,7 @@ private extension LaunchProjectHandler {
     }
     
     func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
-        let gitshell = GitShellAdapter(shell: shell)
-        let infoSelector = LaunchProjectInfoSelector(picker: picker, gitShell: gitshell, infoLoader: store)
+        let infoSelector = LaunchProjectInfoSelector(shell: shell, picker: picker, infoLoader: store)
         
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }

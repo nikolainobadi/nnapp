@@ -6,17 +6,16 @@
 //
 
 import Files
-import GitShellKit
 import CodeLaunchKit
 
 struct LaunchProjectInfoSelector {
+    private let shell: any LaunchShell
     private let picker: any LaunchPicker
-    private let gitShell: any GitShell
     private let infoLoader: any LaunchProjectInfoLoader
 
-    init(picker: any LaunchPicker, gitShell: any GitShell, infoLoader: any LaunchProjectInfoLoader) {
+    init(shell: any LaunchShell, picker: any LaunchPicker, infoLoader: any LaunchProjectInfoLoader) {
+        self.shell = shell
         self.picker = picker
-        self.gitShell = gitShell
         self.infoLoader = infoLoader
     }
 }
@@ -84,7 +83,7 @@ private extension LaunchProjectInfoSelector {
 
     /// Retrieves the remote GitHub URL for the folder, if available and confirmed by the user.
     func getRemote(folder: Folder) -> ProjectLink? {
-        guard let githubURL = try? gitShell.getGitHubURL(at: folder.path),
+        guard let githubURL = try? shell.getGitHubURL(at: folder.path),
               picker.getPermission("Is this the correct remote url: \(githubURL)?") else {
             return nil
         }

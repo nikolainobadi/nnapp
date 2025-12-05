@@ -1,14 +1,14 @@
+////
+////  NnShellKit+Extensions.swift
+////  nnapp
+////
+////  Created by Nikolai Nobadi on 12/1/25.
+////
 //
-//  NnShellKit+Extensions.swift
-//  nnapp
+//import NnShellKit
 //
-//  Created by Nikolai Nobadi on 12/1/25.
-//
-
-import NnShellKit
-
-extension Shell {
-    func runAppleScript(script: String) throws -> String {
-        return try run("/usr/bin/osascript", args: ["-e", script])
-    }
-}
+//extension Shell {
+//    func runAppleScript(script: String) throws -> String {
+//        return try run("/usr/bin/osascript", args: ["-e", script])
+//    }
+//}

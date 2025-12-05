@@ -5,13 +5,12 @@
 //  Created by Nikolai Nobadi on 3/27/25.
 //
 
-import NnShellKit
 import GitShellKit
 
 struct GitShellAdapter {
-    private let shell: any Shell
+    private let shell: any LaunchShell
     
-    init(shell: any Shell) {
+    init(shell: any LaunchShell) {
         self.shell = shell
     }
 }

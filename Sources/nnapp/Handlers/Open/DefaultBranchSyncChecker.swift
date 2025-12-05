@@ -6,16 +6,15 @@
 //
 
 import Files
-import NnShellKit
 import GitShellKit
 import GitCommandGen
 import CodeLaunchKit
 
 struct DefaultBranchSyncChecker {
-    private let shell: any Shell
+    private let shell: any LaunchShell
     private let gitShell: any GitShell
 
-    init(shell: any Shell) {
+    init(shell: any LaunchShell) {
         self.shell = shell
         self.gitShell = GitShellAdapter(shell: shell)
     }
