@@ -163,11 +163,3 @@ private extension FinderHandler {
         }
     }
 }
-
-
-// MARK: - Dependencies
-protocol FinderInfoLoader {
-    func loadCategories() throws -> [LaunchCategory]
-    func loadGroups() throws -> [LaunchGroup]
-    func loadProjects() throws -> [LaunchProject]
-}

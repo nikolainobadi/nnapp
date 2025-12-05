@@ -158,10 +158,3 @@ private extension LaunchCategoryHandler {
         """
     }
 }
-
-// MARK: - Dependencies
-protocol CategoryStore {
-    func loadCategories() throws -> [LaunchCategory]
-    func saveCategory(_ category: LaunchCategory) throws
-    func deleteCategory(_ category: LaunchCategory) throws
-}

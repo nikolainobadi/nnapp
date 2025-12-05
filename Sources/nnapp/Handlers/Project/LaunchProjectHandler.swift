@@ -132,17 +132,6 @@ private extension LaunchProjectHandler {
 }
 
 
-// MARK: - Dependencies
-protocol LaunchProjectGroupSelector {
-    func selectGroup(name: String?) throws -> LaunchGroup
-}
-
-protocol LaunchProjectStore: LaunchProjectInfoLoader {
-    func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws
-    func deleteProject(_ project: LaunchProject, from group: LaunchGroup?) throws
-}
-
-
 // MARK: - Extension Dependencies
 private extension LaunchProject {
     init(info: LaunchProjectInfo, type: ProjectType) {

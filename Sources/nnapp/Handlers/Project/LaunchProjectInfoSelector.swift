@@ -102,11 +102,3 @@ private extension LaunchProjectInfoSelector {
         return handler.getOtherLinks()
     }
 }
-
-
-// MARK: - Dependencies
-protocol LaunchProjectInfoLoader {
-    func loadProjectLinkNames() -> [String]
-    func loadGroups() throws -> [LaunchGroup]
-    func loadProjects() throws -> [LaunchProject]
-}

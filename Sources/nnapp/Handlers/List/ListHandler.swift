@@ -206,15 +206,6 @@ private extension ListHandler {
 }
 
 
-// MARK: - Dependencies
-protocol LaunchListLoader {
-    func loadCategories() throws -> [LaunchCategory]
-    func loadGroups() throws -> [LaunchGroup]
-    func loadProjects() throws -> [LaunchProject]
-    func loadProjectLinkNames() -> [String]
-}
-
-
 // MARK: - Extension Dependencies
 private extension String {
     func addingShortcut(_ shortcut: String?) -> String {

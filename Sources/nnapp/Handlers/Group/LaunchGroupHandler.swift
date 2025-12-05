@@ -281,16 +281,3 @@ private extension LaunchGroupHandler {
         """
     }
 }
-
-
-// MARK: - Dependencies
-protocol LaunchGroupCategorySelector {
-    func getCategory(group: LaunchGroup) -> LaunchCategory?
-    func selectCategory(named name: String?) throws -> LaunchCategory
-}
-
-protocol LaunchGroupStore {
-    func loadGroups() throws -> [LaunchGroup]
-    func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws
-    func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws
-}
