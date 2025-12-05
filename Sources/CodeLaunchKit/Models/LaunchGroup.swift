@@ -12,10 +12,19 @@ public struct LaunchGroup {
     
     private var category: Category?
     
-    public init(name: String, shortcut: String?, projects: [LaunchProject]) {
+    init(name: String, shortcut: String?, projects: [LaunchProject], category: Category?) {
         self.name = name
         self.shortcut = shortcut
         self.projects = projects
+        self.category = category
+    }
+}
+
+
+// MARK: - Init
+public extension LaunchGroup {
+    init(name: String, shortcut: String?, projects: [LaunchProject]) {
+        self.init(name: name, shortcut: shortcut, projects: projects, category: nil)
     }
 }
 

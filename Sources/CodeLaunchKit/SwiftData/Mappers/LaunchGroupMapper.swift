@@ -11,7 +11,7 @@ enum LaunchGroupMapper {
         let projectGroup = LaunchProject.Group(name: group.name, path: groupPath)
         let projects = group.projects.map({ LaunchProjectMapper.toDomain($0, group: projectGroup) })
 
-        return .init(name: group.name, shortcut: group.shortcut, projects: projects)
+        return .init(name: group.name, shortcut: group.shortcut, projects: projects, category: category)
     }
 
     static func toSwiftData(_ group: LaunchGroup) -> SwiftDataLaunchGroup {

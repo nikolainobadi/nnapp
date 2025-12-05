@@ -11,13 +11,7 @@ enum LaunchProjectMapper {
         let remote = project.remote.map(mapLink)
         let links = project.links.map(mapLink)
 
-        return .init(
-            name: project.name,
-            shortcut: project.shortcut,
-            type: type,
-            remote: remote,
-            links: links
-        )
+        return .init(name: project.name, shortcut: project.shortcut, type: type, remote: remote, links: links, group: group)
     }
 
     static func toSwiftData(_ project: LaunchProject) -> SwiftDataLaunchProject {
@@ -25,13 +19,7 @@ enum LaunchProjectMapper {
         let remote = project.remote.map(mapLink)
         let links = project.links.map(mapLink)
 
-        return .init(
-            name: project.name,
-            shortcut: project.shortcut,
-            type: type,
-            remote: remote,
-            links: links
-        )
+        return .init(name: project.name, shortcut: project.shortcut, type: type, remote: remote, links: links)
     }
 }
 
