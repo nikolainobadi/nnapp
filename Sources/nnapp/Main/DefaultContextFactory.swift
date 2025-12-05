@@ -6,6 +6,7 @@
 //
 
 import NnShellKit
+import Foundation
 import SwiftPickerKit
 
 /// Default implementation of the `ContextFactory` protocol used by the `Nnapp` CLI.
@@ -34,7 +35,7 @@ final class DefaultContextFactory: ContextFactory {
     /// Creates a folder browser for selecting folders via tree navigation.
     /// - Parameter picker: Picker used to drive the interactive browsing experience.
     func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {
-        return DefaultFolderBrowser(picker: picker)
+        return DefaultFolderBrowser(picker: picker, homeDirectoryURL: FileManager.default.homeDirectoryForCurrentUser)
     }
 
     /// Returns a selector for choosing a group category during group setup.
