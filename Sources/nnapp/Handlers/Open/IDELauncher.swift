@@ -47,6 +47,7 @@ private extension IDELauncher {
     /// Clones the project repo if it doesn't exist locally and a remote is available.
     func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
         do {
+            
             _ = try Folder(path: folderPath) // already exists
         } catch {
             guard let remote = project.remote,

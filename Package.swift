@@ -25,6 +25,7 @@ let package = Package(
         .target(
             name: "CodeLaunchKit",
             dependencies: [
+                "Files",
                 "NnSwiftDataKit"
             ]
         ),
