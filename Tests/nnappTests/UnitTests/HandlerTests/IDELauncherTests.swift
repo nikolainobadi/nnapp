@@ -12,7 +12,7 @@ import NnShellTesting
 import SwiftPickerTesting
 @testable import nnapp
 
-final class IDELauncherTests {
+struct IDELauncherTests {
     
 }
 
