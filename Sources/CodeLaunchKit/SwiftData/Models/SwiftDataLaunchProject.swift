@@ -53,18 +53,6 @@ public extension SwiftDataLaunchProject {
 
 // MARK: - Extension Dependencies
 public extension SwiftDataProjectType {
-    /// A human-readable name for the project type.
-    var name: String {
-        switch self {
-        case .project:
-            return "Xcode Project"
-        case .package:
-            return "Swift Package"
-        case .workspace:
-            return "XCWorkspace"
-        }
-    }
-    
     /// The file extension typically used by this project type.
     var fileExtension: String {
         switch self {

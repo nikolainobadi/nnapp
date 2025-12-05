@@ -35,42 +35,43 @@ struct FinderHandler {
 extension FinderHandler {
     /// Opens an interactive browser to select and open any folder type.
     func browseAll() throws {
-        let categories = try context.loadCategories()
-
-        if categories.isEmpty {
-            console.printLine("No categories found. Create a category first.")
-            return
-        }
-
-        let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
-        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
-        let selection = picker.treeNavigation("Browse and select folder to open", root: root, newScreen: true, showPromptText: false)
-
-        guard let selectedNode = selection else {
-            console.printLine("No selection made.")
-            return
-        }
-
-        let path = try getPathFromNode(selectedNode)
-        try openInFinder(path: path)
+        // TODO: -
+//        let categories = try context.loadCategories()
+//
+//        if categories.isEmpty {
+//            console.printLine("No categories found. Create a category first.")
+//            return
+//        }
+//
+//        let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
+//        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
+//        let selection = picker.treeNavigation("Browse and select folder to open", root: root, newScreen: true, showPromptText: false)
+//
+//        guard let selectedNode = selection else {
+//            console.printLine("No selection made.")
+//            return
+//        }
+//
+//        let path = try getPathFromNode(selectedNode)
+//        try openInFinder(path: path)
     }
 
-    private func getPathFromNode(_ node: LaunchTreeNode) throws -> String {
-        switch node {
-        case .category(let category, _):
-            return category.path
-        case .group(let group, _):
-            guard let path = group.path else {
-                throw CodeLaunchError.missingGroup
-            }
-            return path
-        case .project(let project, _):
-            guard let path = project.folderPath else {
-                throw CodeLaunchError.missingProject
-            }
-            return path
-        }
-    }
+//    private func getPathFromNode(_ node: LaunchTreeNode) throws -> String {
+//        switch node {
+//        case .category(let category, _):
+//            return category.path
+//        case .group(let group, _):
+//            guard let path = group.path else {
+//                throw CodeLaunchError.missingGroup
+//            }
+//            return path
+//        case .project(let project, _):
+//            guard let path = project.folderPath else {
+//                throw CodeLaunchError.missingProject
+//            }
+//            return path
+//        }
+//    }
 }
 
 

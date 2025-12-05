@@ -11,8 +11,9 @@ public struct LaunchProject {
     public var type: ProjectType
     public var remote: ProjectLink?
     public var links: [ProjectLink]
+    public var groupName: String?
     
-    public init(name: String, shortcut: String? , type: ProjectType, remote: ProjectLink?, links: [ProjectLink]) {
+    public init(name: String, shortcut: String? , type: ProjectType, remote: ProjectLink?, links: [ProjectLink], groupName: String?) {
         self.name = name
         self.shortcut = shortcut
         self.type = type
@@ -22,9 +23,30 @@ public struct LaunchProject {
 }
 
 
+// MARK: - Helpers
+public extension LaunchProject {
+    static func new(name: String, shortcut: String? = nil, type: ProjectType, remote: ProjectLink? = nil, links: [ProjectLink] = [], groupName: String? = nil) -> LaunchProject {
+        return .init(name: name, shortcut: shortcut, type: type, remote: remote, links: links, groupName: groupName)
+    }
+}
+
+
 // MARK: - Dependencies
 public enum ProjectType {
     case project, package, workspace
+}
+
+public extension ProjectType {
+    var name: String {
+        switch self {
+        case .project:
+            return "Xcode Project"
+        case .package:
+            return "Swift Package"
+        case .workspace:
+            return "XCWorkspace"
+        }
+    }
 }
 
 public struct ProjectLink: Equatable {

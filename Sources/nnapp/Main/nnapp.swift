@@ -89,11 +89,12 @@ extension Nnapp {
     }
 
     static func makeListHandler() throws -> ListHandler {
-        let picker = makePicker()
-        let context = try makeContext()
-        let console = contextFactory.makeConsoleOutput()
-
-        return .init(picker: picker, context: context, console: console)
+        fatalError() // TODO: - 
+//        let picker = makePicker()
+//        let context = try makeContext()
+//        let console = contextFactory.makeConsoleOutput()
+//
+//        return .init(picker: picker, context: context, console: console)
     }
 
     static func makeFinderHandler() throws -> FinderHandler {

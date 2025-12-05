@@ -11,6 +11,10 @@ public struct LaunchGroup {
     public var projects: [LaunchProject]
     public var category: Category?
     
+    public var categoryName: String? {
+        return category?.name
+    }
+    
     public var path: String? {
         guard let category else {
             return nil

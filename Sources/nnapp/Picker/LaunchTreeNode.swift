@@ -5,12 +5,13 @@
 //  Created by Nikolai Nobadi on 12/3/25.
 //
 
+import CodeLaunchKit
 import SwiftPickerKit
 
 enum LaunchTreeNode {
-    case category(SwiftDataLaunchCategory, selectable: Bool)
-    case group(SwiftDataLaunchGroup, selectable: Bool)
-    case project(SwiftDataLaunchProject, selectable: Bool)
+    case category(LaunchCategory, selectable: Bool)
+    case group(LaunchGroup, selectable: Bool)
+    case project(LaunchProject, selectable: Bool)
 }
 
 
