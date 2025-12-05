@@ -22,7 +22,7 @@ struct LaunchProjectHandler {
         picker: any LaunchPicker,
         folderBrowser: any FolderBrowser,
         groupSelector: any LaunchProjectGroupSelector,
-        desktopPath: String?
+        desktopPath: String? = nil
     ) {
         self.shell = shell
         self.store = store

@@ -5,75 +5,66 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
-import NnShellKit
-import SwiftPickerKit
-
 extension Nnapp {
-    static func makeCategoryHandler(picker: (any CommandLinePicker)? = nil) throws -> LaunchCategoryHandler {
-        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
-//        let picker = picker ?? makePicker()
-//        let repository = try makeRepository()
-//        let folderBrowser = makeFolderBrowser(picker: picker)
-//        
-//        return .init(store: repository, picker: picker, folderBrowser: folderBrowser)
+    static func makeCategoryHandler(picker: (any LaunchPicker)? = nil) throws -> LaunchCategoryHandler {
+        let picker = picker ?? makePicker()
+        let repository = try makeRepository()
+        let folderBrowser = makeFolderBrowser(picker: picker)
+        
+        return .init(store: repository, picker: picker, folderBrowser: folderBrowser)
     }
     
-    static func makeGroupHandler(picker: (any CommandLinePicker)? = nil) throws -> LaunchGroupHandler {
-        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
-//        let picker = picker ?? makePicker()
-//        let repository = try makeRepository()
-//        let categorySelector = try makeCategoryHandler(picker: picker)
-//        let folderBrowser = makeFolderBrowser(picker: picker)
-//        
-//        return .init(store: repository, picker: picker, folderBrowser: folderBrowser, categorySelector: categorySelector)
+    static func makeGroupHandler(picker: (any LaunchPicker)? = nil) throws -> LaunchGroupHandler {
+        let picker = picker ?? makePicker()
+        let repository = try makeRepository()
+        let categorySelector = try makeCategoryHandler(picker: picker)
+        let folderBrowser = makeFolderBrowser(picker: picker)
+        
+        return .init(store: repository, picker: picker, folderBrowser: folderBrowser, categorySelector: categorySelector)
     }
     
     static func makeProjectHandler() throws -> LaunchProjectHandler {
-        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
-//        let shell = makeShell()
-//        let picker = makePicker()
-//        let repository = try makeRepository()
-//        let groupSelector = try makeGroupHandler(picker: picker)
-//        let folderBrowser = makeFolderBrowser(picker: picker)
-//
-//        return .init(shell: shell, desktopPath: nil, store: repository, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
+        let shell = makeShell()
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let groupSelector = try makeGroupHandler(picker: picker)
+        let folderBrowser = makeFolderBrowser(picker: picker)
+
+        return .init(shell: shell, store: repository, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
     }
 
     static func makeListHandler() throws -> ListHandler {
-        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
-//        let picker = makePicker()
-//        let repository = try makeRepository()
-//        let console = contextFactory.makeConsoleOutput()
-//
-//        return .init(picker: picker, loader: repository, console: console)
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let console = contextFactory.makeConsoleOutput()
+
+        return .init(picker: picker, loader: repository, console: console)
     }
 
     static func makeFinderHandler() throws -> FinderHandler {
-        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
-//        let shell = makeShell()
-//        let picker = makePicker()
-//        let repository = try makeRepository()
-//        let console = contextFactory.makeConsoleOutput()
-//
-//        return .init(shell: shell, picker: picker, loader: repository, console: console)
+        let shell = makeShell()
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let console = contextFactory.makeConsoleOutput()
+
+        return .init(shell: shell, picker: picker, loader: repository, console: console)
     }
 
     static func makeOpenManager() throws -> OpenProjectHandler {
-        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
-//        let shell = makeShell()
-//        let picker = makePicker()
-//        let repository = try makeRepository()
-//        let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
-//        let branchStatusNotifier = contextFactory.makeBranchStatusNotifier(shell: shell)
-//        let fileSystem = contextFactory.makeFileSystem()
-//
-//        return .init(
-//            shell: shell,
-//            picker: picker,
-//            loader: repository,
-//            branchSyncChecker: branchSyncChecker,
-//            branchStatusNotifier: branchStatusNotifier,
-//            fileSystem: fileSystem
-//        )
+        let shell = makeShell()
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
+        let branchStatusNotifier = contextFactory.makeBranchStatusNotifier(shell: shell)
+        let fileSystem = contextFactory.makeFileSystem()
+
+        return .init(
+            shell: shell,
+            picker: picker,
+            loader: repository,
+            branchSyncChecker: branchSyncChecker,
+            branchStatusNotifier: branchStatusNotifier,
+            fileSystem: fileSystem
+        )
     }
 }
