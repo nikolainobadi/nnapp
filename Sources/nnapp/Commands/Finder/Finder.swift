@@ -7,7 +7,6 @@
 
 import ArgumentParser
 
-/// Opens a Category, Group, or Project folder in Finder.
 extension Nnapp {
     struct Finder: ParsableCommand {
         static let configuration = CommandConfiguration(
@@ -20,8 +19,7 @@ extension Nnapp {
         )
 
         func run() throws {
-            let handler = try Nnapp.makeFinderHandler()
-            try handler.browseAll()
+            try Nnapp.makeFinderHandler().browseAll()
         }
     }
 }
@@ -38,8 +36,7 @@ extension Nnapp.Finder {
         var name: String?
 
         func run() throws {
-            let handler = try Nnapp.makeFinderHandler()
-            try handler.openCategory(name: name)
+            try Nnapp.makeFinderHandler().openCategory(name: name)
         }
     }
 }
@@ -56,8 +53,7 @@ extension Nnapp.Finder {
         var name: String?
 
         func run() throws {
-            let handler = try Nnapp.makeFinderHandler()
-            try handler.openGroup(name: name)
+            try Nnapp.makeFinderHandler().openGroup(name: name)
         }
     }
 }
@@ -74,8 +70,7 @@ extension Nnapp.Finder {
         var name: String?
 
         func run() throws {
-            let handler = try Nnapp.makeFinderHandler()
-            try handler.openProject(name: name)
+            try Nnapp.makeFinderHandler().openProject(name: name)
         }
     }
 }

@@ -24,6 +24,7 @@ struct LaunchCategoryHandler {
 
 // MARK: - Add
 extension LaunchCategoryHandler {
+    @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
         let categories = try loadAllCategories()
         let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
@@ -32,6 +33,7 @@ extension LaunchCategoryHandler {
         return try saveCategory(.new(name: name, path: folder.path))
     }
     
+    @discardableResult
     func createNewCategory(named name: String?, parentPath: String?) throws -> LaunchCategory {
         let categories = try loadAllCategories()
         let proposedName = try name ?? picker.getRequiredInput("Enter the name of your new category.")

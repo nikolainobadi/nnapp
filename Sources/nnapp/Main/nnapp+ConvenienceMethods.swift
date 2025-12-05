@@ -9,21 +9,21 @@ import NnShellKit
 import SwiftPickerKit
 
 extension Nnapp {
-    static func makeCategoryHandler() throws -> CategoryHandler {
-        let picker = makePicker()
-        let context = try makeContext()
+    static func makeCategoryHandler(picker: (any CommandLinePicker)? = nil) throws -> LaunchCategoryHandler {
+        let picker = picker ?? makePicker()
+        let context = try makeContextAdapter()
         let folderBrowser = makeFolderBrowser(picker: picker)
         
-        return .init(picker: picker, context: context, folderBrowser: folderBrowser)
+        return .init(store: context, picker: picker, folderBrowser: folderBrowser)
     }
     
-    static func makeGroupHandler() throws -> GroupHandler {
+    static func makeGroupHandler() throws -> LaunchGroupHandler {
         let picker = makePicker()
-        let context = try makeContext()
-        let categorySelector = makeGroupCategorySelector(picker: picker, context: context)
+        let context = try makeContextAdapter()
+        let categorySelector = try makeCategoryHandler(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
         
-        return .init(picker: picker, context: context, categorySelector: categorySelector, folderBrowser: folderBrowser)
+        return .init(store: context, picker: picker, folderBrowser: folderBrowser, categorySelector: categorySelector)
     }
     
     static func makeProjectHandler() throws -> ProjectHandler {
@@ -85,5 +85,27 @@ extension Nnapp {
 
     static func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
         return contextFactory.makeBranchStatusNotifier(shell: shell)
+    }
+}
+
+import CodeLaunchKit
+
+extension CodeLaunchContextAdapter: CategoryStore {
+    func saveCategory(_ category: LaunchCategory) throws {
+        // TODO: -
+    }
+    
+    func deleteCategory(_ category: LaunchCategory) throws {
+        // TODO: -
+    }
+}
+
+extension CodeLaunchContextAdapter: LaunchGroupStore {
+    func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
+        // TODO: -
+    }
+    
+    func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws {
+        // TODO: -
     }
 }
