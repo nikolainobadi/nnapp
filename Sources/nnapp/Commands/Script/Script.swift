@@ -5,7 +5,6 @@
 //  Created by OpenAI Codex on 2024-06-06.
 //
 
-import Foundation
 import ArgumentParser
 
 extension Nnapp {

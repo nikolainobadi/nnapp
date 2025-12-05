@@ -5,7 +5,6 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import Files
 import GitShellKit
 import GitCommandGen
 import CodeLaunchKit
@@ -13,10 +12,12 @@ import CodeLaunchKit
 struct DefaultBranchSyncChecker {
     private let shell: any LaunchShell
     private let gitShell: any GitShell
+    private let fileSystem: any FileSystem
 
-    init(shell: any LaunchShell) {
+    init(shell: any LaunchShell, fileSystem: any FileSystem) {
         self.shell = shell
         self.gitShell = GitShellAdapter(shell: shell)
+        self.fileSystem = fileSystem
     }
 }
 
@@ -31,7 +32,7 @@ extension DefaultBranchSyncChecker: BranchSyncChecker {
         }
 
         // Skip if project folder doesn't exist
-        guard let folderPath = project.folderPath, let folder = try? Folder(path: folderPath) else {
+        guard let folderPath = project.folderPath, let folder = try? fileSystem.directory(at: folderPath) else {
             print("could not find folder")
             return nil
         }
