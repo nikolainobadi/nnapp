@@ -11,7 +11,20 @@ public struct LaunchProject {
     public var type: ProjectType
     public var remote: ProjectLink?
     public var links: [ProjectLink]
-    public var groupName: String?
+    
+    // TODO: - 
+    public var groupName: String? {
+        return nil
+    }
+    public var groupPath: String? {
+        return nil
+    }
+    public var folderPath: String? {
+        return nil
+    }
+    public var filePath: String? {
+        return nil
+    }
     
     public init(name: String, shortcut: String? , type: ProjectType, remote: ProjectLink?, links: [ProjectLink], groupName: String?) {
         self.name = name
