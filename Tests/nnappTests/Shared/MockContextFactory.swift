@@ -39,22 +39,30 @@ final class MockContextFactory {
 
 // MARK: - ContextFactory
 extension MockContextFactory: ContextFactory {
-    func makeShell() -> any Shell {
+    func makeFileSystem() -> any FileSystem {
+        fatalError()
+    }
+    
+    func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser {
+        fatalError()
+    }
+    
+    func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {
+        fatalError()
+    }
+    
+    func makeBranchStatusNotifier(shell: any LaunchShell) -> any BranchStatusNotifier {
+        fatalError()
+    }
+    
+    func makeShell() -> any LaunchShell {
         return shell
     }
     
-    func makePicker() -> any CommandLinePicker {
+    func makePicker() -> any LaunchPicker {
         return picker
     }
     
-//    func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
-//        return MockGroupSelector(context: context)
-//    }
-//    
-//    func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
-//        return MockCategorySelector(context: context)
-//    }
-//    
     func makeContext() throws -> CodeLaunchContext {
         if let context {
             return context
@@ -135,19 +143,20 @@ final class MockFolderBrowser: DirectoryBrowser {
     var error: Error?
 
     func browseForDirectory(prompt: String, startPath: String?) throws -> Directory {
-        browseCallCount += 1
-        capturedPrompt = prompt
-        capturedStartPath = startPath
-
-        if let error {
-            throw error
-        }
-
-        if let folderToReturn {
-            return folderToReturn
-        }
-
-        let folder = try Folder.temporary.createSubfolder(named: "MockFolderBrowser-\(UUID().uuidString)")
-        return FilesDirectoryAdapter(folder: folder)
+        fatalError()
+//        browseCallCount += 1
+//        capturedPrompt = prompt
+//        capturedStartPath = startPath
+//
+//        if let error {
+//            throw error
+//        }
+//
+//        if let folderToReturn {
+//            return folderToReturn
+//        }
+//
+//        let folder = try Folder.temporary.createSubfolder(named: "MockFolderBrowser-\(UUID().uuidString)")
+//        return FilesDirectoryAdapter(folder: folder)
     }
 }

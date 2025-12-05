@@ -1,30 +1,30 @@
+////
+////  MockGroupSelector.swift
+////  nnapp
+////
+////  Created by Nikolai Nobadi on 3/29/25.
+////
 //
-//  MockGroupSelector.swift
-//  nnapp
+//import Foundation
+//import CodeLaunchKit
+//@testable import nnapp
 //
-//  Created by Nikolai Nobadi on 3/29/25.
+//final class MockGroupSelector {
+//    private let context: CodeLaunchContext
+//    
+//    init(context: CodeLaunchContext) {
+//        self.context = context
+//    }
+//}
 //
-
-import Foundation
-import CodeLaunchKit
-@testable import nnapp
-
-final class MockGroupSelector {
-    private let context: CodeLaunchContext
-    
-    init(context: CodeLaunchContext) {
-        self.context = context
-    }
-}
-
-
-// MARK: - Selector
-extension MockGroupSelector: ProjectGroupSelector {
-    func getGroup(named name: String?) throws -> SwiftDataLaunchGroup {
-        guard let group = try context.loadGroups().first else {
-            throw NSError(domain: "Test", code: 0)
-        }
-        
-        return group
-    }
-}
+//
+//// MARK: - Selector
+//extension MockGroupSelector: ProjectGroupSelector {
+//    func getGroup(named name: String?) throws -> SwiftDataLaunchGroup {
+//        guard let group = try context.loadGroups().first else {
+//            throw NSError(domain: "Test", code: 0)
+//        }
+//        
+//        return group
+//    }
+//}
