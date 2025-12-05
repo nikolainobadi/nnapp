@@ -8,14 +8,13 @@
 import Files
 import GitShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 
 struct LaunchProjectInfoSelector {
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let gitShell: any GitShell
     private let infoLoader: any LaunchProjectInfoLoader
 
-    init(picker: any CommandLinePicker, gitShell: any GitShell, infoLoader: any LaunchProjectInfoLoader) {
+    init(picker: any LaunchPicker, gitShell: any GitShell, infoLoader: any LaunchProjectInfoLoader) {
         self.picker = picker
         self.gitShell = gitShell
         self.infoLoader = infoLoader

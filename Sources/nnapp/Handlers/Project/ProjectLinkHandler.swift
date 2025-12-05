@@ -6,18 +6,17 @@
 //
 
 import CodeLaunchKit
-import SwiftPickerKit
 
 /// Handles interactive prompting for custom project links beyond the primary remote.
 struct ProjectLinkHandler {
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let linkOptions: [String]
     
     /// Initializes the handler used to collect additional project links.
     /// - Parameters:
     ///   - picker: Utility used for user prompts and permissions.
     ///   - linkOptions: Pre-existing link names to present as quick selections.
-    init(picker: any CommandLinePicker, linkOptions: [String]) {
+    init(picker: any LaunchPicker, linkOptions: [String]) {
         self.picker = picker
         self.linkOptions = linkOptions
     }

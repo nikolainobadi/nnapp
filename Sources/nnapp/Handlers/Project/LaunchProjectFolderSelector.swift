@@ -7,10 +7,9 @@
 
 import Files
 import CodeLaunchKit
-import SwiftPickerKit
 
 struct LaunchProjectFolderSelector {
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let folderBrowser: any FolderBrowser
     private let desktopPath: String
 
@@ -19,7 +18,7 @@ struct LaunchProjectFolderSelector {
     ///   - picker: Utility for interactive user prompts.
     ///   - folderBrowser: Utility for browsing and selecting folders.
     ///   - desktopPath: Optional desktop path override for testing.
-    init(picker: any CommandLinePicker, folderBrowser: any FolderBrowser, desktopPath: String? = nil) {
+    init(picker: any LaunchPicker, folderBrowser: any FolderBrowser, desktopPath: String? = nil) {
         self.picker = picker
         self.folderBrowser = folderBrowser
         self.desktopPath = desktopPath ?? Folder.home.path.appendingPathComponent("Desktop")

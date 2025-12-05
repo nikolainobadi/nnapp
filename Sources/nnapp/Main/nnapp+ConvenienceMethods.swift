@@ -27,13 +27,14 @@ extension Nnapp {
     }
     
     static func makeProjectHandler() throws -> LaunchProjectHandler {
-        let shell = makeShell()
-        let picker = makePicker()
-        let repository = try makeRepository()
-        let groupSelector = try makeGroupHandler(picker: picker)
-        let folderBrowser = makeFolderBrowser(picker: picker)
-
-        return .init(shell: shell, desktopPath: nil, store: repository, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
+        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
+//        let shell = makeShell()
+//        let picker = makePicker()
+//        let repository = try makeRepository()
+//        let groupSelector = try makeGroupHandler(picker: picker)
+//        let folderBrowser = makeFolderBrowser(picker: picker)
+//
+//        return .init(shell: shell, desktopPath: nil, store: repository, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
     }
 
     static func makeListHandler() throws -> ListHandler {

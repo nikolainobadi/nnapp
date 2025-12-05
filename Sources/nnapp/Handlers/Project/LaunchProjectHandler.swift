@@ -8,13 +8,12 @@
 import Files
 import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 
 struct LaunchProjectHandler {
     private let shell: any Shell
     private let desktopPath: String?
     private let store: any LaunchProjectStore
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let folderBrowser: any FolderBrowser
     private let groupSelector: any LaunchProjectGroupSelector
     
@@ -22,7 +21,7 @@ struct LaunchProjectHandler {
         shell: any Shell,
         desktopPath: String?,
         store: any LaunchProjectStore,
-        picker: any CommandLinePicker,
+        picker: any LaunchPicker,
         folderBrowser: any FolderBrowser,
         groupSelector: any LaunchProjectGroupSelector
     ) {
