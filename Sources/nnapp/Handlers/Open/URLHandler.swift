@@ -37,7 +37,6 @@ extension URLHandler {
             break
         case 1:
             selection = links.first
-            try shell.runAndPrint(bash: "open \(links.first!.urlString)")
         default:
             selection = try picker.requiredSingleSelection("Select a link to open", items: links)
         }
