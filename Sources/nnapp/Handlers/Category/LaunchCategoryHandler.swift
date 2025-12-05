@@ -5,7 +5,6 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
-import Files
 import CodeLaunchKit
 
 struct LaunchCategoryHandler {
@@ -107,7 +106,7 @@ private extension LaunchCategoryHandler {
         return try store.loadCategories()
     }
     
-    func selectFolder(path: String?, browsePrompt: String) throws -> Folder {
+    func selectFolder(path: String?, browsePrompt: String) throws -> Directory {
         return try folderBrowser.browseForFolder(prompt: browsePrompt, startPath: path)
     }
     
@@ -123,7 +122,7 @@ private extension LaunchCategoryHandler {
         return name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
-    func selectParentFolder(path: String?, categoryName: String) throws -> Folder {
+    func selectParentFolder(path: String?, categoryName: String) throws -> Directory {
         let folder = try selectFolder(path: path, browsePrompt: "Select the folder where \(categoryName.yellow) should be created")
         
         try validateParentFolder(folder, categoryName: categoryName)
@@ -131,14 +130,14 @@ private extension LaunchCategoryHandler {
         return folder
     }
     
-    func validateParentFolder(_ folder: Folder, categoryName: String) throws {
-        if folder.subfolders.contains(where: { $0.name.matches(categoryName) }) {
+    func validateParentFolder(_ folder: Directory, categoryName: String) throws {
+        if folder.subdirectories.contains(where: { $0.name.matches(categoryName) }) {
             throw CodeLaunchError.categoryPathTaken
         }
     }
     
-    func createSubfolder(named name: String, in parentFolder: Folder) throws -> Folder {
-        return try parentFolder.createSubfolderIfNeeded(withName: name)
+    func createSubfolder(named name: String, in parentFolder: Directory) throws -> Directory {
+        return try parentFolder.createSubdirectory(named: name)
     }
     
     func saveCategory(_ category: LaunchCategory) throws -> LaunchCategory {

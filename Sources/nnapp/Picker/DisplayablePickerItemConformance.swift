@@ -86,6 +86,14 @@ extension AssignGroupType: DisplayablePickerItem {
 }
 
 
+// MARK: - DirectoryContainer
+extension DirectoryContainer: DisplayablePickerItem {
+    var displayName: String {
+        return directory.name
+    }
+}
+
+
 // MARK: - OLD
 extension SwiftDataProjectLink: DisplayablePickerItem {
     public var displayName: String {

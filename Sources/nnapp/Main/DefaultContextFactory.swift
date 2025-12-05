@@ -32,7 +32,11 @@ final class DefaultContextFactory: ContextFactory {
     }
 
     func makeFolderBrowser(picker: any LaunchPicker) -> any FolderBrowser {
-        return DefaultFolderBrowser(picker: picker, homeDirectoryURL: FileManager.default.homeDirectoryForCurrentUser)
+        return DefaultFolderBrowser(
+            picker: picker,
+            fileSystem: makeFileSystem(),
+            homeDirectoryURL: FileManager.default.homeDirectoryForCurrentUser
+        )
     }
 
     func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {

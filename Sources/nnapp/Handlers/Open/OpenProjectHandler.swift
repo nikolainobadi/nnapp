@@ -16,7 +16,6 @@ struct OpenProjectHandler {
     private let urlLauncher: URLLauncher
     private let branchSyncChecker: any BranchSyncChecker
     private let branchStatusNotifier: any BranchStatusNotifier
-    private let fileSystem: any FileSystem
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(
@@ -29,7 +28,6 @@ struct OpenProjectHandler {
     ) {
         self.picker = picker
         self.loader = loader
-        self.fileSystem = fileSystem
         self.ideLauncher = .init(shell: shell, picker: picker, fileSystem: fileSystem)
         self.terminalManager = .init(shell: shell, loader: loader)
         self.urlLauncher = .init(shell: shell, picker: picker)

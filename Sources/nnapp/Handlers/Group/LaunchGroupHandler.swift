@@ -5,7 +5,6 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
-import Files
 import CodeLaunchKit
 
 struct LaunchGroupHandler {
@@ -13,12 +12,20 @@ struct LaunchGroupHandler {
     private let picker: any LaunchPicker
     private let folderBrowser: any FolderBrowser
     private let categorySelector: any LaunchGroupCategorySelector
+    private let fileSystem: any FileSystem
     
-    init(store: any LaunchGroupStore, picker: any LaunchPicker, folderBrowser: any FolderBrowser, categorySelector: any LaunchGroupCategorySelector) {
+    init(
+        store: any LaunchGroupStore,
+        picker: any LaunchPicker,
+        folderBrowser: any FolderBrowser,
+        categorySelector: any LaunchGroupCategorySelector,
+        fileSystem: any FileSystem
+    ) {
         self.store = store
         self.picker = picker
         self.folderBrowser = folderBrowser
         self.categorySelector = categorySelector
+        self.fileSystem = fileSystem
     }
 }
 
@@ -194,18 +201,18 @@ private extension LaunchGroupHandler {
         return try picker.requiredSingleSelection("How would you like to assign a Group to your Project?", items: AssignGroupType.allCases, showSelectedItemText: false)
     }
     
-    func selectGroupFolder(path: String?, category: LaunchCategory) throws -> Folder {
+    func selectGroupFolder(path: String?, category: LaunchCategory) throws -> any Directory {
         if let path {
-            return try .init(path: path)
+            return try fileSystem.directory(at: path)
         }
         
-        let categoryFolder = try Folder(path: category.path)
-        let availableFolders = categoryFolder.subfolders.filter { folder in
+        let categoryFolder = try fileSystem.directory(at: category.path)
+        let availableFolders = categoryFolder.subdirectories.filter { folder in
             !category.groups.map({ $0.name.lowercased() }).contains(folder.name.lowercased())
         }
 
         if !availableFolders.isEmpty, picker.getPermission("Would you like to select a subfolder of \(categoryFolder.name)?") {
-            return try picker.requiredSingleSelection("Select a folder", items: availableFolders, showSelectedItemText: false)
+            return try picker.requiredSingleSelection("Select a folder", items: availableFolders.map({ DirectoryContainer(directory: $0) }), showSelectedItemText: false).directory
         }
 
         return try folderBrowser.browseForFolder(prompt: "Browse to select a folder to import as a Group")
@@ -215,7 +222,7 @@ private extension LaunchGroupHandler {
         return try store.loadGroups()
     }
     
-    func saveGroup(_ group: LaunchGroup, in category: LaunchCategory, groupFolder: Folder? = nil) throws -> LaunchGroup {
+    func saveGroup(_ group: LaunchGroup, in category: LaunchCategory, groupFolder: Directory? = nil) throws -> LaunchGroup {
         if let groupFolder {
             try moveFolderIfNecessary(groupFolder, category: category)
         } else {
@@ -234,10 +241,10 @@ private extension LaunchGroupHandler {
         return name
     }
     
-    func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
-        let categoryFolder = try Folder(path: category.path)
+    func moveFolderIfNecessary(_ folder: Directory, category: LaunchCategory) throws {
+        let categoryFolder = try fileSystem.directory(at: category.path)
         
-        if let existingFolder = try? categoryFolder.subfolder(named: folder.name) {
+        if let existingFolder = try? categoryFolder.subdirectory(named: folder.name) {
             if existingFolder.path != folder.path {
                 throw CodeLaunchError.groupFolderAlreadyExists
             }
@@ -250,14 +257,14 @@ private extension LaunchGroupHandler {
     }
     
     func createNewGroupFolder(group: LaunchGroup, category: LaunchCategory) throws {
-        let categoryFolder = try Folder(path: category.path)
-        let subfolderNames = categoryFolder.subfolders.map({ $0.name })
+        let categoryFolder = try fileSystem.directory(at: category.path)
+        let subfolderNames = categoryFolder.subdirectories.map({ $0.name })
 
         if subfolderNames.contains(where: { $0.matches(group.name) }) {
             throw CodeLaunchError.groupFolderAlreadyExists
         }
 
-        try categoryFolder.createSubfolder(named: group.name)
+        _ = try categoryFolder.createSubdirectory(named: group.name)
     }
     
     func deleteGroup(_ group: LaunchGroup) throws {

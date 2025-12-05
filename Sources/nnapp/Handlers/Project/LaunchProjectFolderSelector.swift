@@ -5,23 +5,27 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
-import Files
 import CodeLaunchKit
 
 struct LaunchProjectFolderSelector {
-    private let desktopPath: String
     private let picker: any LaunchPicker
+    private let fileSystem: any FileSystem
     private let folderBrowser: any FolderBrowser
 
     /// Initializes a new folder selector using the provided user input picker.
     /// - Parameters:
     ///   - picker: Utility for interactive user prompts.
     ///   - folderBrowser: Utility for browsing and selecting folders.
+    ///   - fileSystem: File system abstraction used for folder resolution.
     ///   - desktopPath: Optional desktop path override for testing.
-    init(picker: any LaunchPicker, folderBrowser: any FolderBrowser, desktopPath: String? = nil) {
+    init(
+        picker: any LaunchPicker,
+        fileSystem: any FileSystem,
+        folderBrowser: any FolderBrowser
+    ) {
         self.picker = picker
+        self.fileSystem = fileSystem
         self.folderBrowser = folderBrowser
-        self.desktopPath = desktopPath ?? Folder.home.path.appendingPathComponent("Desktop")
     }
 }
 
@@ -35,9 +39,9 @@ extension LaunchProjectFolderSelector {
     ///   - fromDesktop: Whether to filter and select from valid projects on the Desktop.
     /// - Returns: A validated `ProjectFolder` containing the resolved folder and type.
     func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool = false) throws -> LaunchProjectFolder {
-        if let path, let folder = try? Folder(path: path) {
-            let projectType = try getProjectType(folder: folder)
-            return .init(folder: folder, type: projectType)
+        if let path, let directory = try? fileSystem.directory(at: path) {
+            let projectType = try getProjectType(folder: directory)
+            return .init(folder: directory, type: projectType)
         }
         
         // Handle --from-desktop flag
@@ -57,7 +61,7 @@ extension LaunchProjectFolderSelector {
             throw CodeLaunchError.missingGroup
         }
 
-        let groupFolder = try Folder(path: groupPath)
+        let groupFolder = try fileSystem.directory(at: groupPath)
         let availableFolders = getAvailableSubfolders(group: group, folder: groupFolder)
 
         if !availableFolders.isEmpty,
@@ -79,12 +83,12 @@ extension LaunchProjectFolderSelector {
 // MARK: - Private Methods
 private extension LaunchProjectFolderSelector {
     /// Determines the project type (e.g. package, project, workspace) by inspecting the folder contents.
-    func getProjectType(folder: Folder) throws -> ProjectType {
+    func getProjectType(folder: Directory) throws -> ProjectType {
         if folder.containsFile(named: "Package.swift") {
             return .package
         }
 
-        if folder.subfolders.contains(where: { $0.extension == "xcodeproj" }) {
+        if folder.subdirectories.contains(where: { $0.extension == "xcodeproj" }) {
             return .project
         }
 
@@ -93,8 +97,8 @@ private extension LaunchProjectFolderSelector {
     }
 
     /// Returns a list of valid project subfolders within the group folder that are not already registered.
-    func getAvailableSubfolders(group: LaunchGroup, folder: Folder) -> [LaunchProjectFolder] {
-        return folder.subfolders.compactMap { subFolder in
+    func getAvailableSubfolders(group: LaunchGroup, folder: Directory) -> [LaunchProjectFolder] {
+        return folder.subdirectories.compactMap { subFolder in
             guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
                   let projectType = try? getProjectType(folder: subFolder) else {
                 return nil
@@ -106,9 +110,9 @@ private extension LaunchProjectFolderSelector {
     
     /// Returns a list of valid Xcode projects and Swift packages from the user's Desktop.
     func getDesktopProjectFolders() throws -> [LaunchProjectFolder] {
-        let desktopFolder = try Folder(path: desktopPath)
+        let desktopFolder = try fileSystem.desktopDirectory()
         
-        return desktopFolder.subfolders.compactMap { subFolder in
+        return desktopFolder.subdirectories.compactMap { subFolder in
             // Only include folders that contain valid Xcode projects or Swift packages
             guard let projectType = try? getProjectType(folder: subFolder) else {
                 return nil

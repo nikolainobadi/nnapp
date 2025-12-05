@@ -5,13 +5,12 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
-import Files
 import CodeLaunchKit
 
 struct LaunchProjectHandler {
-    private let desktopPath: String?
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
+    private let fileSystem: any FileSystem
     private let store: any LaunchProjectStore
     private let folderBrowser: any FolderBrowser
     private let groupSelector: any LaunchProjectGroupSelector
@@ -20,14 +19,14 @@ struct LaunchProjectHandler {
         shell: any LaunchShell,
         store: any LaunchProjectStore,
         picker: any LaunchPicker,
+        fileSystem: any FileSystem,
         folderBrowser: any FolderBrowser,
         groupSelector: any LaunchProjectGroupSelector,
-        desktopPath: String? = nil
     ) {
         self.shell = shell
         self.store = store
         self.picker = picker
-        self.desktopPath = desktopPath
+        self.fileSystem = fileSystem
         self.folderBrowser = folderBrowser
         self.groupSelector = groupSelector
     }
@@ -76,12 +75,12 @@ private extension LaunchProjectHandler {
     }
     
     func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> LaunchProjectFolder {
-        let folderSelector = LaunchProjectFolderSelector(picker: picker, folderBrowser: folderBrowser, desktopPath: desktopPath)
+        let folderSelector = LaunchProjectFolderSelector(picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser)
         
         return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
     }
     
-    func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
+    func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
         let infoSelector = LaunchProjectInfoSelector(shell: shell, picker: picker, infoLoader: store)
         
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
@@ -108,14 +107,14 @@ private extension LaunchProjectHandler {
         return try picker.requiredSingleSelection(prompt, items: projects, showSelectedItemText: false)
     }
     
-    func moveFolderIfNecessary(_ folder: Folder, parentPath: String?) throws {
+    func moveFolderIfNecessary(_ folder: Directory, parentPath: String?) throws {
         guard let parentPath else {
             throw CodeLaunchError.missingGroup
         }
         
-        let parentFolder = try Folder(path: parentPath)
+        let parentFolder = try fileSystem.directory(at: parentPath)
         
-        if let existingSubfolder = try? parentFolder.subfolder(named: folder.name) {
+        if let existingSubfolder = try? parentFolder.subdirectory(named: folder.name) {
             if existingSubfolder.path != folder.path  {
                 throw CodeLaunchError.folderNameTaken
             }

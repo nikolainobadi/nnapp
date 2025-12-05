@@ -19,8 +19,15 @@ extension Nnapp {
         let repository = try makeRepository()
         let categorySelector = try makeCategoryHandler(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
+        let fileSystem = contextFactory.makeFileSystem()
         
-        return .init(store: repository, picker: picker, folderBrowser: folderBrowser, categorySelector: categorySelector)
+        return .init(
+            store: repository,
+            picker: picker,
+            folderBrowser: folderBrowser,
+            categorySelector: categorySelector,
+            fileSystem: fileSystem
+        )
     }
     
     static func makeProjectHandler() throws -> LaunchProjectHandler {
@@ -29,8 +36,16 @@ extension Nnapp {
         let repository = try makeRepository()
         let groupSelector = try makeGroupHandler(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
+        let fileSystem = contextFactory.makeFileSystem()
 
-        return .init(shell: shell, store: repository, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
+        return .init(
+            shell: shell,
+            store: repository,
+            picker: picker,
+            fileSystem: fileSystem,
+            folderBrowser: folderBrowser,
+            groupSelector: groupSelector
+        )
     }
 
     static func makeListHandler() throws -> ListHandler {

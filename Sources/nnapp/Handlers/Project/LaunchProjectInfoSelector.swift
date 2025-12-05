@@ -5,7 +5,6 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
-import Files
 import CodeLaunchKit
 
 struct LaunchProjectInfoSelector {
@@ -30,7 +29,7 @@ extension LaunchProjectInfoSelector {
     ///   - group: The group this project will belong to.
     ///   - isMainProject: Indicates whether this project is the group's primary launch target.
     /// - Returns: A `ProjectInfo` struct with the collected input.
-    func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
+    func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
         try validateName(folder.name)
         let shortcut = try getShortcut(shortcut: shortcut, group: group, isMainProject: isMainProject)
         try validateShortcut(shortcut)
@@ -82,7 +81,7 @@ private extension LaunchProjectInfoSelector {
     }
 
     /// Retrieves the remote GitHub URL for the folder, if available and confirmed by the user.
-    func getRemote(folder: Folder) -> ProjectLink? {
+    func getRemote(folder: Directory) -> ProjectLink? {
         guard let githubURL = try? shell.getGitHubURL(at: folder.path),
               picker.getPermission("Is this the correct remote url: \(githubURL)?") else {
             return nil
