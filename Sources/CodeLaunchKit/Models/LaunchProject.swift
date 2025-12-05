@@ -11,33 +11,37 @@ public struct LaunchProject {
     public var type: ProjectType
     public var remote: ProjectLink?
     public var links: [ProjectLink]
+    public var group: Group?
     
-    // TODO: - 
-    public var groupName: String? {
-        return nil
-    }
-    public var groupPath: String? {
-        return nil
-    }
-    public var folderPath: String? {
-        return nil
-    }
-    public var filePath: String? {
-        return nil
-    }
-    
-    public init(name: String, shortcut: String? , type: ProjectType, remote: ProjectLink?, links: [ProjectLink], groupName: String?) {
+    public init(name: String, shortcut: String? , type: ProjectType, remote: ProjectLink?, links: [ProjectLink], group: Group?) {
         self.name = name
         self.shortcut = shortcut
         self.type = type
         self.remote = remote
         self.links = links
+        self.group = group
     }
 }
 
 
 // MARK: - Helpers
 public extension LaunchProject {
+    var groupName: String? {
+        return group?.name
+    }
+    
+    var groupPath: String? {
+        return group?.path
+    }
+    
+    var folderPath: String? {
+        return group?.path?.appendingPathComponent(name)
+    }
+    
+    var filePath: String? {
+        return folderPath?.appendingPathComponent(fileName)
+    }
+    
     var fileName: String {
         switch type {
         case .package:
@@ -50,6 +54,18 @@ public extension LaunchProject {
 
 
 // MARK: - Dependencies
+extension LaunchProject {
+    public struct Group {
+        public let name: String
+        public let path: String?
+        
+        public init(name: String, path: String?) {
+            self.name = name
+            self.path = path
+        }
+    }
+}
+
 public enum ProjectType {
     case project, package, workspace
 }
