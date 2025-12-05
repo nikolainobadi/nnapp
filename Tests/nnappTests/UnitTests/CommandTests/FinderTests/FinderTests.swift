@@ -17,7 +17,7 @@ struct FinderTests {
         let (factory, shell) = makeTestObjects()
         let context = try factory.makeContext()
         let categoryName = name ?? "categoryName"
-        let category = makeCategory(name: categoryName)
+        let category = makeSwiftDataCategory(name: categoryName)
 
         try context.saveCategory(category)
         try runCategoryCommand(factory, name: name)
@@ -32,8 +32,8 @@ struct FinderTests {
     func opensGroupFolder(info: GroupAndProjectTestInfo) throws {
         let (factory, shell) = makeTestObjects()
         let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup(name: info.name ?? "groupName", shortcut: info.shortcut)
+        let category = makeSwiftDataCategory()
+        let group = makeSwiftDataGroup(name: info.name ?? "groupName", shortcut: info.shortcut)
 
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
@@ -49,9 +49,9 @@ struct FinderTests {
     func opensProjectFolder(info: GroupAndProjectTestInfo) throws {
         let (factory, shell) = makeTestObjects()
         let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup()
-        let project = makeProject(name: info.name ?? "projectName", shortcut: info.shortcut)
+        let category = makeSwiftDataCategory()
+        let group = makeSwiftDataGroup()
+        let project = makeSwiftDataProject(name: info.name ?? "projectName", shortcut: info.shortcut)
 
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)

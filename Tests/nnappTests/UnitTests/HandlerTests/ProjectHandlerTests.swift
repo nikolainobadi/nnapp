@@ -180,7 +180,7 @@ extension ProjectHandlerTests {
     func throwsErrorWhenProjectNameAlreadyExists() throws {
         let (sut, context) = try makeSUT()
         let group = try setupTestGroup(context: context)
-        let existingProject = makeProject(name: projectName)
+        let existingProject = makeSwiftDataProject(name: projectName)
         
         try context.saveProject(existingProject, in: group)
         
@@ -245,7 +245,7 @@ extension ProjectHandlerTests {
     func removesProjectByName() throws {
         let (sut, context) = try makeSUT(permissionResponses: [true])
         let group = try setupTestGroup(context: context)
-        let project = makeProject(name: projectName, shortcut: "testcut")
+        let project = makeSwiftDataProject(name: projectName, shortcut: "testcut")
         
         try context.saveProject(project, in: group)
         
@@ -263,7 +263,7 @@ extension ProjectHandlerTests {
         let (sut, context) = try makeSUT(permissionResponses: [true])
         let group = try setupTestGroup(context: context)
         let shortcut = "testcut"
-        let project = makeProject(name: projectName, shortcut: shortcut)
+        let project = makeSwiftDataProject(name: projectName, shortcut: shortcut)
         
         try context.saveProject(project, in: group)
         
@@ -280,7 +280,7 @@ extension ProjectHandlerTests {
     func promptsUserToSelectProjectWhenNoParameters() throws {
         let (sut, context) = try makeSUT(permissionResponses: [true])
         let group = try setupTestGroup(context: context)
-        let project = makeProject(name: projectName, shortcut: "testcut")
+        let project = makeSwiftDataProject(name: projectName, shortcut: "testcut")
         
         try context.saveProject(project, in: group)
         
@@ -325,7 +325,7 @@ private extension ProjectHandlerTests {
         let factory = MockContextFactory()
         let context = try factory.makeContext()
         let existingCategoryFolder = try tempFolder.createSubfolderIfNeeded(withName: existingCategoryName)
-        let category = makeCategory(name: existingCategoryFolder.name, path: existingCategoryFolder.path)
+        let category = makeSwiftDataCategory(name: existingCategoryFolder.name, path: existingCategoryFolder.path)
         
         try context.saveCategory(category)
         
@@ -369,7 +369,7 @@ let package = Package(
     }
     
     func setupTestGroup(context: CodeLaunchContext) throws -> SwiftDataLaunchGroup {
-        let group = makeGroup(name: existingGroupName)
+        let group = makeSwiftDataGroup(name: existingGroupName)
         let category = try #require(try context.loadCategories().first)
         
         group.category = category

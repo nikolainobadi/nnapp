@@ -45,7 +45,7 @@ extension CreateCategoryTests {
         let existingCategoryFolder = try tempFolder.createSubfolder(named: categoryName)
         let factory = MockContextFactory()
         let context = try factory.makeContext()
-        let category = makeCategory(name: categoryName, path: existingCategoryFolder.path)
+        let category = makeSwiftDataCategory(name: categoryName, path: existingCategoryFolder.path)
 
         try context.saveCategory(category)
         
