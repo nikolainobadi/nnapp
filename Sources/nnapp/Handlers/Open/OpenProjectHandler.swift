@@ -13,7 +13,7 @@ struct OpenProjectHandler {
     private let loader: any LaunchHierarchyLoader
     private let ideLauncher: IDELauncher
     private let terminalManager: TerminalHandler
-    private let urlLauncher: URLLauncher
+    private let urlLauncher: URLHandler
     private let branchSyncChecker: any BranchSyncChecker
     private let branchStatusNotifier: any BranchStatusNotifier
 
