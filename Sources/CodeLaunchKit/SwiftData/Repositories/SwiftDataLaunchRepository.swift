@@ -27,10 +27,12 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, LaunchP
     }
 
     public func loadGroups() throws -> [LaunchGroup] {
+        // TODO: - need to set LaunchProject.category
         return try loadCategories().flatMap(\.groups)
     }
 
     public func loadProjects() throws -> [LaunchProject] {
+        // TODO: - need to set LaunchProject.group
         return try loadGroups().flatMap(\.projects)
     }
 

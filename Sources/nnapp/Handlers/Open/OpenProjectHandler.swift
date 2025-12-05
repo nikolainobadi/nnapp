@@ -77,6 +77,7 @@ extension OpenProjectHandler {
     ///   - terminalOption: Controls terminal launch behavior.
     func openInIDE(_ project: LaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
         guard let folderPath = project.folderPath else {
+            print("fuck you")
             throw CodeLaunchError.missingProject
         }
 

@@ -7,6 +7,7 @@
 
 enum LaunchCategoryMapper {
     static func toDomain(_ category: SwiftDataLaunchCategory) -> LaunchCategory {
+        // TODO: - set LaunchGroup.category and LaunchProject.group
         let categorySummary = LaunchGroup.Category(name: category.name, path: category.path)
         let groups = category.groups.map({ LaunchGroupMapper.toDomain($0, category: categorySummary) })
 

@@ -14,7 +14,13 @@ public struct LaunchProject {
     
     private var group: Group?
     
-    public init(name: String, shortcut: String? , type: ProjectType, remote: ProjectLink?, links: [ProjectLink]) {
+    public init(
+        name: String,
+        shortcut: String? ,
+        type: ProjectType,
+        remote: ProjectLink?,
+        links: [ProjectLink]
+    ) {
         self.name = name
         self.shortcut = shortcut
         self.type = type
