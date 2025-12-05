@@ -7,15 +7,14 @@
 
 import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 
 struct FinderHandler {
     private let shell: any Shell
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let console: any ConsoleOutput
     private let loader: any FinderInfoLoader
 
-    init(shell: any Shell, picker: any CommandLinePicker, loader: any FinderInfoLoader, console: any ConsoleOutput) {
+    init(shell: any Shell, picker: any LaunchPicker, loader: any FinderInfoLoader, console: any ConsoleOutput) {
         self.shell = shell
         self.picker = picker
         self.loader = loader
@@ -36,8 +35,7 @@ extension FinderHandler {
         }
 
         let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
-        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
-        let selection = picker.treeNavigation("Browse and select folder to open", root: root, newScreen: true, showPromptText: false)
+        let selection = picker.treeNavigation("Browse and select folder to open", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
 
         guard let selectedNode = selection else {
             console.printLine("No selection made.")

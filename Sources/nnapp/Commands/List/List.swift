@@ -6,7 +6,6 @@
 //
 
 import ArgumentParser
-import SwiftPickerKit
 
 extension Nnapp {
     struct List: ParsableCommand {

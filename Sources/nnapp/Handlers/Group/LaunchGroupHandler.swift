@@ -7,15 +7,14 @@
 
 import Files
 import CodeLaunchKit
-import SwiftPickerKit
 
 struct LaunchGroupHandler {
     private let store: any LaunchGroupStore
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let folderBrowser: any FolderBrowser
     private let categorySelector: any LaunchGroupCategorySelector
     
-    init(store: any LaunchGroupStore, picker: any CommandLinePicker, folderBrowser: any FolderBrowser, categorySelector: any LaunchGroupCategorySelector) {
+    init(store: any LaunchGroupStore, picker: any LaunchPicker, folderBrowser: any FolderBrowser, categorySelector: any LaunchGroupCategorySelector) {
         self.store = store
         self.picker = picker
         self.folderBrowser = folderBrowser

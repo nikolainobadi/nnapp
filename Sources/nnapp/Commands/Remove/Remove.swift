@@ -5,7 +5,6 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import SwiftPickerKit
 import ArgumentParser
 
 extension Nnapp {

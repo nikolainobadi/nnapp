@@ -7,7 +7,6 @@
 
 import Foundation
 import ArgumentParser
-import SwiftPickerKit
 
 extension Nnapp {
     struct Script: ParsableCommand {

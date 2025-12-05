@@ -7,7 +7,6 @@
 
 import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 import ArgumentParser
 
 @main
@@ -38,7 +37,7 @@ extension Nnapp {
         return contextFactory.makeShell()
     }
     
-    static func makePicker() -> any CommandLinePicker {
+    static func makePicker() -> any LaunchPicker {
         return contextFactory.makePicker()
     }
 
@@ -46,7 +45,7 @@ extension Nnapp {
         return .init(context: try contextFactory.makeContext())
     }
 
-    static func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {
+    static func makeFolderBrowser(picker: any LaunchPicker) -> any FolderBrowser {
         return contextFactory.makeFolderBrowser(picker: picker)
     }
 }
@@ -55,11 +54,11 @@ extension Nnapp {
 // MARK: - Dependencies
 protocol ContextFactory {
     func makeShell() -> any Shell
-    func makePicker() -> any CommandLinePicker
+    func makePicker() -> any LaunchPicker
     func makeContext() throws -> CodeLaunchContext
     func makeConsoleOutput() -> any ConsoleOutput
     func makeFileSystem() -> any FileSystem
-    func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser
+    func makeFolderBrowser(picker: any LaunchPicker) -> any FolderBrowser
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker
     func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier
 }

@@ -6,11 +6,10 @@
 //
 
 import CodeLaunchKit
-import SwiftPickerKit
 
 /// Coordinates list and display operations for CodeLaunch hierarchy.
 struct ListHandler {
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let loader: any LaunchListLoader
     private let console: any ConsoleOutput
 
@@ -19,7 +18,7 @@ struct ListHandler {
     ///   - picker: Utility for prompting user input and selections.
     ///   - context: Data context for loading categories, groups, and projects.
     ///   - console: Console output adapter for displaying information.
-    init(picker: any CommandLinePicker, loader: any LaunchListLoader, console: any ConsoleOutput) {
+    init(picker: any LaunchPicker, loader: any LaunchListLoader, console: any ConsoleOutput) {
         self.picker = picker
         self.loader = loader
         self.console = console
@@ -41,8 +40,7 @@ extension ListHandler {
         }
         
         let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: false) })
-        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
-        let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: root, newScreen: true, showPromptText: false)
+        let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
         
         if let selectedNode = selection {
             displayNodeDetails(selectedNode)
