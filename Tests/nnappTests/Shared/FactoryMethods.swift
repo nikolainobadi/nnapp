@@ -8,8 +8,12 @@
 @testable import CodeLaunchKit
 
 // MARK: - Domain Models
-func makeProject(name: String = "TestProject", shortcut: String? = nil, type: ProjectType = .project, remote: ProjectLink? = nil, links: [ProjectLink] = [], group: LaunchProject.Group? = nil) -> LaunchProject {
+func makeProject(name: String = "TestProject", shortcut: String? = nil, type: ProjectType = .package, remote: ProjectLink? = nil, links: [ProjectLink] = [], group: LaunchProject.Group? = nil) -> LaunchProject {
     return .init(name: name, shortcut: shortcut, type: type, remote: remote, links: links, group: group)
+}
+
+func makeProjectGroup(name: String = "TestGroup", path: String? = "/tmp/testgroup") -> LaunchProject.Group {
+    return .init(name: name, path: path)
 }
 
 func makeProjectLink(name: String = "Website", urlString: String = "https://example.com") -> ProjectLink {

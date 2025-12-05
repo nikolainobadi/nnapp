@@ -15,15 +15,15 @@ public struct DefaultFileSystem {
 
 // MARK: - FileSystem
 extension DefaultFileSystem: FileSystem {
-    public var homeDirectory: Directory {
+    public var homeDirectory: any Directory {
         return FilesDirectoryAdapter(folder: Folder.home)
     }
     
-    public func directory(at path: String) throws -> Directory {
+    public func directory(at path: String) throws -> any Directory {
         return try FilesDirectoryAdapter(folder: Folder(path: path))
     }
     
-    public func desktopDirectory() throws -> Directory {
+    public func desktopDirectory() throws -> any Directory {
         return try directory(at: FileManager.default.homeDirectoryForCurrentUser.path())
     }
 }

@@ -6,8 +6,8 @@
 //
 
 public protocol FileSystem {
-    var homeDirectory: Directory { get }
+    var homeDirectory: any Directory { get }
     
-    func directory(at path: String) throws -> Directory
-    func desktopDirectory() throws -> Directory
+    func directory(at path: String) throws -> any Directory
+    func desktopDirectory() throws -> any Directory
 }
