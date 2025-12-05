@@ -6,6 +6,7 @@
 //
 
 import NnShellKit
+import CodeLaunchKit
 
 struct DefaultBranchStatusNotifier {
     private let shell: any Shell
@@ -18,6 +19,33 @@ struct DefaultBranchStatusNotifier {
 
 // MARK: - BranchStatusNotifier
 extension DefaultBranchStatusNotifier: BranchStatusNotifier {
+    func notify(status: LaunchBranchStatus, for project: LaunchProject) {
+        let title = "Branch Status Alert"
+        let message: String
+
+        switch status {
+        case .behind:
+            message = "\(project.name) is BEHIND the remote branch"
+        case .diverged:
+            message = "\(project.name) has DIVERGED from the remote branch"
+        }
+
+        let script = """
+        display notification "\(message)" with title "\(title)" sound name "default"
+        """
+
+        print("preparing to notify with message:", message)
+        do {
+            let _ = try shell.runAppleScript(script: script)
+        } catch {
+            print("unable to send notification", error.localizedDescription)
+        }
+    }
+}
+
+
+// MARK: - Old
+extension DefaultBranchStatusNotifier {
     func notify(status: LaunchBranchStatus, for project: SwiftDataLaunchProject) {
         let title = "Branch Status Alert"
         let message: String

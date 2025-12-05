@@ -9,21 +9,22 @@ import Files
 import NnShellKit
 import GitShellKit
 import GitCommandGen
+import CodeLaunchKit
 
 struct DefaultBranchSyncChecker {
     private let shell: any Shell
-    private let gitShell: GitShellAdapter
+    private let gitShell: any GitShell
 
     init(shell: any Shell) {
         self.shell = shell
-        self.gitShell = .init(shell: shell)
+        self.gitShell = GitShellAdapter(shell: shell)
     }
 }
 
 
 // MARK: - BranchSyncChecker
 extension DefaultBranchSyncChecker: BranchSyncChecker {
-    func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus? {
+    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
         // Skip if project doesn't have a remote
         guard project.remote != nil else {
             print("no remote")
@@ -117,4 +118,65 @@ private extension DefaultBranchSyncChecker {
 // MARK: - Dependencies
 enum BranchSyncStatus: String, CaseIterable {
     case behind, ahead, nsync, diverged, undetermined, noRemoteBranch
+}
+
+
+// MARK: - OLD
+extension DefaultBranchSyncChecker {
+    func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus? {
+        // Skip if project doesn't have a remote
+        guard project.remote != nil else {
+            print("no remote")
+            return nil
+        }
+
+        // Skip if project folder doesn't exist
+        guard let folderPath = project.folderPath, let folder = try? Folder(path: folderPath) else {
+            print("could not find folder")
+            return nil
+        }
+
+        // Skip if Git repo doesn't exist or has no remote
+        guard (try? gitShell.localGitExists(at: folder.path)) == true, (try? gitShell.remoteExists(path: folder.path)) == true else {
+            print("no local or remote repo")
+            return nil
+        }
+        
+        let originResult = try? gitShell.runGitCommandWithOutput(.fetchOrigin, path: folder.path)
+        
+        if originResult == nil {
+            print("failed to fetch origin for \(project.name)")
+            return nil
+        }
+
+        // Get current branch name
+        guard let currentBranch = try? shell.bash(makeGitCommand(.getCurrentBranchName, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
+            print("could not find current branch")
+            return nil
+        }
+
+        // Check current branch sync status
+        if let currentStatus = try? getSyncStatus(for: currentBranch, at: folder.path) {
+            if currentStatus == .behind {
+                return .behind
+            } else if currentStatus == .diverged {
+                return .diverged
+            }
+        } else {
+            print("could not get sync status")
+        }
+
+        // Check main branch sync status if not already on main
+        if currentBranch != "main" {
+            if let mainStatus = try? getSyncStatus(for: "main", at: folder.path) {
+                if mainStatus == .behind {
+                    return .behind
+                } else if mainStatus == .diverged {
+                    return .diverged
+                }
+            }
+        }
+
+        return nil
+    }
 }
