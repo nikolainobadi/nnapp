@@ -10,9 +10,9 @@ import CodeLaunchKit
 struct LaunchCategoryHandler {
     private let store: any CategoryStore
     private let picker: any LaunchPicker
-    private let folderBrowser: any FolderBrowser
+    private let folderBrowser: any DirectoryBrowser
     
-    init(store: any CategoryStore, picker: any LaunchPicker, folderBrowser: any FolderBrowser) {
+    init(store: any CategoryStore, picker: any LaunchPicker, folderBrowser: any DirectoryBrowser) {
         self.store = store
         self.picker = picker
         self.folderBrowser = folderBrowser
@@ -107,7 +107,7 @@ private extension LaunchCategoryHandler {
     }
     
     func selectFolder(path: String?, browsePrompt: String) throws -> Directory {
-        return try folderBrowser.browseForFolder(prompt: browsePrompt, startPath: path)
+        return try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: path)
     }
     
     func selectAssignCategoryType() throws -> AssignCategoryType {

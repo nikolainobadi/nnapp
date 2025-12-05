@@ -12,7 +12,7 @@ struct LaunchProjectHandler {
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
     private let store: any LaunchProjectStore
-    private let folderBrowser: any FolderBrowser
+    private let folderBrowser: any DirectoryBrowser
     private let groupSelector: any LaunchProjectGroupSelector
     
     init(
@@ -20,8 +20,8 @@ struct LaunchProjectHandler {
         store: any LaunchProjectStore,
         picker: any LaunchPicker,
         fileSystem: any FileSystem,
-        folderBrowser: any FolderBrowser,
-        groupSelector: any LaunchProjectGroupSelector,
+        folderBrowser: any DirectoryBrowser,
+        groupSelector: any LaunchProjectGroupSelector
     ) {
         self.shell = shell
         self.store = store

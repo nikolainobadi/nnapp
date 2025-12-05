@@ -45,7 +45,7 @@ extension Nnapp {
         return .init(context: try contextFactory.makeContext())
     }
 
-    static func makeFolderBrowser(picker: any LaunchPicker) -> any FolderBrowser {
+    static func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser {
         return contextFactory.makeFolderBrowser(picker: picker)
     }
 }
@@ -58,7 +58,7 @@ protocol ContextFactory {
     func makeFileSystem() -> any FileSystem
     func makeConsoleOutput() -> any ConsoleOutput
     func makeContext() throws -> CodeLaunchContext
-    func makeFolderBrowser(picker: any LaunchPicker) -> any FolderBrowser
+    func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser
     func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker
     func makeBranchStatusNotifier(shell: any LaunchShell) -> any BranchStatusNotifier
 }

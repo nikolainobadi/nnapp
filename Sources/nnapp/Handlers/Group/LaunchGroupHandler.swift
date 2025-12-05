@@ -10,14 +10,14 @@ import CodeLaunchKit
 struct LaunchGroupHandler {
     private let store: any LaunchGroupStore
     private let picker: any LaunchPicker
-    private let folderBrowser: any FolderBrowser
+    private let folderBrowser: any DirectoryBrowser
     private let categorySelector: any LaunchGroupCategorySelector
     private let fileSystem: any FileSystem
     
     init(
         store: any LaunchGroupStore,
         picker: any LaunchPicker,
-        folderBrowser: any FolderBrowser,
+        folderBrowser: any DirectoryBrowser,
         categorySelector: any LaunchGroupCategorySelector,
         fileSystem: any FileSystem
     ) {
@@ -215,7 +215,7 @@ private extension LaunchGroupHandler {
             return try picker.requiredSingleSelection("Select a folder", items: availableFolders.map({ DirectoryContainer(directory: $0) }), showSelectedItemText: false).directory
         }
 
-        return try folderBrowser.browseForFolder(prompt: "Browse to select a folder to import as a Group")
+        return try folderBrowser.browseForDirectory(prompt: "Browse to select a folder to import as a Group")
     }
     
     func loadAllGroups() throws -> [LaunchGroup] {

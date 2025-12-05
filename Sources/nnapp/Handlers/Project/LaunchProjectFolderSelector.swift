@@ -10,7 +10,7 @@ import CodeLaunchKit
 struct LaunchProjectFolderSelector {
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
-    private let folderBrowser: any FolderBrowser
+    private let folderBrowser: any DirectoryBrowser
 
     /// Initializes a new folder selector using the provided user input picker.
     /// - Parameters:
@@ -21,7 +21,7 @@ struct LaunchProjectFolderSelector {
     init(
         picker: any LaunchPicker,
         fileSystem: any FileSystem,
-        folderBrowser: any FolderBrowser
+        folderBrowser: any DirectoryBrowser
     ) {
         self.picker = picker
         self.fileSystem = fileSystem
@@ -69,7 +69,7 @@ extension LaunchProjectFolderSelector {
             return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
         }
 
-        let folder = try folderBrowser.browseForFolder(
+        let folder = try folderBrowser.browseForDirectory(
             prompt: "Browse to select a folder to use for your Project",
             startPath: groupPath
         )

@@ -31,8 +31,8 @@ final class DefaultContextFactory: ContextFactory {
         return DefaultFileSystem()
     }
 
-    func makeFolderBrowser(picker: any LaunchPicker) -> any FolderBrowser {
-        return DefaultFolderBrowser(
+    func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser {
+        return DefaultDirectoryBrowser(
             picker: picker,
             fileSystem: makeFileSystem(),
             homeDirectoryURL: FileManager.default.homeDirectoryForCurrentUser

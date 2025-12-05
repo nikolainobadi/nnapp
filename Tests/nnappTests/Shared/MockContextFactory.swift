@@ -23,9 +23,9 @@ final class MockContextFactory {
     private let uniqueId: String
     private let branchSyncChecker: (any BranchSyncChecker)?
     private let branchStatusNotifier: (any BranchStatusNotifier)?
-    private let folderBrowser: any FolderBrowser
+    private let folderBrowser: any DirectoryBrowser
 
-    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, branchStatusNotifier: (any BranchStatusNotifier)? = nil, folderBrowser: (any FolderBrowser)? = nil) {
+    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, branchStatusNotifier: (any BranchStatusNotifier)? = nil, folderBrowser: (any DirectoryBrowser)? = nil) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
@@ -76,7 +76,7 @@ extension MockContextFactory: ContextFactory {
         return MockConsoleOutput()
     }
 
-    func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {
+    func makeFolderBrowser(picker: any CommandLinePicker) -> any DirectoryBrowser {
         return folderBrowser
     }
 
@@ -127,14 +127,14 @@ final class MockBranchStatusNotifier: BranchStatusNotifier {
     }
 }
 
-final class MockFolderBrowser: FolderBrowser {
+final class MockFolderBrowser: DirectoryBrowser {
     private(set) var browseCallCount = 0
     private(set) var capturedPrompt: String?
     private(set) var capturedStartPath: String?
-    var folderToReturn: Folder?
+    var folderToReturn: Directory?
     var error: Error?
 
-    func browseForFolder(prompt: String, startPath: String?) throws -> Folder {
+    func browseForDirectory(prompt: String, startPath: String?) throws -> Directory {
         browseCallCount += 1
         capturedPrompt = prompt
         capturedStartPath = startPath
@@ -147,6 +147,7 @@ final class MockFolderBrowser: FolderBrowser {
             return folderToReturn
         }
 
-        return try Folder.temporary.createSubfolder(named: "MockFolderBrowser-\(UUID().uuidString)")
+        let folder = try Folder.temporary.createSubfolder(named: "MockFolderBrowser-\(UUID().uuidString)")
+        return FilesDirectoryAdapter(folder: folder)
     }
 }
