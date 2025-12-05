@@ -38,8 +38,13 @@ public struct LaunchProject {
 
 // MARK: - Helpers
 public extension LaunchProject {
-    static func new(name: String, shortcut: String? = nil, type: ProjectType, remote: ProjectLink? = nil, links: [ProjectLink] = [], groupName: String? = nil) -> LaunchProject {
-        return .init(name: name, shortcut: shortcut, type: type, remote: remote, links: links, groupName: groupName)
+    var fileName: String {
+        switch type {
+        case .package:
+            return "Package.swift"
+        default:
+            return "\(name).\(type.fileExtension)"
+        }
     }
 }
 
@@ -58,6 +63,17 @@ public extension ProjectType {
             return "Swift Package"
         case .workspace:
             return "XCWorkspace"
+        }
+    }
+    
+    var fileExtension: String {
+        switch self {
+        case .project:
+            return "xcodeproj"
+        case .package:
+            return "swift"
+        case .workspace:
+            return "xcworkspace"
         }
     }
 }
