@@ -144,6 +144,6 @@ private extension LaunchProjectHandler {
 // MARK: - Extension Dependencies
 private extension LaunchProject {
     init(info: LaunchProjectInfo, type: ProjectType) {
-        self.init(name: info.name, shortcut: info.shortcut, type: type, remote: info.remote, links: info.otherLinks, group: nil)
+        self.init(name: info.name, shortcut: info.shortcut, type: type, remote: info.remote, links: info.otherLinks)
     }
 }

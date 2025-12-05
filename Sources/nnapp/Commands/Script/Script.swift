@@ -30,7 +30,7 @@ extension Nnapp.Script {
         )
 
         func run() throws {
-            if let script = try Nnapp.makeContext().loadLaunchScript() {
+            if let script = try Nnapp.makeRepository().loadLaunchScript() {
                 print(script)
             } else {
                 print("No launch script configured")
@@ -51,7 +51,7 @@ extension Nnapp.Script {
 
         func run() throws {
             let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
+            let context = try Nnapp.makeRepository()
             let script = try script ?? picker.getRequiredInput("Enter the launch script to run with `nnapp open`")
             
             context.saveLaunchScript(script)
@@ -69,7 +69,7 @@ extension Nnapp.Script {
 
         func run() throws {
             let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
+            let context = try Nnapp.makeRepository()
 
             guard let script = context.loadLaunchScript() else {
                 print("No launch script configured")

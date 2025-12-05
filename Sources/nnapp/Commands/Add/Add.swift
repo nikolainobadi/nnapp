@@ -109,7 +109,7 @@ extension Nnapp.Add {
         func run() throws {
             // TODO: - should encapsulate this logic
             let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
+            let context = try Nnapp.makeRepository()
             let existingList = context.loadProjectLinkNames()
             let name = try name ?? picker.getRequiredInput("Enter the name of your new Project Link option.")
 

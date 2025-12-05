@@ -87,12 +87,6 @@ extension AssignGroupType: DisplayablePickerItem {
 
 
 // MARK: - OLD
-//extension ProjectFolder: DisplayablePickerItem {
-//    var displayName: String {
-//        return name
-//    }
-//}
-
 extension SwiftDataProjectLink: DisplayablePickerItem {
     public var displayName: String {
         return "\(name.bold) - \(urlString)"

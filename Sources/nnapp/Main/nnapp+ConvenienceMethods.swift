@@ -57,18 +57,13 @@ extension Nnapp {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
-        let ideLauncher = IDELauncher(shell: shell, picker: picker)
-        let terminalManager = TerminalManager(shell: shell, loader: repository)
-        let urlLauncher = URLLauncher(shell: shell, picker: picker)
         let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
         let branchStatusNotifier = contextFactory.makeBranchStatusNotifier(shell: shell)
 
         return .init(
+            shell: shell,
             picker: picker,
             loader: repository,
-            ideLauncher: ideLauncher,
-            terminalManager: terminalManager,
-            urlLauncher: urlLauncher,
             branchSyncChecker: branchSyncChecker,
             branchStatusNotifier: branchStatusNotifier
         )

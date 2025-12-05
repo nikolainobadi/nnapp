@@ -90,7 +90,7 @@ extension Nnapp.Remove {
         func run() throws {
             // TODO: - encapsulate logic
             let picker = Nnapp.makePicker()
-            let context = try Nnapp.makeContext()
+            let context = try Nnapp.makeRepository()
             let existingNames = context.loadProjectLinkNames()
 
             if existingNames.isEmpty {

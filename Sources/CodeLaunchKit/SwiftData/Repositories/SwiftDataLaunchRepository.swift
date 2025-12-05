@@ -7,12 +7,11 @@
 
 import Foundation
 
-/// SwiftData-backed repository that translates between persistence models and domain models.
 public final class SwiftDataLaunchRepository {
     private let context: CodeLaunchContext
-    private let categoryMapper = LaunchCategoryMapper()
-    private let groupMapper = LaunchGroupMapper()
-    private let projectMapper = LaunchProjectMapper()
+    private let categoryMapper = LaunchCategoryMapper.self
+    private let groupMapper = LaunchGroupMapper.self
+    private let projectMapper = LaunchProjectMapper.self
 
     public init(context: CodeLaunchContext) {
         self.context = context
@@ -98,6 +97,10 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, LaunchProj
 
         try context.deleteProject(storedProject)
     }
+    
+    public func saveProjectLinkNames(_ names: [String]) {
+        context.saveProjectLinkNames(names)
+    }
 
     public func saveLaunchScript(_ script: String) {
         context.saveLaunchScript(script)
@@ -112,19 +115,19 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, LaunchProj
 // MARK: - Helpers
 private extension SwiftDataLaunchRepository {
     func fetchCategory(named name: String) throws -> SwiftDataLaunchCategory? {
-        return try context.loadCategories().first { $0.name.lowercased() == name.lowercased() }
+        return try context.loadCategories().first(where: { $0.name.matches(name) })
     }
 
     func fetchGroup(named name: String, categoryName: String?) throws -> SwiftDataLaunchGroup? {
         let groups = try context.loadGroups()
 
         return groups.first { group in
-            guard group.name.lowercased() == name.lowercased() else {
+            guard group.name.matches(name) else {
                 return false
             }
 
             if let categoryName {
-                return group.category?.name.lowercased() == categoryName.lowercased()
+                return categoryName.matches(group.category?.name)
             }
 
             return true
@@ -135,15 +138,15 @@ private extension SwiftDataLaunchRepository {
         let projects = try context.loadProjects()
 
         return projects.first { project in
-            let nameMatches = project.name.lowercased() == name.lowercased()
+            let nameMatches = project.name.matches(name)
             let shortcutMatches = {
                 guard let shortcut, let projectShortcut = project.shortcut else { return false }
-                return projectShortcut.lowercased() == shortcut.lowercased()
+                return shortcut.matches(projectShortcut)
             }()
 
             let groupMatches: Bool
             if let groupName {
-                groupMatches = project.group?.name.lowercased() == groupName.lowercased()
+                groupMatches = groupName.matches(project.group?.name)
             } else {
                 groupMatches = true
             }

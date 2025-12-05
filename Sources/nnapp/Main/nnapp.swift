@@ -14,7 +14,7 @@ import ArgumentParser
 struct Nnapp: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Utility to manage Xcode Projects and Swift Packages for quick launching with command-line.",
-        version: "v0.6.0",
+        version: "0.6.0",
         subcommands: [
             Add.self,
             Create.self,
@@ -41,21 +41,9 @@ extension Nnapp {
     static func makePicker() -> any CommandLinePicker {
         return contextFactory.makePicker()
     }
-    
-    static func makeContext() throws -> CodeLaunchContext {
-        return try contextFactory.makeContext()
-    }
 
     static func makeRepository() throws -> SwiftDataLaunchRepository {
-        return .init(context: try makeContext())
-    }
-    
-    static func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
-        return contextFactory.makeGroupCategorySelector(picker: picker, context: context)
-    }
-    
-    static func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
-        return contextFactory.makeProjectGroupSelector(picker: picker, context: context)
+        return .init(context: try contextFactory.makeContext())
     }
 
     static func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {
@@ -71,8 +59,6 @@ protocol ContextFactory {
     func makeContext() throws -> CodeLaunchContext
     func makeConsoleOutput() -> any ConsoleOutput
     func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser
-    func makeGroupCategorySelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector
-    func makeProjectGroupSelector(picker: CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker
     func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier
 }

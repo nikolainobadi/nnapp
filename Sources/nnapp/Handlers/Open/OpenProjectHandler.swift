@@ -5,33 +5,33 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import NnShellKit
 import CodeLaunchKit
 import SwiftPickerKit
 
 /// Coordinates project opening operations by delegating to specialized components.
 struct OpenProjectHandler {
     private let picker: any CommandLinePicker
-    private let loader: any OpenInfoLoader
+    private let loader: any LaunchHierarchyLoader
     private let ideLauncher: IDELauncher
     private let terminalManager: TerminalManager
     private let urlLauncher: URLLauncher
     private let branchSyncChecker: any BranchSyncChecker
     private let branchStatusNotifier: any BranchStatusNotifier
 
+    typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(
+        shell: any Shell,
         picker: any CommandLinePicker,
-        loader: any OpenInfoLoader,
-        ideLauncher: IDELauncher,
-        terminalManager: TerminalManager,
-        urlLauncher: URLLauncher,
+        loader: any Loader,
         branchSyncChecker: any BranchSyncChecker,
         branchStatusNotifier: any BranchStatusNotifier
     ) {
         self.picker = picker
         self.loader = loader
-        self.ideLauncher = ideLauncher
-        self.terminalManager = terminalManager
-        self.urlLauncher = urlLauncher
+        self.ideLauncher = .init(shell: shell, picker: picker)
+        self.terminalManager = .init(shell: shell, loader: loader)
+        self.urlLauncher = .init(shell: shell, picker: picker)
         self.branchSyncChecker = branchSyncChecker
         self.branchStatusNotifier = branchStatusNotifier
     }
@@ -114,81 +114,10 @@ enum LaunchBranchStatus {
     case behind, diverged
 }
 
-protocol OpenInfoLoader {
-    func loadGroups() throws -> [LaunchGroup]
-    func loadProjects() throws -> [LaunchProject]
-}
-
 protocol BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
-    func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus?
 }
 
 protocol BranchStatusNotifier {
     func notify(status: LaunchBranchStatus, for project: LaunchProject)
-    func notify(status: LaunchBranchStatus, for project: SwiftDataLaunchProject)
-}
-
-
-// MARK: - OLD
-extension OpenProjectHandler {
-    /// Resolves a `LaunchProject` using either a shortcut or interactive selection.
-    /// - Parameters:
-    ///   - shortcut: Optional shortcut to identify the project or group.
-    ///   - useGroupShortcut: Whether to treat the shortcut as a group identifier.
-    /// - Returns: The selected `LaunchProject`.
-    func selectProject(shortcut: String?, useGroupShortcut: Bool) throws -> SwiftDataLaunchProject {
-        fatalError() // TODO: -
-//        let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut of the app you would like to open")
-//        
-//        if useGroupShortcut {
-//            let groups = try context.loadGroups()
-//            guard let group = groups.first(where: { shortcut.matches($0.shortcut) }) else {
-//                throw CodeLaunchError.missingGroup
-//            }
-//            
-//            return try picker.requiredSingleSelection("Select a project", items: group.projects)
-//        } else {
-//            let projects = try context.loadProjects()
-//            
-//            guard let project = projects.first(where: { shortcut.matches($0.shortcut) }) else {
-//                throw CodeLaunchError.missingProject
-//            }
-//            
-//            return project
-//        }
-    }
-    
-    /// Opens the project in Xcode or VSCode, optionally launching terminal in the project directory.
-    /// - Parameters:
-    ///   - project: The project to open.
-    ///   - launchType: Whether to open in Xcode or VSCode.
-    ///   - terminalOption: Controls terminal launch behavior.
-    func openInIDE(_ project: SwiftDataLaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
-        guard let folderPath = project.folderPath else {
-            throw CodeLaunchError.missingProject
-        }
-
-        try ideLauncher.openInIDE(project, launchType: launchType)
-        terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
-
-        if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
-            print("found status, preparing to notify")
-            branchStatusNotifier.notify(status: status, for: project)
-        } else {
-            print("\(project.name) is up to date")
-        }
-    }
-    
-    /// Opens the remote repository URL in the browser.
-    /// - Parameter project: The project whose remote URL to open.
-    func openRemoteURL(for project: SwiftDataLaunchProject) throws {
-        try urlLauncher.openRemoteURL(remote: project.remote)
-    }
-
-    /// Opens one of the project's custom links, prompting if multiple exist.
-    /// - Parameter project: The project whose link to open.
-    func openProjectLink(for project: SwiftDataLaunchProject) throws {
-        try urlLauncher.openProjectLink(links: project.links)
-    }
 }

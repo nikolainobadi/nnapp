@@ -7,4 +7,4 @@
 
 import CodeLaunchKit
 
-extension SwiftDataLaunchRepository: OpenInfoLoader, ScriptLoader { }
+extension SwiftDataLaunchRepository: ScriptLoader { }
