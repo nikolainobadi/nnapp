@@ -7,6 +7,7 @@
 
 import NnShellKit
 import Foundation
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Default implementation of the `ContextFactory` protocol used by the `Nnapp` CLI.

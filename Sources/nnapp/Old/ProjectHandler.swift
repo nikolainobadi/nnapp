@@ -53,17 +53,17 @@ extension ProjectHandler {
     ///   - isMainProject: Whether this is the main project for the group (used for terminal launches).
     ///   - fromDesktop: Whether to filter and select from valid projects on the Desktop.
     func addProject(path: String?, group: String?, shortcut: String?, isMainProject: Bool, fromDesktop: Bool) throws {
-        let selectedGroup = try groupSelector.getGroup(named: group)
-        let projectFolder = try selectProjectFolder(path: path, group: selectedGroup, fromDesktop: fromDesktop)
-        let info = try selectProjectInfo(folder: projectFolder.folder, shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
-        let project = SwiftDataLaunchProject(name: info.name, shortcut: info.shortcut, type: projectFolder.type, remote: info.remote, links: info.otherLinks)
-        
-        if isMainProject || (selectedGroup.shortcut == nil && picker.getPermission("Is this the main project of \(selectedGroup.name)?")) {
-            selectedGroup.shortcut = info.shortcut
-        }
-        
-        try moveFolderIfNecessary(projectFolder.folder, parentPath: selectedGroup.path)
-        try context.saveProject(project, in: selectedGroup)
+//        let selectedGroup = try groupSelector.getGroup(named: group)
+//        let projectFolder = try selectProjectFolder(path: path, group: selectedGroup, fromDesktop: fromDesktop)
+//        let info = try selectProjectInfo(folder: projectFolder.folder, shortcut: shortcut, group: selectedGroup, isMainProject: isMainProject)
+//        let project = SwiftDataLaunchProject(name: info.name, shortcut: info.shortcut, type: projectFolder.type, remote: info.remote, links: info.otherLinks)
+//        
+//        if isMainProject || (selectedGroup.shortcut == nil && picker.getPermission("Is this the main project of \(selectedGroup.name)?")) {
+//            selectedGroup.shortcut = info.shortcut
+//        }
+//        
+//        try moveFolderIfNecessary(projectFolder.folder, parentPath: selectedGroup.path)
+//        try context.saveProject(project, in: selectedGroup)
     }
 }
 
@@ -86,17 +86,17 @@ extension ProjectHandler {
 
 // MARK: - Private Methods
 private extension ProjectHandler {
-    func selectProjectFolder(path: String?, group: SwiftDataLaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
-        let folderSelector = ProjectFolderSelector(picker: picker, folderBrowser: folderBrowser, desktopPath: desktopPath)
-        
-        return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
-    }
+//    func selectProjectFolder(path: String?, group: SwiftDataLaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
+//        let folderSelector = ProjectFolderSelector(picker: picker, folderBrowser: folderBrowser, desktopPath: desktopPath)
+//        
+//        return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
+//    }
     
-    func selectProjectInfo(folder: Folder, shortcut: String?, group: SwiftDataLaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
-        let infoSelector = ProjectInfoSelector(picker: picker, gitShell: gitShell, context: context)
-        
-        return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
-    }
+//    func selectProjectInfo(folder: Folder, shortcut: String?, group: SwiftDataLaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
+//        let infoSelector = ProjectInfoSelector(picker: picker, gitShell: gitShell, context: context)
+//        
+//        return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
+//    }
     
     /// Moves a folder into the group folder if not already present.
     func moveFolderIfNecessary(_ folder: Folder, parentPath: String?) throws {

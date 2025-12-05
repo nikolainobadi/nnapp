@@ -39,15 +39,15 @@ extension ProjectInfoSelector {
     ///   - group: The group this project will belong to.
     ///   - isMainProject: Indicates whether this project is the group's primary launch target.
     /// - Returns: A `ProjectInfo` struct with the collected input.
-    func selectProjectInfo(folder: Folder, shortcut: String?, group: SwiftDataLaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
-        try validateName(folder.name)
-        let shortcut = try getShortcut(shortcut: shortcut, group: group, isMainProject: isMainProject)
-        try validateShortcut(shortcut)
-        let remote = getRemote(folder: folder)
-        let otherLinks = getOtherLinks()
-
-        return .init(name: folder.name, shortcut: shortcut, remote: remote, otherLinks: otherLinks)
-    }
+//    func selectProjectInfo(folder: Folder, shortcut: String?, group: SwiftDataLaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
+//        try validateName(folder.name)
+//        let shortcut = try getShortcut(shortcut: shortcut, group: group, isMainProject: isMainProject)
+//        try validateShortcut(shortcut)
+//        let remote = getRemote(folder: folder)
+//        let otherLinks = getOtherLinks()
+//
+//        return .init(name: folder.name, shortcut: shortcut, remote: remote, otherLinks: otherLinks)
+//    }
 }
 
 

@@ -37,45 +37,45 @@ extension ProjectFolderSelector {
     ///   - group: The group the project will belong to (used for default folder lookup).
     ///   - fromDesktop: Whether to filter and select from valid projects on the Desktop.
     /// - Returns: A validated `ProjectFolder` containing the resolved folder and type.
-    func selectProjectFolder(path: String?, group: SwiftDataLaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
-        if let path, let folder = try? Folder(path: path) {
-            let projectType = try getProjectType(folder: folder)
-            return .init(folder: folder, type: projectType)
-        }
-        
-        // Handle --from-desktop flag
-        if fromDesktop {
-            let desktopFolders = try getDesktopProjectFolders()
-            
-            guard !desktopFolders.isEmpty else {
-                print("No valid Xcode projects or Swift packages found on Desktop")
-                throw CodeLaunchError.noProjectInFolder
-            }
-            
-            return try picker.requiredSingleSelection("Select a project from Desktop", items: desktopFolders)
-        }
-
-        guard let groupPath = group.path else {
-            print("unable to resolve local path for \(group.name)")
-            throw CodeLaunchError.missingGroup
-        }
-
-        let groupFolder = try Folder(path: groupPath)
-        let availableFolders = getAvailableSubfolders(group: group, folder: groupFolder)
-
-        if !availableFolders.isEmpty,
-           picker.getPermission("Would you like to select a project from the \(groupFolder.name) folder?") {
-            return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
-        }
-
-        let folder = try folderBrowser.browseForFolder(
-            prompt: "Browse to select a folder to use for your Project",
-            startPath: groupPath
-        )
-        let projectType = try getProjectType(folder: folder)
-
-        return .init(folder: folder, type: projectType)
-    }
+//    func selectProjectFolder(path: String?, group: SwiftDataLaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
+//        if let path, let folder = try? Folder(path: path) {
+//            let projectType = try getProjectType(folder: folder)
+//            return .init(folder: folder, type: projectType)
+//        }
+//        
+//        // Handle --from-desktop flag
+//        if fromDesktop {
+//            let desktopFolders = try getDesktopProjectFolders()
+//            
+//            guard !desktopFolders.isEmpty else {
+//                print("No valid Xcode projects or Swift packages found on Desktop")
+//                throw CodeLaunchError.noProjectInFolder
+//            }
+//            
+//            return try picker.requiredSingleSelection("Select a project from Desktop", items: desktopFolders)
+//        }
+//
+//        guard let groupPath = group.path else {
+//            print("unable to resolve local path for \(group.name)")
+//            throw CodeLaunchError.missingGroup
+//        }
+//
+//        let groupFolder = try Folder(path: groupPath)
+//        let availableFolders = getAvailableSubfolders(group: group, folder: groupFolder)
+//
+//        if !availableFolders.isEmpty,
+//           picker.getPermission("Would you like to select a project from the \(groupFolder.name) folder?") {
+//            return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
+//        }
+//
+//        let folder = try folderBrowser.browseForFolder(
+//            prompt: "Browse to select a folder to use for your Project",
+//            startPath: groupPath
+//        )
+//        let projectType = try getProjectType(folder: folder)
+//
+//        return .init(folder: folder, type: projectType)
+//    }
 }
 
 
@@ -96,28 +96,28 @@ private extension ProjectFolderSelector {
     }
 
     /// Returns a list of valid project subfolders within the group folder that are not already registered.
-    func getAvailableSubfolders(group: SwiftDataLaunchGroup, folder: Folder) -> [ProjectFolder] {
-        return folder.subfolders.compactMap { subFolder in
-            guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
-                  let projectType = try? getProjectType(folder: subFolder) else {
-                return nil
-            }
-
-            return .init(folder: subFolder, type: projectType)
-        }
-    }
+//    func getAvailableSubfolders(group: SwiftDataLaunchGroup, folder: Folder) -> [ProjectFolder] {
+//        return folder.subfolders.compactMap { subFolder in
+//            guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
+//                  let projectType = try? getProjectType(folder: subFolder) else {
+//                return nil
+//            }
+//
+//            return .init(folder: subFolder, type: projectType)
+//        }
+//    }
     
     /// Returns a list of valid Xcode projects and Swift packages from the user's Desktop.
-    func getDesktopProjectFolders() throws -> [ProjectFolder] {
-        let desktopFolder = try Folder(path: desktopPath)
-        
-        return desktopFolder.subfolders.compactMap { subFolder in
-            // Only include folders that contain valid Xcode projects or Swift packages
-            guard let projectType = try? getProjectType(folder: subFolder) else {
-                return nil
-            }
-            
-            return .init(folder: subFolder, type: projectType)
-        }
-    }
+//    func getDesktopProjectFolders() throws -> [ProjectFolder] {
+//        let desktopFolder = try Folder(path: desktopPath)
+//        
+//        return desktopFolder.subfolders.compactMap { subFolder in
+//            // Only include folders that contain valid Xcode projects or Swift packages
+//            guard let projectType = try? getProjectType(folder: subFolder) else {
+//                return nil
+//            }
+//            
+//            return .init(folder: subFolder, type: projectType)
+//        }
+//    }
 }
