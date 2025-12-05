@@ -33,6 +33,11 @@ final class DefaultContextFactory: ContextFactory {
         return DefaultConsoleOutput()
     }
 
+    /// Provides the default file system implementation backed by `Files`.
+    func makeFileSystem() -> any FileSystem {
+        return DefaultFileSystem()
+    }
+
     /// Creates a folder browser for selecting folders via tree navigation.
     /// - Parameter picker: Picker used to drive the interactive browsing experience.
     func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {

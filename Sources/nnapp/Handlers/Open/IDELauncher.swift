@@ -5,20 +5,19 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import Files
-import Foundation
 import NnShellKit
 import GitShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 
 struct IDELauncher {
     private let shell: any Shell
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
+    private let fileSystem: any FileSystem
     
-    init(shell: any Shell, picker: any CommandLinePicker) {
+    init(shell: any Shell, picker: any LaunchPicker, fileSystem: any FileSystem) {
         self.shell = shell
         self.picker = picker
+        self.fileSystem = fileSystem
     }
 }
 
@@ -47,8 +46,7 @@ private extension IDELauncher {
     /// Clones the project repo if it doesn't exist locally and a remote is available.
     func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
         do {
-            
-            _ = try Folder(path: folderPath) // already exists
+            _ = try fileSystem.directory(at: folderPath) // already exists
         } catch {
             guard let remote = project.remote,
                   let groupPath = project.groupPath,
@@ -58,13 +56,13 @@ private extension IDELauncher {
                 throw CodeLaunchError.noRemoteRepository
             }
             
-            try picker.requiredPermission(prompt: """
+            let prompt = """
             Unable to locate \(project.fileName.green) at path \(filePath.yellow)
             Would you like to fetch it from \(remote.name.green) - \(remote.urlString.yellow)?
-            """)
+            """
             
-            let cloneCommand = makeGitCommand(.clone(url: remote.urlString), path: groupPath)
-            try shell.runAndPrint(bash: cloneCommand)
+            try picker.requiredPermission(prompt)
+            try shell.runAndPrint(bash: makeGitCommand(.clone(url: remote.urlString), path: groupPath))
         }
     }
 }

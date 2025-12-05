@@ -22,7 +22,8 @@ private extension IDELauncherTests {
     func makeSUT() -> (sut: IDELauncher, shell: MockShell, picker: MockSwiftPicker) {
         let shell = MockShell()
         let picker = MockSwiftPicker()
-        let sut = IDELauncher(shell: shell, picker: picker)
+        let fileSystem = FilesFileSystem()
+        let sut = IDELauncher(shell: shell, picker: picker, fileSystem: fileSystem)
         
         return (sut, shell, picker)
     }

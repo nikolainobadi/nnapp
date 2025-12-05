@@ -54,18 +54,21 @@ extension Nnapp {
     }
 
     static func makeOpenManager() throws -> OpenProjectHandler {
-        let shell = makeShell()
-        let picker = makePicker()
-        let repository = try makeRepository()
-        let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
-        let branchStatusNotifier = contextFactory.makeBranchStatusNotifier(shell: shell)
-
-        return .init(
-            shell: shell,
-            picker: picker,
-            loader: repository,
-            branchSyncChecker: branchSyncChecker,
-            branchStatusNotifier: branchStatusNotifier
-        )
+        fatalError() // TODO: - uncomment when makePicker returns any LaunchPicker
+//        let shell = makeShell()
+//        let picker = makePicker()
+//        let repository = try makeRepository()
+//        let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
+//        let branchStatusNotifier = contextFactory.makeBranchStatusNotifier(shell: shell)
+//        let fileSystem = contextFactory.makeFileSystem()
+//
+//        return .init(
+//            shell: shell,
+//            picker: picker,
+//            loader: repository,
+//            branchSyncChecker: branchSyncChecker,
+//            branchStatusNotifier: branchStatusNotifier,
+//            fileSystem: fileSystem
+//        )
     }
 }

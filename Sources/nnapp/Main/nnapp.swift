@@ -58,6 +58,7 @@ protocol ContextFactory {
     func makePicker() -> any CommandLinePicker
     func makeContext() throws -> CodeLaunchContext
     func makeConsoleOutput() -> any ConsoleOutput
+    func makeFileSystem() -> any FileSystem
     func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker
     func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier

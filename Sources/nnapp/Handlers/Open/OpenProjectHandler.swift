@@ -7,29 +7,31 @@
 
 import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 
 /// Coordinates project opening operations by delegating to specialized components.
 struct OpenProjectHandler {
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let loader: any LaunchHierarchyLoader
     private let ideLauncher: IDELauncher
     private let terminalManager: TerminalHandler
     private let urlLauncher: URLLauncher
     private let branchSyncChecker: any BranchSyncChecker
     private let branchStatusNotifier: any BranchStatusNotifier
+    private let fileSystem: any FileSystem
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(
         shell: any Shell,
-        picker: any CommandLinePicker,
+        picker: any LaunchPicker,
         loader: any Loader,
         branchSyncChecker: any BranchSyncChecker,
-        branchStatusNotifier: any BranchStatusNotifier
+        branchStatusNotifier: any BranchStatusNotifier,
+        fileSystem: any FileSystem
     ) {
         self.picker = picker
         self.loader = loader
-        self.ideLauncher = .init(shell: shell, picker: picker)
+        self.fileSystem = fileSystem
+        self.ideLauncher = .init(shell: shell, picker: picker, fileSystem: fileSystem)
         self.terminalManager = .init(shell: shell, loader: loader)
         self.urlLauncher = .init(shell: shell, picker: picker)
         self.branchSyncChecker = branchSyncChecker

@@ -8,16 +8,22 @@
 import Files
 import Foundation
 
-struct DefaultFileSystem: FileSystem {
-    var homeDirectory: Directory {
+public struct DefaultFileSystem {
+    public init() { }
+}
+
+
+// MARK: - FileSystem
+extension DefaultFileSystem: FileSystem {
+    public var homeDirectory: Directory {
         return FilesDirectoryAdapter(folder: Folder.home)
     }
     
-    func directory(at path: String) throws -> Directory {
+    public func directory(at path: String) throws -> Directory {
         return try FilesDirectoryAdapter(folder: Folder(path: path))
     }
     
-    func desktopDirectory() throws -> Directory {
+    public func desktopDirectory() throws -> Directory {
         return try directory(at: FileManager.default.homeDirectoryForCurrentUser.path())
     }
 }
