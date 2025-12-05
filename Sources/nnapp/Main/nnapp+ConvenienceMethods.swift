@@ -54,24 +54,25 @@ extension Nnapp {
     }
 
     static func makeOpenManager() throws -> OpenProjectHandler {
-        let shell = makeShell()
-        let picker = makePicker()
-        let context = try makeContext()
-        let ideLauncher = makeIDELauncher(shell: shell, picker: picker)
-        let terminalManager = makeTerminalManager(shell: shell, context: context)
-        let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
-        let branchSyncChecker = makeBranchSyncChecker(shell: shell)
-        let branchStatusNotifier = makeBranchStatusNotifier(shell: shell)
-
-        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher, branchSyncChecker: branchSyncChecker, branchStatusNotifier: branchStatusNotifier)
+        fatalError() // TODO: - 
+//        let shell = makeShell()
+//        let picker = makePicker()
+//        let context = try makeContext()
+//        let ideLauncher = makeIDELauncher(shell: shell, picker: picker)
+//        let terminalManager = makeTerminalManager(shell: shell, context: context)
+//        let urlLauncher = makeURLLauncher(shell: shell, picker: picker)
+//        let branchSyncChecker = makeBranchSyncChecker(shell: shell)
+//        let branchStatusNotifier = makeBranchStatusNotifier(shell: shell)
+//
+//        return .init(picker: picker, context: context, ideLauncher: ideLauncher, terminalManager: terminalManager, urlLauncher: urlLauncher, branchSyncChecker: branchSyncChecker, branchStatusNotifier: branchStatusNotifier)
     }
     
     static func makeIDELauncher(shell: Shell, picker: CommandLinePicker) -> IDELauncher {
         return .init(shell: shell, picker: picker)
     }
     
-    static func makeTerminalManager(shell: Shell, context: CodeLaunchContext) -> TerminalManager {
-        return .init(shell: shell, context: context)
+    static func makeTerminalManager(shell: Shell, loader: any ScriptLoader) -> TerminalManager {
+        return .init(shell: shell, loader: loader)
     }
     
     static func makeURLLauncher(shell: Shell, picker: CommandLinePicker) -> URLLauncher {

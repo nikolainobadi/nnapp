@@ -11,15 +11,15 @@ import NnShellKit
 /// Manages terminal operations including iTerm integration and session management.
 struct TerminalManager {
     private let shell: any Shell
-    private let context: CodeLaunchContext
+    private let loader: any ScriptLoader
     
     /// Initializes a new terminal manager.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - context: Data context for loading launch scripts.
-    init(shell: any Shell, context: CodeLaunchContext) {
+    init(shell: any Shell, loader: any ScriptLoader) {
         self.shell = shell
-        self.context = context
+        self.loader = loader
     }
 }
 
@@ -43,7 +43,7 @@ extension TerminalManager {
         print("preparing to open project in new terminal window")
         var script = "cd \(folderPath)"
         
-        if let extraCommand = context.loadLaunchScript() {
+        if let extraCommand = loader.loadLaunchScript() {
             script.append(" && \(extraCommand)")
         }
         
@@ -95,4 +95,10 @@ private extension TerminalManager {
         
         return try shell.runAppleScript(script: script).components(separatedBy: ", ")
     }
+}
+
+
+// MARK: - Dependencies
+protocol ScriptLoader {
+    func loadLaunchScript() -> String?
 }
