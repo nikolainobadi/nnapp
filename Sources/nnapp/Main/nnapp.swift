@@ -45,9 +45,9 @@ extension Nnapp {
     static func makeContext() throws -> CodeLaunchContext {
         return try contextFactory.makeContext()
     }
-    
-    static func makeContextAdapter() throws -> CodeLaunchContextAdapter {
-        return try .init(context: makeContext())
+
+    static func makeRepository() throws -> SwiftDataLaunchRepository {
+        return .init(context: try makeContext())
     }
     
     static func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {

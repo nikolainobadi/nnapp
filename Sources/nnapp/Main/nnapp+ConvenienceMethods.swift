@@ -11,46 +11,46 @@ import SwiftPickerKit
 extension Nnapp {
     static func makeCategoryHandler(picker: (any CommandLinePicker)? = nil) throws -> LaunchCategoryHandler {
         let picker = picker ?? makePicker()
-        let context = try makeContextAdapter()
+        let repository = try makeRepository()
         let folderBrowser = makeFolderBrowser(picker: picker)
         
-        return .init(store: context, picker: picker, folderBrowser: folderBrowser)
+        return .init(store: repository, picker: picker, folderBrowser: folderBrowser)
     }
     
     static func makeGroupHandler() throws -> LaunchGroupHandler {
         let picker = makePicker()
-        let context = try makeContextAdapter()
+        let repository = try makeRepository()
         let categorySelector = try makeCategoryHandler(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
         
-        return .init(store: context, picker: picker, folderBrowser: folderBrowser, categorySelector: categorySelector)
+        return .init(store: repository, picker: picker, folderBrowser: folderBrowser, categorySelector: categorySelector)
     }
     
     static func makeProjectHandler() throws -> LaunchProjectHandler {
         let shell = makeShell()
         let picker = makePicker()
-        let context = try makeContextAdapter()
+        let repository = try makeRepository()
         let groupSelector = try makeGroupHandler()
         let folderBrowser = makeFolderBrowser(picker: picker)
 
-        return .init(shell: shell, desktopPath: nil, store: context, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
+        return .init(shell: shell, desktopPath: nil, store: repository, picker: picker, folderBrowser: folderBrowser, groupSelector: groupSelector)
     }
 
     static func makeListHandler() throws -> ListHandler {
         let picker = makePicker()
-        let context = try makeContextAdapter()
+        let repository = try makeRepository()
         let console = contextFactory.makeConsoleOutput()
 
-        return .init(picker: picker, loader: context, console: console)
+        return .init(picker: picker, loader: repository, console: console)
     }
 
     static func makeFinderHandler() throws -> FinderHandler {
         let shell = makeShell()
         let picker = makePicker()
-        let context = try makeContextAdapter()
+        let repository = try makeRepository()
         let console = contextFactory.makeConsoleOutput()
 
-        return .init(shell: shell, picker: picker, loader: context, console: console)
+        return .init(shell: shell, picker: picker, loader: repository, console: console)
     }
 
     static func makeOpenManager() throws -> OpenProjectHandler {
