@@ -1,5 +1,5 @@
 //
-//  IDELauncherTests.swift
+//  IDEHandlerTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/5/25.
@@ -12,7 +12,7 @@ import NnShellTesting
 import SwiftPickerTesting
 @testable import nnapp
 
-struct IDELauncherTests {
+struct IDEHandlerTests {
     @Test("Throws when project is missing required paths")
     func throwsWhenProjectIsMissingPaths() {
         let sut = makeSUT().sut
@@ -43,12 +43,12 @@ struct IDELauncherTests {
 
 
 // MARK: - SUT
-private extension IDELauncherTests {
-    func makeSUT(homeDirectoryPath: String = "/Users/test", directoryToLoad: MockDirectory? = nil) -> (sut: IDELauncher, shell: MockShell, fileSystem: MockFileSystem) {
+private extension IDEHandlerTests {
+    func makeSUT(homeDirectoryPath: String = "/Users/test", directoryToLoad: MockDirectory? = nil) -> (sut: IDEHandler, shell: MockShell, fileSystem: MockFileSystem) {
         let shell = MockShell()
         let picker = MockSwiftPicker(permissionResult: .init(defaultValue: true, type: .ordered([true])))
         let fileSystem = MockFileSystem(homeDirectory: .init(path: homeDirectoryPath), directoryToLoad: directoryToLoad)
-        let sut = IDELauncher(shell: shell, picker: picker, fileSystem: fileSystem)
+        let sut = IDEHandler(shell: shell, picker: picker, fileSystem: fileSystem)
         
         return (sut, shell, fileSystem)
     }

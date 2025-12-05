@@ -11,7 +11,7 @@ import CodeLaunchKit
 struct OpenProjectHandler {
     private let picker: any LaunchPicker
     private let loader: any LaunchHierarchyLoader
-    private let ideLauncher: IDELauncher
+    private let ideLauncher: IDEHandler
     private let terminalManager: TerminalHandler
     private let urlLauncher: URLHandler
     private let branchSyncChecker: any BranchSyncChecker

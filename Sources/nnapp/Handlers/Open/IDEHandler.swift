@@ -1,5 +1,5 @@
 //
-//  IDELauncher.swift
+//  IDEHandler.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/26/25.
@@ -8,7 +8,7 @@
 import GitShellKit
 import CodeLaunchKit
 
-struct IDELauncher {
+struct IDEHandler {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
@@ -22,7 +22,7 @@ struct IDELauncher {
 
 
 // MARK: - IDE Operations
-extension IDELauncher {
+extension IDEHandler {
     /// Opens the project in Xcode or VSCode.
     /// - Parameters:
     ///   - project: The project to open.
@@ -41,7 +41,7 @@ extension IDELauncher {
 
 
 // MARK: - Private Methods
-private extension IDELauncher {
+private extension IDEHandler {
     /// Clones the project repo if it doesn't exist locally and a remote is available.
     func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
         do {
