@@ -16,9 +16,26 @@ extension LaunchCategory: DisplayablePickerItem {
     }
 }
 
+
 // MARK: - LaunchGroup
 extension LaunchGroup: DisplayablePickerItem {
     public var displayName: String {
+        return name
+    }
+}
+
+
+// MARK: - LaunchProject
+extension LaunchProject: DisplayablePickerItem {
+    public var displayName: String {
+        return name
+    }
+}
+
+
+// MARK: - LaunchProjectFolder
+extension LaunchProjectFolder: DisplayablePickerItem {
+    var displayName: String {
         return name
     }
 }

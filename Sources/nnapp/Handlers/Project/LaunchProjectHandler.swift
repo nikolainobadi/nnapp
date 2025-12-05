@@ -12,10 +12,27 @@ import SwiftPickerKit
 
 struct LaunchProjectHandler {
     private let shell: any Shell
+    private let desktopPath: String?
     private let store: any LaunchProjectStore
     private let picker: any CommandLinePicker
     private let folderBrowser: any FolderBrowser
     private let groupSelector: any LaunchProjectGroupSelector
+    
+    init(
+        shell: any Shell,
+        desktopPath: String?,
+        store: any LaunchProjectStore,
+        picker: any CommandLinePicker,
+        folderBrowser: any FolderBrowser,
+        groupSelector: any LaunchProjectGroupSelector
+    ) {
+        self.shell = shell
+        self.desktopPath = desktopPath
+        self.store = store
+        self.picker = picker
+        self.folderBrowser = folderBrowser
+        self.groupSelector = groupSelector
+    }
 }
 
 
@@ -23,12 +40,11 @@ struct LaunchProjectHandler {
 extension LaunchProjectHandler {
     func addProject(path: String?, shortcut: String?, groupName: String?, isMainProject: Bool, fromDesktop: Bool) throws {
         let group = try selectGroup(named: groupName)
-        let groupPath = getPath(for: group)
         let projectFolder = try selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
         let info = try selectProjectInfo(folder: projectFolder.folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
         let project = LaunchProject(info: info, type: projectFolder.type)
         
-        try moveFolderIfNecessary(projectFolder.folder, parentPath: groupPath)
+        try moveFolderIfNecessary(projectFolder.folder, parentPath: group.path)
         try saveProject(project, in: group)
     }
 }
@@ -37,7 +53,7 @@ extension LaunchProjectHandler {
 // MARK: - Remove
 extension LaunchProjectHandler {
     func removeProject(name: String?, shortcut: String?) throws {
-        let projectToDelete = try getProject(name: name, shortcut: shortcut)
+        let projectToDelete = try getProjectToDelete(name: name, shortcut: shortcut)
         
         // TODO: - maybe indicate that this is different from evicting?
         try picker.requiredPermission("Are you sure want to remove \(projectToDelete.name.yellow)?")
@@ -53,19 +69,37 @@ private extension LaunchProjectHandler {
     }
     
     func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> LaunchProjectFolder {
-        fatalError() // TODO: -
+        let folderSelector = LaunchProjectFolderSelector(picker: picker, folderBrowser: folderBrowser, desktopPath: desktopPath)
+        
+        return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
     }
     
     func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
-        fatalError() // TODO: -
+        let gitshell = GitShellAdapter(shell: shell)
+        let infoSelector = LaunchProjectInfoSelector(picker: picker, gitShell: gitshell, infoLoader: store)
+        
+        return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }
     
-    func getPath(for group: LaunchGroup) -> String? {
-        return nil // TODO: -
-    }
-    
-    func getProject(name: String?, shortcut: String?) throws -> LaunchProject {
-        fatalError() // TODO: -
+    func getProjectToDelete(name: String?, shortcut: String?) throws -> LaunchProject {
+        let projects = try store.loadProjects()
+        let prompt = "Select the Project you would like to remove."
+        // TODO: - update when evict is enabled
+//        let prompt = "Select the Project you would like to remove. (Note: this will unregister the project from quick-launch. If you want to remove the project and keep it available for quick launch, use \("evict".bold)"
+        
+        if let name {
+            if let project = projects.first(where: { $0.name.lowercased().contains(name.lowercased()) }) {
+                return project
+            }
+            
+            print("Cannot find project named \(name)")
+        } else if let shortcut {
+            if let project = projects.first(where: { shortcut.matches($0.shortcut) }) {
+                return project
+            }
+        }
+        
+        return try picker.requiredSingleSelection(prompt, items: projects, showSelectedItemText: false)
     }
     
     func moveFolderIfNecessary(_ folder: Folder, parentPath: String?) throws {
@@ -103,27 +137,11 @@ protocol LaunchProjectGroupSelector {
     func selectGroup(name: String?) throws -> LaunchGroup
 }
 
-protocol LaunchProjectStore {
+protocol LaunchProjectStore: LaunchProjectInfoLoader {
     func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws
     func deleteProject(_ project: LaunchProject, from group: LaunchGroup?) throws
 }
 
-struct LaunchProjectInfo {
-    let name: String
-    let shortcut: String?
-    let remote: ProjectLink?
-    let otherLinks: [ProjectLink]
-}
-
-struct LaunchProjectFolder {
-    let folder: Folder
-    let type: ProjectType
-
-    /// The name of the folder, used as the project name.
-    var name: String {
-        return folder.name
-    }
-}
 
 // MARK: - Extension Dependencies
 private extension LaunchProject {

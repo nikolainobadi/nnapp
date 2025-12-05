@@ -112,3 +112,9 @@ private extension DefaultBranchSyncChecker {
         }
     }
 }
+
+
+// MARK: - Dependencies
+enum BranchSyncStatus: String, CaseIterable {
+    case behind, ahead, nsync, diverged, undetermined, noRemoteBranch
+}
