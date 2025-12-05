@@ -9,14 +9,15 @@ import Files
 import NnShellKit
 import GitShellKit
 import GitCommandGen
+import CodeLaunchKit
 
 struct DefaultBranchSyncChecker {
     private let shell: any Shell
-    private let gitShell: GitShellAdapter
+    private let gitShell: any GitShell
 
     init(shell: any Shell) {
         self.shell = shell
-        self.gitShell = .init(shell: shell)
+        self.gitShell = GitShellAdapter(shell: shell)
     }
 }
 
@@ -111,4 +112,10 @@ private extension DefaultBranchSyncChecker {
             return .diverged
         }
     }
+}
+
+
+// MARK: - Dependencies
+enum BranchSyncStatus: String, CaseIterable {
+    case behind, ahead, nsync, diverged, undetermined, noRemoteBranch
 }

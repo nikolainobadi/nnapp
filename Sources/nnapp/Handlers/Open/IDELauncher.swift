@@ -9,17 +9,13 @@ import Files
 import Foundation
 import NnShellKit
 import GitShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
-/// Handles launching projects in IDEs (Xcode/VSCode) and cloning repositories when needed.
 struct IDELauncher {
     private let shell: any Shell
     private let picker: any CommandLinePicker
     
-    /// Initializes a new IDE launcher.
-    /// - Parameters:
-    ///   - shell: Shell protocol for executing system commands.
-    ///   - picker: Utility for prompting user input and permissions.
     init(shell: any Shell, picker: any CommandLinePicker) {
         self.shell = shell
         self.picker = picker
@@ -43,15 +39,20 @@ extension IDELauncher {
         let isXcode = launchType == .xcode
         try shell.runAndPrint(bash: "\(isXcode ? "open" : "code") \(isXcode ? filePath : folderPath)")
     }
-    
+}
+
+
+// MARK: - Private Methods
+private extension IDELauncher {
     /// Clones the project repo if it doesn't exist locally and a remote is available.
-    private func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
+    func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
         do {
             _ = try Folder(path: folderPath) // already exists
         } catch {
             guard let remote = project.remote,
                   let groupPath = project.groupPath,
-                  !groupPath.isEmpty else {
+                  !groupPath.isEmpty
+            else {
                 print("cannot locate project \(project.name) and no remote repository exists")
                 throw CodeLaunchError.noRemoteRepository
             }

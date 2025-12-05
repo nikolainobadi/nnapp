@@ -6,6 +6,7 @@
 //
 
 import Files
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Handles creation, import, selection, and deletion of `LaunchGroup` objects.
@@ -39,10 +40,10 @@ extension GroupHandler {
     ///   - category: Optional name of the category to assign the group to.
     /// - Returns: The newly imported `LaunchGroup`.
     @discardableResult
-    func importGroup(path: String?, category: String?) throws -> LaunchGroup {
+    func importGroup(path: String?, category: String?) throws -> SwiftDataLaunchGroup {
         let selectedCategory = try categorySelector.getCategory(named: category)
         let selectedGroupFolder = try selectGroupFolderToImport(path: path, category: selectedCategory)
-        let group = LaunchGroup(name: selectedGroupFolder.name)
+        let group = SwiftDataLaunchGroup(name: selectedGroupFolder.name)
 
         try validateName(group.name, groups: selectedCategory.groups)
         try moveFolderIfNecessary(selectedGroupFolder, category: selectedCategory)
@@ -57,12 +58,12 @@ extension GroupHandler {
     ///   - category: Optional name of the category to assign the group to.
     /// - Returns: The newly created `LaunchGroup`.
     @discardableResult
-    func createGroup(name: String?, category: String?) throws -> LaunchGroup {
+    func createGroup(name: String?, category: String?) throws -> SwiftDataLaunchGroup {
         let category = try categorySelector.getCategory(named: category)
         let name = try name ?? picker.getRequiredInput("Enter the name of your new group.")
 
         try validateName(name, groups: category.groups)
-        let group = LaunchGroup(name: name)
+        let group = SwiftDataLaunchGroup(name: name)
 
         try createNewGroupFolder(group: group, category: category)
         try context.saveGroup(group, in: category)
@@ -77,7 +78,7 @@ extension GroupHandler: ProjectGroupSelector {
     /// Selects or creates a group to assign a project to.
     /// - Parameter name: Optional group name to match.
     /// - Returns: The selected or newly created `LaunchGroup`.
-    func getGroup(named name: String?) throws -> LaunchGroup {
+    func getGroup(named name: String?) throws -> SwiftDataLaunchGroup {
         let groups = try context.loadGroups()
 
         if let name {
@@ -105,7 +106,7 @@ extension GroupHandler {
     /// - Parameter name: Optional name of the group to delete. If `nil`, user selects from list.
     func removeGroup(name: String?) throws {
         let groups = try context.loadGroups()
-        var groupToDelete: LaunchGroup
+        var groupToDelete: SwiftDataLaunchGroup
 
         if let name, let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
             groupToDelete = group
@@ -129,7 +130,7 @@ extension GroupHandler {
     /// - Parameter group: Optional name or shortcut of the group to modify. If `nil`, user selects from list.
     func setMainProject(group: String?) throws {
         let groups = try context.loadGroups()
-        var selectedGroup: LaunchGroup
+        var selectedGroup: SwiftDataLaunchGroup
 
         if let group {
             if let foundGroup = groups.first(where: { $0.name.matches(group) || $0.shortcut?.matches(group) == true }) {
@@ -218,14 +219,14 @@ extension GroupHandler {
 // MARK: - Private Methods
 private extension GroupHandler {
     /// Ensures the group name doesn't already exist under the given category.
-    func validateName(_ name: String, groups: [LaunchGroup]) throws {
+    func validateName(_ name: String, groups: [SwiftDataLaunchGroup]) throws {
         if groups.contains(where: { $0.name.matches(name) }) {
             throw CodeLaunchError.groupNameTaken
         }
     }
 
     /// Creates a folder on disk for the group within its parent category.
-    func createNewGroupFolder(group: LaunchGroup, category: LaunchCategory) throws {
+    func createNewGroupFolder(group: SwiftDataLaunchGroup, category: SwiftDataLaunchCategory) throws {
         let categoryFolder = try Folder(path: category.path)
         let subfolderNames = categoryFolder.subfolders.map({ $0.name })
 
@@ -240,7 +241,7 @@ private extension GroupHandler {
     }
 
     /// Moves a group folder into its assigned category folder if needed.
-    func moveFolderIfNecessary(_ folder: Folder, category: LaunchCategory) throws {
+    func moveFolderIfNecessary(_ folder: Folder, category: SwiftDataLaunchCategory) throws {
         let categoryFolder = try Folder(path: category.path)
         if let existingFolder = try? categoryFolder.subfolder(named: folder.name) {
             if existingFolder.path != folder.path {
@@ -254,7 +255,7 @@ private extension GroupHandler {
     }
 
     /// Selects a folder to use for group import, optionally from disk or from subfolders.
-    func selectGroupFolderToImport(path: String?, category: LaunchCategory) throws -> Folder {
+    func selectGroupFolderToImport(path: String?, category: SwiftDataLaunchCategory) throws -> Folder {
         if let path {
             return try .init(path: path)
         }
@@ -271,7 +272,7 @@ private extension GroupHandler {
         return try folderBrowser.browseForFolder(prompt: "Browse to select a folder to import as a Group")
     }
 
-    func makeGroupDetail(for group: LaunchGroup) -> String {
+    func makeGroupDetail(for group: SwiftDataLaunchGroup) -> String {
         let categoryName = group.category?.name ?? "Not assigned"
         let path = group.path?.yellow ?? "path not set"
         let shortcut = group.shortcut ?? "None"
@@ -288,5 +289,5 @@ private extension GroupHandler {
 
 // MARK: - Dependencies
 protocol GroupCategorySelector {
-    func getCategory(named name: String?) throws -> LaunchCategory
+    func getCategory(named name: String?) throws -> SwiftDataLaunchCategory
 }

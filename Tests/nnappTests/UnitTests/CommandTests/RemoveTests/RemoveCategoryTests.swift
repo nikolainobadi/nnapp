@@ -15,9 +15,9 @@ final class RemoveTests: MainActorTempFolderDatasource {
     func removesCategoryAndChildren() throws {
         let factory = try makeFactory()
         let context = try factory.makeContext()
-        let category = makeCategory(name: "ToDelete")
-        let group = makeGroup(name: "G")
-        let project = makeProject(name: "P")
+        let category = makeSwiftDataCategory(name: "ToDelete")
+        let group = makeSwiftDataGroup(name: "G")
+        let project = makeSwiftDataProject(name: "P")
 
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
@@ -38,7 +38,7 @@ final class RemoveTests: MainActorTempFolderDatasource {
     func promptsIfNoCategoryNameProvided() throws {
         let factory = try makeFactory()
         let context = try factory.makeContext()
-        let category = makeCategory(name: "A")
+        let category = makeSwiftDataCategory(name: "A")
         try context.saveCategory(category)
 
         try runCommand(factory, args: ["remove", "category"])
@@ -55,9 +55,9 @@ extension RemoveTests {
     func removesGroupAndProjects() throws {
         let factory = try makeFactory()
         let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup(name: "G")
-        let project = makeProject(name: "P")
+        let category = makeSwiftDataCategory()
+        let group = makeSwiftDataGroup(name: "G")
+        let project = makeSwiftDataProject(name: "P")
 
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
@@ -80,9 +80,9 @@ extension RemoveTests {
     func removesProjectByName() throws {
         let factory = try makeFactory()
         let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup()
-        let project = makeProject(name: "P")
+        let category = makeSwiftDataCategory()
+        let group = makeSwiftDataGroup()
+        let project = makeSwiftDataProject(name: "P")
 
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)
@@ -97,9 +97,9 @@ extension RemoveTests {
     func removesProjectByShortcut() throws {
         let factory = try makeFactory()
         let context = try factory.makeContext()
-        let category = makeCategory()
-        let group = makeGroup()
-        let project = makeProject(name: "P", shortcut: "pshort")
+        let category = makeSwiftDataCategory()
+        let group = makeSwiftDataGroup()
+        let project = makeSwiftDataProject(name: "P", shortcut: "pshort")
 
         try context.saveCategory(category)
         try context.saveGroup(group, in: category)

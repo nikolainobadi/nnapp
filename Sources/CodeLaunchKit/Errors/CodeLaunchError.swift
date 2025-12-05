@@ -1,11 +1,11 @@
 //
-//  NnappError.swift
+//  CodeLaunchError.swift
 //  nnapp
 //
-//  Created by Nikolai Nobadi on 3/26/25.
+//  Created by Nikolai Nobadi on 12/4/25.
 //
 
-enum CodeLaunchError: Error {
+public enum CodeLaunchError: Error {
     case invalidInput
     case missingGroup
     case missingProject
@@ -22,8 +22,4 @@ enum CodeLaunchError: Error {
     case groupFolderAlreadyExists
     case shortcutTaken
     case folderNameTaken
-}
-
-enum ShellError: Error {
-    case commandFailed(command: String, error: String)
 }

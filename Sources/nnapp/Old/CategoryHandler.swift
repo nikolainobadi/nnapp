@@ -6,6 +6,7 @@
 //
 
 import Files
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Handles creation, import, selection, and deletion of `LaunchCategory` objects.
@@ -34,13 +35,13 @@ extension CategoryHandler {
     /// - Parameter path: Optional absolute path to the folder. If `nil`, prompts the user.
     /// - Returns: The imported `LaunchCategory`.
     @discardableResult
-    func importCategory(path: String?) throws -> LaunchCategory {
+    func importCategory(path: String?) throws -> SwiftDataLaunchCategory {
         let categories = try context.loadCategories()
         let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
 
         try validateName(folder.name, categories: categories)
         
-        let category = LaunchCategory(name: folder.name, path: folder.path)
+        let category = SwiftDataLaunchCategory(name: folder.name, path: folder.path)
 
         try context.saveCategory(category)
         
@@ -53,7 +54,7 @@ extension CategoryHandler {
     ///   - parentPath: Optional path to the parent directory. If `nil`, prompts the user.
     /// - Returns: The newly created `LaunchCategory`.
     @discardableResult
-    func createCategory(name: String?, parentPath: String?) throws -> LaunchCategory {
+    func createCategory(name: String?, parentPath: String?) throws -> SwiftDataLaunchCategory {
         let categories = try context.loadCategories()
         let name = try name ?? picker.getRequiredInput("Enter the name of your new category.")
 
@@ -64,7 +65,7 @@ extension CategoryHandler {
         try validateParentFolder(parentFolder, categoryName: name)
         
         let categoryFolder = try parentFolder.createSubfolder(named: name)
-        let category = LaunchCategory(name: name, path: categoryFolder.path)
+        let category = SwiftDataLaunchCategory(name: name, path: categoryFolder.path)
 
         try context.saveCategory(category)
         
@@ -79,7 +80,7 @@ extension CategoryHandler {
     /// - Parameter name: Optional name of the category to remove. If `nil`, user selects from list.
     func removeCategory(name: String?) throws {
         let categories = try context.loadCategories()
-        var categoryToDelete: LaunchCategory
+        var categoryToDelete: SwiftDataLaunchCategory
 
         if let name, let category = categories.first(where: { $0.name.lowercased() == name.lowercased() }) {
             categoryToDelete = category
@@ -102,7 +103,7 @@ extension CategoryHandler: GroupCategorySelector {
     /// Resolves a category to use for group creation, based on the provided name or user input.
     /// - Parameter name: Optional category name to look up.
     /// - Returns: A selected or newly created `LaunchCategory`.
-    func getCategory(named name: String?) throws -> LaunchCategory {
+    func getCategory(named name: String?) throws -> SwiftDataLaunchCategory {
         let categories = try context.loadCategories()
 
         if let name {
@@ -127,7 +128,7 @@ extension CategoryHandler: GroupCategorySelector {
 // MARK: - Private Methods
 private extension CategoryHandler {
     /// Ensures the provided name is unique among existing categories.
-    func validateName(_ name: String, categories: [LaunchCategory]) throws {
+    func validateName(_ name: String, categories: [SwiftDataLaunchCategory]) throws {
         if categories.contains(where: { $0.name.matches(name) }) {
             throw CodeLaunchError.categoryNameTaken
         }
@@ -148,7 +149,7 @@ private extension CategoryHandler {
         }
     }
 
-    func makeCategoryDetail(for category: LaunchCategory) -> String {
+    func makeCategoryDetail(for category: SwiftDataLaunchCategory) -> String {
         let groupCount = category.groups.count
         let totalProjects = category.groups.reduce(0) { $0 + $1.projects.count }
 

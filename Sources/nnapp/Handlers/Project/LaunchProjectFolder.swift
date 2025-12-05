@@ -1,14 +1,14 @@
 //
-//  ProjectFolder.swift
+//  LaunchProjectFolder.swift
 //  nnapp
 //
-//  Created by Nikolai Nobadi on 3/29/25.
+//  Created by Nikolai Nobadi on 12/4/25.
 //
 
 import Files
+import CodeLaunchKit
 
-/// Wraps a `Folder` and its determined `ProjectType` during folder selection and validation.
-struct ProjectFolder {
+struct LaunchProjectFolder {
     let folder: Folder
     let type: ProjectType
 

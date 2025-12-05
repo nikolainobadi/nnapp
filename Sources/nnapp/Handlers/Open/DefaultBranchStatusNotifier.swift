@@ -6,6 +6,7 @@
 //
 
 import NnShellKit
+import CodeLaunchKit
 
 struct DefaultBranchStatusNotifier {
     private let shell: any Shell

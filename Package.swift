@@ -22,10 +22,17 @@ let package = Package(
         .package(url: "https://github.com/nikolainobadi/SwiftPickerKit.git", from: "0.7.0")
     ],
     targets: [
+        .target(
+            name: "CodeLaunchKit",
+            dependencies: [
+                "NnSwiftDataKit"
+            ]
+        ),
         .executableTarget(
             name: "nnapp",
             dependencies: [
                 "Files",
+                "CodeLaunchKit",
                 "NnSwiftDataKit",
                 .product(name: "GitShellKit", package: "NnGitKit"),
                 .product(name: "NnShellKit", package: "NnShellKit"),

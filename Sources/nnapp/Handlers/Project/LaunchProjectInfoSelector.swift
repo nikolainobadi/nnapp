@@ -1,36 +1,30 @@
 //
-//  ProjectInfoSelector.swift
+//  LaunchProjectInfoSelector.swift
 //  nnapp
 //
-//  Created by Nikolai Nobadi on 3/29/25.
+//  Created by Nikolai Nobadi on 12/4/25.
 //
 
 import Files
 import GitShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
-/// Handles interactive input for project metadata such as name, shortcut, and links.
-/// Used during the creation of new `LaunchProject` instances.
-struct ProjectInfoSelector {
+struct LaunchProjectInfoSelector {
     private let picker: any CommandLinePicker
     private let gitShell: any GitShell
-    private let context: CodeLaunchContext
+    private let infoLoader: any LaunchProjectInfoLoader
 
-    /// Initializes the selector with supporting dependencies.
-    /// - Parameters:
-    ///   - picker: Input utility for user interaction.
-    ///   - gitShell: Adapter for executing Git commands.
-    ///   - context: Persistence layer for validation and lookups.
-    init(picker: any CommandLinePicker, gitShell: any GitShell, context: CodeLaunchContext) {
+    init(picker: any CommandLinePicker, gitShell: any GitShell, infoLoader: any LaunchProjectInfoLoader) {
         self.picker = picker
         self.gitShell = gitShell
-        self.context = context
+        self.infoLoader = infoLoader
     }
 }
 
 
 // MARK: - Action
-extension ProjectInfoSelector {
+extension LaunchProjectInfoSelector {
     /// Prompts the user for project info (name, shortcut, remote, links) using the folder and group context.
     /// - Parameters:
     ///   - folder: The selected folder to create the project from.
@@ -38,7 +32,7 @@ extension ProjectInfoSelector {
     ///   - group: The group this project will belong to.
     ///   - isMainProject: Indicates whether this project is the group's primary launch target.
     /// - Returns: A `ProjectInfo` struct with the collected input.
-    func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
+    func selectProjectInfo(folder: Folder, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
         try validateName(folder.name)
         let shortcut = try getShortcut(shortcut: shortcut, group: group, isMainProject: isMainProject)
         try validateShortcut(shortcut)
@@ -51,10 +45,10 @@ extension ProjectInfoSelector {
 
 
 // MARK: - Private Methods
-private extension ProjectInfoSelector {
+private extension LaunchProjectInfoSelector {
     /// Ensures the project name is unique within the persistence context.
     func validateName(_ name: String) throws {
-        let projects = try context.loadProjects()
+        let projects = try infoLoader.loadProjects()
 
         if projects.contains(where: { $0.name.matches(name) }) {
             throw CodeLaunchError.projectNameTaken
@@ -64,7 +58,7 @@ private extension ProjectInfoSelector {
     /// Ensures the provided shortcut doesn't conflict with any existing group or project.
     func validateShortcut(_ shortcut: String?) throws {
         if let shortcut {
-            let groups = try context.loadGroups()
+            let groups = try infoLoader.loadGroups()
             let projects = groups.flatMap({ $0.projects })
             let allShortcuts = groups.compactMap({ $0.shortcut }) + projects.compactMap({ $0.shortcut })
 
@@ -102,7 +96,7 @@ private extension ProjectInfoSelector {
 
     /// Launches a prompt flow for adding additional custom links (e.g. Firebase, website).
     func getOtherLinks() -> [ProjectLink] {
-        let linkOptions = context.loadProjectLinkNames()
+        let linkOptions = infoLoader.loadProjectLinkNames()
         let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions)
         
         return handler.getOtherLinks()

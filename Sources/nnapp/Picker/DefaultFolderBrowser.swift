@@ -7,20 +7,21 @@
 
 import Files
 import Foundation
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Provides a reusable folder browsing experience backed by `SwiftPickerKit` tree navigation.
 struct DefaultFolderBrowser {
     private let picker: any CommandLinePicker
-    private let fileManager: FileManager
+    private let homeDirectoryURL: URL
     
     /// Initializes a new folder browser.
     /// - Parameters:
     ///   - picker: Picker used to drive the interactive tree navigation.
     ///   - fileManager: File manager used for locating the default root directory.
-    init(picker: any CommandLinePicker, fileManager: FileManager = .default) {
+    init(picker: any CommandLinePicker, homeDirectoryURL: URL) {
         self.picker = picker
-        self.fileManager = fileManager
+        self.homeDirectoryURL = homeDirectoryURL
     }
 }
 
@@ -53,6 +54,6 @@ private extension DefaultFolderBrowser {
             return .init(fileURLWithPath: startPath).standardizedFileURL
         }
         
-        return fileManager.homeDirectoryForCurrentUser
+        return homeDirectoryURL
     }
 }

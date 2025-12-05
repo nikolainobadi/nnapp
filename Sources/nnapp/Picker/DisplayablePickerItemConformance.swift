@@ -6,44 +6,57 @@
 //
 
 import Files
+import CodeLaunchKit
 import SwiftPickerKit
 
-extension LaunchCategory: DisplayablePickerItem {
-    public var displayName: String {
-        return name
-    }
-}
-
-extension LaunchGroup: DisplayablePickerItem {
-    public var displayName: String {
-        return name
-    }
-}
-
-extension LaunchProject: DisplayablePickerItem {
-    public var displayName: String {
-        return name
-    }
-}
-
+// MARK: - Folder
 extension Folder: @retroactive DisplayablePickerItem {
     public var displayName: String {
         return name
     }
 }
 
-extension ProjectFolder: DisplayablePickerItem {
-    var displayName: String {
+// MARK: - LaunchCategory
+extension LaunchCategory: DisplayablePickerItem {
+    public var displayName: String {
         return name
     }
 }
 
+
+// MARK: - LaunchGroup
+extension LaunchGroup: DisplayablePickerItem {
+    public var displayName: String {
+        return name
+    }
+}
+
+
+// MARK: - LaunchProject
+extension LaunchProject: DisplayablePickerItem {
+    public var displayName: String {
+        return name
+    }
+}
+
+
+// MARK: - ProjectLink
 extension ProjectLink: DisplayablePickerItem {
     public var displayName: String {
         return "\(name.bold) - \(urlString)"
     }
 }
 
+
+// MARK: - LaunchProjectFolder
+extension LaunchProjectFolder: DisplayablePickerItem {
+    var displayName: String {
+        return name
+    }
+}
+
+
+// MARK: - AssignCategoryType
 extension AssignCategoryType: DisplayablePickerItem {
     var displayName: String {
         switch self {
@@ -57,6 +70,8 @@ extension AssignCategoryType: DisplayablePickerItem {
     }
 }
 
+
+// MARK: - AssignGroupType
 extension AssignGroupType: DisplayablePickerItem {
     var displayName: String {
         switch self {
@@ -67,5 +82,31 @@ extension AssignGroupType: DisplayablePickerItem {
         case .import:
             return "Import existing folder to create new Group"
         }
+    }
+}
+
+
+// MARK: - OLD
+extension SwiftDataProjectLink: DisplayablePickerItem {
+    public var displayName: String {
+        return "\(name.bold) - \(urlString)"
+    }
+}
+
+extension SwiftDataLaunchCategory: DisplayablePickerItem {
+    public var displayName: String {
+        return name
+    }
+}
+
+extension SwiftDataLaunchGroup: DisplayablePickerItem {
+    public var displayName: String {
+        return name
+    }
+}
+
+extension SwiftDataLaunchProject: DisplayablePickerItem {
+    public var displayName: String {
+        return name
     }
 }

@@ -5,13 +5,14 @@
 //  Created by Nikolai Nobadi on 3/28/25.
 //
 
+import Files
 import SwiftData
 import Foundation
 import NnShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 import NnShellTesting
 import SwiftPickerTesting
-import Files
 @testable import nnapp
 
 final class MockContextFactory {
@@ -46,14 +47,14 @@ extension MockContextFactory: ContextFactory {
         return picker
     }
     
-    func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
-        return MockGroupSelector(context: context)
-    }
-    
-    func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
-        return MockCategorySelector(context: context)
-    }
-    
+//    func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
+//        return MockGroupSelector(context: context)
+//    }
+//    
+//    func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
+//        return MockCategorySelector(context: context)
+//    }
+//    
     func makeContext() throws -> CodeLaunchContext {
         if let context {
             return context

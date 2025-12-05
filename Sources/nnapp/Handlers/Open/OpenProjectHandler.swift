@@ -5,33 +5,33 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
+import NnShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Coordinates project opening operations by delegating to specialized components.
 struct OpenProjectHandler {
     private let picker: any CommandLinePicker
-    private let context: CodeLaunchContext
+    private let loader: any LaunchHierarchyLoader
     private let ideLauncher: IDELauncher
-    private let terminalManager: TerminalManager
+    private let terminalManager: TerminalHandler
     private let urlLauncher: URLLauncher
     private let branchSyncChecker: any BranchSyncChecker
     private let branchStatusNotifier: any BranchStatusNotifier
 
-    /// Initializes a new handler for project opening operations.
-    /// - Parameters:
-    ///   - picker: Utility for prompting user input and selections.
-    ///   - context: Data context for loading projects and configurations.
-    ///   - ideLauncher: Component for launching IDEs and cloning projects.
-    ///   - terminalManager: Component for terminal operations.
-    ///   - urlLauncher: Component for opening URLs and links.
-    ///   - branchSyncChecker: Component for checking branch sync status.
-    ///   - branchStatusNotifier: Component for notifying about branch status.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext, ideLauncher: IDELauncher, terminalManager: TerminalManager, urlLauncher: URLLauncher, branchSyncChecker: any BranchSyncChecker, branchStatusNotifier: any BranchStatusNotifier) {
+    typealias Loader = LaunchHierarchyLoader & ScriptLoader
+    init(
+        shell: any Shell,
+        picker: any CommandLinePicker,
+        loader: any Loader,
+        branchSyncChecker: any BranchSyncChecker,
+        branchStatusNotifier: any BranchStatusNotifier
+    ) {
         self.picker = picker
-        self.context = context
-        self.ideLauncher = ideLauncher
-        self.terminalManager = terminalManager
-        self.urlLauncher = urlLauncher
+        self.loader = loader
+        self.ideLauncher = .init(shell: shell, picker: picker)
+        self.terminalManager = .init(shell: shell, loader: loader)
+        self.urlLauncher = .init(shell: shell, picker: picker)
         self.branchSyncChecker = branchSyncChecker
         self.branchStatusNotifier = branchStatusNotifier
     }
@@ -49,14 +49,14 @@ extension OpenProjectHandler {
         let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut of the app you would like to open")
         
         if useGroupShortcut {
-            let groups = try context.loadGroups()
+            let groups = try loader.loadGroups()
             guard let group = groups.first(where: { shortcut.matches($0.shortcut) }) else {
                 throw CodeLaunchError.missingGroup
             }
             
             return try picker.requiredSingleSelection("Select a project", items: group.projects)
         } else {
-            let projects = try context.loadProjects()
+            let projects = try loader.loadProjects()
             
             guard let project = projects.first(where: { shortcut.matches($0.shortcut) }) else {
                 throw CodeLaunchError.missingProject
@@ -77,6 +77,7 @@ extension OpenProjectHandler {
     ///   - terminalOption: Controls terminal launch behavior.
     func openInIDE(_ project: LaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
         guard let folderPath = project.folderPath else {
+            print("fuck you")
             throw CodeLaunchError.missingProject
         }
 

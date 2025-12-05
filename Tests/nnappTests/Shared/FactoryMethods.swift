@@ -5,16 +5,20 @@
 //  Created by Nikolai Nobadi on 3/29/25.
 //
 
-@testable import nnapp
+@testable import CodeLaunchKit
 
-func makeCategory(name: String = "iOSApps", path: String = "path/to/category") -> LaunchCategory {
+func makeProject(name: String = "TestProject", shortcut: String? = nil, type: ProjectType = .project, remote: ProjectLink? = nil, links: [ProjectLink] = [], group: LaunchProject.Group? = nil) -> LaunchProject {
+    return .init(name: name, shortcut: shortcut, type: type, remote: remote, links: links, group: group)
+}
+
+func makeSwiftDataCategory(name: String = "iOSApps", path: String = "path/to/category") -> SwiftDataLaunchCategory {
     return .init(name: name, path: path)
 }
 
-func makeGroup(name: String = "MyGroup", shortcut: String? = nil) -> LaunchGroup {
+func makeSwiftDataGroup(name: String = "MyGroup", shortcut: String? = nil) -> SwiftDataLaunchGroup {
     return .init(name: name, shortcut: shortcut)
 }
 
-func makeProject(name: String = "MyProject", shortcut: String? = nil, remote: ProjectLink? = nil, links: [ProjectLink] = []) -> LaunchProject {
+func makeSwiftDataProject(name: String = "MyProject", shortcut: String? = nil, remote: SwiftDataProjectLink? = nil, links: [SwiftDataProjectLink] = []) -> SwiftDataLaunchProject {
     return .init(name: name, shortcut: shortcut, type: .package, remote: remote, links: links)
 }

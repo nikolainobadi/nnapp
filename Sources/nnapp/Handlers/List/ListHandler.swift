@@ -5,12 +5,13 @@
 //  Created by Nikolai Nobadi on 12/3/25.
 //
 
+import CodeLaunchKit
 import SwiftPickerKit
 
 /// Coordinates list and display operations for CodeLaunch hierarchy.
 struct ListHandler {
     private let picker: any CommandLinePicker
-    private let context: CodeLaunchContext
+    private let loader: any LaunchListLoader
     private let console: any ConsoleOutput
 
     /// Initializes a new handler for list operations.
@@ -18,9 +19,9 @@ struct ListHandler {
     ///   - picker: Utility for prompting user input and selections.
     ///   - context: Data context for loading categories, groups, and projects.
     ///   - console: Console output adapter for displaying information.
-    init(picker: any CommandLinePicker, context: CodeLaunchContext, console: any ConsoleOutput) {
+    init(picker: any CommandLinePicker, loader: any LaunchListLoader, console: any ConsoleOutput) {
         self.picker = picker
-        self.context = context
+        self.loader = loader
         self.console = console
     }
 }
@@ -30,7 +31,7 @@ struct ListHandler {
 extension ListHandler {
     /// Displays an interactive tree navigation of the entire CodeLaunch hierarchy.
     func browseHierarchy() throws {
-        let categories = try context.loadCategories()
+        let categories = try loader.loadCategories()
         
         if categories.isEmpty {
             console.printHeader("CodeLaunch")
@@ -55,7 +56,7 @@ extension ListHandler {
     /// Selects and displays details for a specific category.
     /// - Parameter name: Optional category name. If nil, prompts user to select.
     func selectAndDisplayCategory(name: String?) throws {
-        let categories = try context.loadCategories()
+        let categories = try loader.loadCategories()
         let selectedCategory: LaunchCategory
 
         if let name, let category = categories.first(where: { name.matches($0.name) }) {
@@ -97,7 +98,7 @@ extension ListHandler {
     /// Selects and displays details for a specific group.
     /// - Parameter name: Optional group name or shortcut. If nil, prompts user to select.
     func selectAndDisplayGroup(name: String?) throws {
-        let groups = try context.loadGroups()
+        let groups = try loader.loadGroups()
         let selectedGroup: LaunchGroup
 
         if let name, let group = groups.first(where: { name.matches($0.name) || name.matches($0.shortcut) }) {
@@ -115,7 +116,7 @@ extension ListHandler {
     /// - Parameter group: The group to display.
     func displayGroupDetails(_ group: LaunchGroup) {
         console.printHeader(group.name)
-        console.printLine("category: \(group.category?.name ?? "NOT ASSIGNED")")
+        console.printLine("category: \(group.categoryName ?? "NOT ASSIGNED")")
         console.printLine("group path: \(group.path ?? "NOT ASSIGNED")")
         console.printLine("project count: \(group.projects.count)")
         console.printLine("")
@@ -134,7 +135,7 @@ extension ListHandler {
     /// Selects and displays details for a specific project.
     /// - Parameter name: Optional project name or shortcut. If nil, prompts user to select.
     func selectAndDisplayProject(name: String?) throws {
-        let projects = try context.loadProjects()
+        let projects = try loader.loadProjects()
         let selectedProject: LaunchProject
 
         if let name, let project = projects.first(where: { name.matches($0.name) || name.matches($0.shortcut) }) {
@@ -152,7 +153,7 @@ extension ListHandler {
     /// - Parameter project: The project to display.
     func displayProjectDetails(_ project: LaunchProject) {
         console.printHeader(project.name)
-        console.printLine("group: \(project.group?.name ?? "NOT ASSIGNED")")
+        console.printLine("group: \(project.groupName ?? "NOT ASSIGNED")")
         console.printLine("shortcut: \(project.shortcut ?? "NOT ASSIGNED")")
         console.printLine("project type: \(project.type.name)")
 
@@ -169,7 +170,7 @@ extension ListHandler {
 extension ListHandler {
     /// Displays all saved project link names.
     func displayProjectLinks() {
-        let existingNames = context.loadProjectLinkNames()
+        let existingNames = loader.loadProjectLinkNames()
 
         if existingNames.isEmpty {
             console.printLine("No saved Project Link names")

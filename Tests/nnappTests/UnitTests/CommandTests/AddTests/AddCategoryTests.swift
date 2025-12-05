@@ -6,6 +6,7 @@
 //
 
 import Testing
+import CodeLaunchKit
 import SwiftPickerTesting
 @testable import nnapp
 
@@ -16,7 +17,7 @@ final class AddCategoryTests: MainActorBaseAddTests {
         let existingName = "existingCategory"
         let factory = MockContextFactory()
         let context = try factory.makeContext()
-        let existingCategory = makeCategory(name: existingName, path: tempFolder.path.appendingPathComponent(existingName))
+        let existingCategory = makeSwiftDataCategory(name: existingName, path: tempFolder.path.appendingPathComponent(existingName))
         let otherFolder = try tempFolder.createSubfolder(named: "OtherFolder")
         let categoryFolderToImport = try otherFolder.createSubfolder(named: existingName)
         

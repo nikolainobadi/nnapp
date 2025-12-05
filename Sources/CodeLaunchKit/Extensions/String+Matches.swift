@@ -1,11 +1,11 @@
 //
-//  String+Extensions.swift
+//  String+Matches.swift
 //  nnapp
 //
-//  Created by Nikolai Nobadi on 9/8/25.
+//  Created by Nikolai Nobadi on 12/4/25.
 //
 
-extension String {
+public extension String {
     /// Returns `true` if the string matches another value, case-insensitively.
     /// - Parameter value: The optional string to compare against.
     /// - Returns: `true` if both strings match when lowercased; otherwise, `false`.

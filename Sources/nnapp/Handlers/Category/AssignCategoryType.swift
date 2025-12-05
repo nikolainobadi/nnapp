@@ -6,5 +6,5 @@
 //
 
 enum AssignCategoryType: CaseIterable {
-    case select, create, `import`
+    case `import`, create, select
 }

@@ -6,25 +6,19 @@
 //
 
 import NnShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 
-/// Coordinates opening folders in Finder for categories, groups, and projects.
 struct FinderHandler {
     private let shell: any Shell
     private let picker: any CommandLinePicker
-    private let context: CodeLaunchContext
     private let console: any ConsoleOutput
+    private let loader: any FinderInfoLoader
 
-    /// Initializes a new handler for Finder operations.
-    /// - Parameters:
-    ///   - shell: Shell adapter for executing commands.
-    ///   - picker: Utility for prompting user input and selections.
-    ///   - context: Data context for loading entities.
-    ///   - console: Console output for displaying messages.
-    init(shell: any Shell, picker: any CommandLinePicker, context: CodeLaunchContext, console: any ConsoleOutput) {
+    init(shell: any Shell, picker: any CommandLinePicker, loader: any FinderInfoLoader, console: any ConsoleOutput) {
         self.shell = shell
         self.picker = picker
-        self.context = context
+        self.loader = loader
         self.console = console
     }
 }
@@ -34,7 +28,7 @@ struct FinderHandler {
 extension FinderHandler {
     /// Opens an interactive browser to select and open any folder type.
     func browseAll() throws {
-        let categories = try context.loadCategories()
+        let categories = try loader.loadCategories()
 
         if categories.isEmpty {
             console.printLine("No categories found. Create a category first.")
@@ -53,23 +47,6 @@ extension FinderHandler {
         let path = try getPathFromNode(selectedNode)
         try openInFinder(path: path)
     }
-
-    private func getPathFromNode(_ node: LaunchTreeNode) throws -> String {
-        switch node {
-        case .category(let category, _):
-            return category.path
-        case .group(let group, _):
-            guard let path = group.path else {
-                throw CodeLaunchError.missingGroup
-            }
-            return path
-        case .project(let project, _):
-            guard let path = project.folderPath else {
-                throw CodeLaunchError.missingProject
-            }
-            return path
-        }
-    }
 }
 
 
@@ -80,19 +57,6 @@ extension FinderHandler {
     func openCategory(name: String?) throws {
         let path = try resolveCategoryPath(name: name)
         try openInFinder(path: path)
-    }
-
-    private func resolveCategoryPath(name: String?) throws -> String {
-        let categories = try context.loadCategories()
-
-        if let name {
-            if let category = categories.first(where: { name.matches($0.name) }) {
-                return category.path
-            }
-            try picker.requiredPermission("Could not find a Category named \(name). Would you like to select from the list?")
-        }
-
-        return try picker.requiredSingleSelection("Select a Category", items: categories).path
     }
 }
 
@@ -105,27 +69,6 @@ extension FinderHandler {
         let path = try resolveGroupPath(name: name)
         try openInFinder(path: path)
     }
-
-    private func resolveGroupPath(name: String?) throws -> String {
-        let groups = try context.loadGroups()
-
-        if let name {
-            if let group = groups.first(where: { name.matches($0.name) || name.matches($0.shortcut) }),
-               let path = group.path {
-                return path
-            }
-            try picker.requiredPermission("Could not find a Group with the name or shortcut \(name). Would you like to select from the list?")
-        }
-
-        let group = try picker.requiredSingleSelection("Select a Group", items: groups)
-
-        guard let path = group.path else {
-            console.printLine("Could not resolve local path for \(group.name)")
-            throw CodeLaunchError.missingGroup
-        }
-
-        return path
-    }
 }
 
 
@@ -137,9 +80,32 @@ extension FinderHandler {
         let path = try resolveProjectPath(name: name)
         try openInFinder(path: path)
     }
+}
 
-    private func resolveProjectPath(name: String?) throws -> String {
-        let projects = try context.loadProjects()
+
+// MARK: - Private Methods
+private extension FinderHandler {
+    /// Opens the specified path in Finder.
+    /// - Parameter path: The file system path to open.
+    func openInFinder(path: String) throws {
+        try shell.runAndPrint(bash: "open -a Finder \(path)")
+    }
+    
+    func resolveCategoryPath(name: String?) throws -> String {
+        let categories = try loader.loadCategories()
+
+        if let name {
+            if let category = categories.first(where: { name.matches($0.name) }) {
+                return category.path
+            }
+            try picker.requiredPermission("Could not find a Category named \(name). Would you like to select from the list?")
+        }
+
+        return try picker.requiredSingleSelection("Select a Category", items: categories).path
+    }
+    
+    func resolveProjectPath(name: String?) throws -> String {
+        let projects = try loader.loadProjects()
 
         if let name {
             if let project = projects.first(where: { name.matches($0.name) || name.matches($0.shortcut) }),
@@ -158,14 +124,42 @@ extension FinderHandler {
 
         return path
     }
-}
+    
+    func resolveGroupPath(name: String?) throws -> String {
+        let groups = try loader.loadGroups()
 
+        if let name {
+            if let group = groups.first(where: { name.matches($0.name) || name.matches($0.shortcut) }),
+               let path = group.path {
+                return path
+            }
+            try picker.requiredPermission("Could not find a Group with the name or shortcut \(name). Would you like to select from the list?")
+        }
 
-// MARK: - Finder Integration
-private extension FinderHandler {
-    /// Opens the specified path in Finder.
-    /// - Parameter path: The file system path to open.
-    func openInFinder(path: String) throws {
-        try shell.runAndPrint(bash: "open -a Finder \(path)")
+        let group = try picker.requiredSingleSelection("Select a Group", items: groups)
+
+        guard let path = group.path else {
+            console.printLine("Could not resolve local path for \(group.name)")
+            throw CodeLaunchError.missingGroup
+        }
+
+        return path
+    }
+    
+    func getPathFromNode(_ node: LaunchTreeNode) throws -> String {
+        switch node {
+        case .category(let category, _):
+            return category.path
+        case .group(let group, _):
+            guard let path = group.path else {
+                throw CodeLaunchError.missingGroup
+            }
+            return path
+        case .project(let project, _):
+            guard let path = project.folderPath else {
+                throw CodeLaunchError.missingProject
+            }
+            return path
+        }
     }
 }

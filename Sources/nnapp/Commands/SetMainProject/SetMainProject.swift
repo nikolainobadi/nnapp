@@ -7,14 +7,12 @@
 
 import ArgumentParser
 
-/// Changes the main project for a group by allowing the user to select from available non-main projects.
 extension Nnapp {
     struct SetMainProject: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Set or change the main project for a group by selecting from available projects."
         )
 
-        /// The name or shortcut of the group to modify.
         @Argument(help: "The name or shortcut of the group to set the main project for.")
         var group: String?
 

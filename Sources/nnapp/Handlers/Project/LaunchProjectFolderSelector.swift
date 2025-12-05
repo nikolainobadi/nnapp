@@ -1,16 +1,15 @@
 //
-//  ProjectFolderSelector.swift
+//  LaunchProjectFolderSelector.swift
 //  nnapp
 //
-//  Created by Nikolai Nobadi on 3/29/25.
+//  Created by Nikolai Nobadi on 12/4/25.
 //
 
 import Files
+import CodeLaunchKit
 import SwiftPickerKit
 
-/// Handles selection and validation of project folders for use in `LaunchProject` creation.
-/// Determines the `ProjectType` by inspecting folder contents.
-struct ProjectFolderSelector {
+struct LaunchProjectFolderSelector {
     private let picker: any CommandLinePicker
     private let folderBrowser: any FolderBrowser
     private let desktopPath: String
@@ -29,14 +28,14 @@ struct ProjectFolderSelector {
 
 
 // MARK: - Action
-extension ProjectFolderSelector {
+extension LaunchProjectFolderSelector {
     /// Prompts the user to select a folder for a project and resolves its type.
     /// - Parameters:
     ///   - path: Optional absolute path to a project folder.
     ///   - group: The group the project will belong to (used for default folder lookup).
     ///   - fromDesktop: Whether to filter and select from valid projects on the Desktop.
     /// - Returns: A validated `ProjectFolder` containing the resolved folder and type.
-    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
+    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool = false) throws -> LaunchProjectFolder {
         if let path, let folder = try? Folder(path: path) {
             let projectType = try getProjectType(folder: folder)
             return .init(folder: folder, type: projectType)
@@ -79,7 +78,7 @@ extension ProjectFolderSelector {
 
 
 // MARK: - Private Methods
-private extension ProjectFolderSelector {
+private extension LaunchProjectFolderSelector {
     /// Determines the project type (e.g. package, project, workspace) by inspecting the folder contents.
     func getProjectType(folder: Folder) throws -> ProjectType {
         if folder.containsFile(named: "Package.swift") {
@@ -95,7 +94,7 @@ private extension ProjectFolderSelector {
     }
 
     /// Returns a list of valid project subfolders within the group folder that are not already registered.
-    func getAvailableSubfolders(group: LaunchGroup, folder: Folder) -> [ProjectFolder] {
+    func getAvailableSubfolders(group: LaunchGroup, folder: Folder) -> [LaunchProjectFolder] {
         return folder.subfolders.compactMap { subFolder in
             guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
                   let projectType = try? getProjectType(folder: subFolder) else {
@@ -107,7 +106,7 @@ private extension ProjectFolderSelector {
     }
     
     /// Returns a list of valid Xcode projects and Swift packages from the user's Desktop.
-    func getDesktopProjectFolders() throws -> [ProjectFolder] {
+    func getDesktopProjectFolders() throws -> [LaunchProjectFolder] {
         let desktopFolder = try Folder(path: desktopPath)
         
         return desktopFolder.subfolders.compactMap { subFolder in

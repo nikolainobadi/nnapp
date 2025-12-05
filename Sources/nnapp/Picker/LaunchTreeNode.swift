@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 12/3/25.
 //
 
+import CodeLaunchKit
 import SwiftPickerKit
 
 enum LaunchTreeNode {
