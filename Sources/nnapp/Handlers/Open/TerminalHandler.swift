@@ -11,14 +11,16 @@ import Foundation
 struct TerminalHandler {
     private let shell: any LaunchShell
     private let loader: any ScriptLoader
+    private let environment: any TerminalEnvironmentProviding
     
     /// Initializes a new terminal manager.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - context: Data context for loading launch scripts.
-    init(shell: any LaunchShell, loader: any ScriptLoader) {
+    init(shell: any LaunchShell, loader: any ScriptLoader, environment: any TerminalEnvironmentProviding = ProcessInfoEnvironmentProvider()) {
         self.shell = shell
         self.loader = loader
+        self.environment = environment
     }
 }
 
@@ -58,7 +60,7 @@ private extension TerminalHandler {
     /// Runs the given shell script in a new iTerm tab, if iTerm is available.
     /// - Parameter script: A shell command string to execute.
     func runScriptInNewTerminalWindow(script: String) {
-        if let termProgram = ProcessInfo.processInfo.environment["TERM_PROGRAM"], termProgram == "iTerm.app" {
+        if environment.termProgram() == "iTerm.app" {
             let appleScript = """
                 tell application "iTerm"
                     activate
@@ -101,4 +103,14 @@ private extension TerminalHandler {
 // MARK: - Dependencies
 protocol ScriptLoader {
     func loadLaunchScript() -> String?
+}
+
+protocol TerminalEnvironmentProviding {
+    func termProgram() -> String?
+}
+
+struct ProcessInfoEnvironmentProvider: TerminalEnvironmentProviding {
+    func termProgram() -> String? {
+        return ProcessInfo.processInfo.environment["TERM_PROGRAM"]
+    }
 }
