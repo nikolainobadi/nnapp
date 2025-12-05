@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CodeLaunchKit
 @testable import nnapp
 
 final class MockGroupSelector {

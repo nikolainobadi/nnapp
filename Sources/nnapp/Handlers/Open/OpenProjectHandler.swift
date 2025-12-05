@@ -14,7 +14,7 @@ struct OpenProjectHandler {
     private let picker: any CommandLinePicker
     private let loader: any LaunchHierarchyLoader
     private let ideLauncher: IDELauncher
-    private let terminalManager: TerminalManager
+    private let terminalManager: TerminalHandler
     private let urlLauncher: URLLauncher
     private let branchSyncChecker: any BranchSyncChecker
     private let branchStatusNotifier: any BranchStatusNotifier

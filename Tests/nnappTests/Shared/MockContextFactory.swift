@@ -9,6 +9,7 @@ import Files
 import SwiftData
 import Foundation
 import NnShellKit
+import CodeLaunchKit
 import SwiftPickerKit
 import NnShellTesting
 import SwiftPickerTesting
@@ -46,14 +47,14 @@ extension MockContextFactory: ContextFactory {
         return picker
     }
     
-    func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
-        return MockGroupSelector(context: context)
-    }
-    
-    func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
-        return MockCategorySelector(context: context)
-    }
-    
+//    func makeProjectGroupSelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any ProjectGroupSelector {
+//        return MockGroupSelector(context: context)
+//    }
+//    
+//    func makeGroupCategorySelector(picker: any CommandLinePicker, context: CodeLaunchContext) -> any GroupCategorySelector {
+//        return MockCategorySelector(context: context)
+//    }
+//    
     func makeContext() throws -> CodeLaunchContext {
         if let context {
             return context
@@ -104,10 +105,10 @@ private extension MockContextFactory {
 // MARK: - Mocks
 final class MockBranchSyncChecker: BranchSyncChecker {
     private(set) var checkCallCount = 0
-    private(set) var lastProject: SwiftDataLaunchProject?
+    private(set) var lastProject: LaunchProject?
     var result: LaunchBranchStatus?
 
-    func checkBranchSyncStatus(for project: SwiftDataLaunchProject) -> LaunchBranchStatus? {
+    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
         checkCallCount += 1
         lastProject = project
         return result
@@ -117,9 +118,9 @@ final class MockBranchSyncChecker: BranchSyncChecker {
 final class MockBranchStatusNotifier: BranchStatusNotifier {
     private(set) var notifyCallCount = 0
     private(set) var lastStatus: LaunchBranchStatus?
-    private(set) var lastProject: SwiftDataLaunchProject?
+    private(set) var lastProject: LaunchProject?
 
-    func notify(status: LaunchBranchStatus, for project: SwiftDataLaunchProject) {
+    func notify(status: LaunchBranchStatus, for project: LaunchProject) {
         notifyCallCount += 1
         lastStatus = status
         lastProject = project

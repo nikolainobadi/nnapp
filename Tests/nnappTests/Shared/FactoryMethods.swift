@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/29/25.
 //
 
+import CodeLaunchKit
 @testable import nnapp
 
 func makeCategory(name: String = "iOSApps", path: String = "path/to/category") -> SwiftDataLaunchCategory {

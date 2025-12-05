@@ -1,5 +1,5 @@
 //
-//  TerminalManager.swift
+//  TerminalHandler.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/26/25.
@@ -9,7 +9,7 @@ import Foundation
 import NnShellKit
 
 /// Manages terminal operations including iTerm integration and session management.
-struct TerminalManager {
+struct TerminalHandler {
     private let shell: any Shell
     private let loader: any ScriptLoader
     
@@ -25,7 +25,7 @@ struct TerminalManager {
 
 
 // MARK: - Actions
-extension TerminalManager {
+extension TerminalHandler {
     /// Opens the project folder in a new terminal window, if not already open.
     /// - Parameters:
     ///   - folderPath: The project folder path to open.
@@ -36,7 +36,8 @@ extension TerminalManager {
         }
         
         guard let openPaths = try? getITermSessionPaths(),
-              !openPaths.contains(folderPath) else {
+              !openPaths.contains(folderPath)
+        else {
             return
         }
         
@@ -54,7 +55,7 @@ extension TerminalManager {
 
 
 // MARK: - Private Methods
-private extension TerminalManager {
+private extension TerminalHandler {
     /// Runs the given shell script in a new iTerm tab, if iTerm is available.
     /// - Parameter script: A shell command string to execute.
     func runScriptInNewTerminalWindow(script: String) {
