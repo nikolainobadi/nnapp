@@ -42,7 +42,6 @@ extension IDEHandler {
 
 // MARK: - Private Methods
 private extension IDEHandler {
-    /// Clones the project repo if it doesn't exist locally and a remote is available.
     func cloneProjectIfNecessary(_ project: LaunchProject, folderPath: String, filePath: String) throws {
         do {
             _ = try fileSystem.directory(at: folderPath) // already exists

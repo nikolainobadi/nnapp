@@ -5,8 +5,6 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import Foundation
-
 /// Manages terminal operations including iTerm integration and session management.
 struct TerminalHandler {
     private let shell: any LaunchShell
@@ -107,10 +105,4 @@ protocol ScriptLoader {
 
 protocol TerminalEnvironmentProviding {
     func termProgram() -> String?
-}
-
-struct ProcessInfoEnvironmentProvider: TerminalEnvironmentProviding {
-    func termProgram() -> String? {
-        return ProcessInfo.processInfo.environment["TERM_PROGRAM"]
-    }
 }
