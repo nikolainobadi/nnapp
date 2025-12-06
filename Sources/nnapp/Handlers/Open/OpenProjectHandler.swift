@@ -15,7 +15,7 @@ struct OpenProjectHandler {
     private let terminalManager: TerminalHandler
     private let urlLauncher: URLHandler
     private let branchSyncChecker: any BranchSyncChecker
-    private let branchStatusNotifier: any BranchStatusNotifier
+    private let branchStatusNotifier: DefaultBranchStatusNotifier
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(
@@ -23,7 +23,6 @@ struct OpenProjectHandler {
         picker: any LaunchPicker,
         loader: any Loader,
         branchSyncChecker: any BranchSyncChecker,
-        branchStatusNotifier: any BranchStatusNotifier,
         fileSystem: any FileSystem
     ) {
         self.picker = picker
@@ -32,7 +31,7 @@ struct OpenProjectHandler {
         self.terminalManager = .init(shell: shell, loader: loader)
         self.urlLauncher = .init(shell: shell, picker: picker)
         self.branchSyncChecker = branchSyncChecker
-        self.branchStatusNotifier = branchStatusNotifier
+        self.branchStatusNotifier = .init(shell: shell)
     }
 }
 
@@ -116,8 +115,4 @@ enum LaunchBranchStatus {
 
 protocol BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
-}
-
-protocol BranchStatusNotifier {
-    func notify(status: LaunchBranchStatus, for project: LaunchProject)
 }

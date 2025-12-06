@@ -60,5 +60,4 @@ protocol ContextFactory {
     func makeContext() throws -> CodeLaunchContext
     func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser
     func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker
-    func makeBranchStatusNotifier(shell: any LaunchShell) -> any BranchStatusNotifier
 }

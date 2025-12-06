@@ -42,8 +42,4 @@ final class DefaultContextFactory: ContextFactory {
     func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {
         return DefaultBranchSyncChecker(shell: shell, fileSystem: makeFileSystem())
     }
-
-    func makeBranchStatusNotifier(shell: any LaunchShell) -> any BranchStatusNotifier {
-        return DefaultBranchStatusNotifier(shell: shell)
-    }
 }

@@ -31,7 +31,7 @@ extension TerminalHandlerTests {
         let launchScript = "source ~/.zshrc && echo hi"
         let shell = MockShell(results: [""])
         let envProvider = TestEnvironmentProvider(termProgram: "iTerm.app")
-        let (sut, _) = makeSUT(scriptToLoad: launchScript, shell: shell, environment: envProvider)
+        let sut = makeSUT(scriptToLoad: launchScript, shell: shell, environment: envProvider).sut
         
         sut.openDirectoryInTerminal(folderPath: folderPath, terminalOption: .onlyTerminal)
         
@@ -42,11 +42,11 @@ extension TerminalHandlerTests {
     @Test("Skips opening terminal when session already open")
     func skipsOpeningTerminalWhenSessionAlreadyOpen() {
         let shell = MockShell(results: [folderPath])
-        let (sut, _) = makeSUT(shell: shell)
+        let sut = makeSUT(shell: shell).sut
 
         sut.openDirectoryInTerminal(folderPath: folderPath, terminalOption: nil)
 
-        #expect(shell.executedCommand(containing: "cd \(folderPath)") == false)
+        #expect(!shell.executedCommand(containing: "cd \(folderPath)"))
     }
 }
 

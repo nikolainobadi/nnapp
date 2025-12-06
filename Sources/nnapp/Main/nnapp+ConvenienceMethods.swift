@@ -70,7 +70,6 @@ extension Nnapp {
         let picker = makePicker()
         let repository = try makeRepository()
         let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
-        let branchStatusNotifier = contextFactory.makeBranchStatusNotifier(shell: shell)
         let fileSystem = contextFactory.makeFileSystem()
 
         return .init(
@@ -78,7 +77,6 @@ extension Nnapp {
             picker: picker,
             loader: repository,
             branchSyncChecker: branchSyncChecker,
-            branchStatusNotifier: branchStatusNotifier,
             fileSystem: fileSystem
         )
     }
