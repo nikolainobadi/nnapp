@@ -5,10 +5,10 @@
 //  Created by Nikolai Nobadi on 12/05/25.
 //
 
+import Testing
 import CodeLaunchKit
 import NnShellTesting
 import SwiftPickerTesting
-import Testing
 @testable import nnapp
 
 struct ProjectInfoSelectorTests {
