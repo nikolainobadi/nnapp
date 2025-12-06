@@ -135,13 +135,13 @@ private extension OpenProjectHandlerTests {
         selectionIndex: Int = 0,
         branchStatus: LaunchBranchStatus? = nil,
         throwError: Bool = false
-    ) -> (sut: OpenProjectHandler, service: MockProjectOpenService) {
+    ) -> (sut: OpenProjectHandler, delegate: MockOpenProjectDelegate) {
         let picker = MockSwiftPicker(selectionResult: .init(defaultSingle: .index(selectionIndex)))
         let loader = StubLoader(projects: projects, groups: groups)
-        let service = MockProjectOpenService(throwError: throwError, branchStatus: branchStatus)
-        let sut = OpenProjectHandler(picker: picker, loader: loader, service: service)
+        let delegate = MockOpenProjectDelegate(throwError: throwError, branchStatus: branchStatus)
+        let sut = OpenProjectHandler(picker: picker, loader: loader, delegate: delegate)
 
-        return (sut, service)
+        return (sut, delegate)
     }
 }
 
@@ -178,7 +178,7 @@ private extension OpenProjectHandlerTests {
         }
     }
     
-    final class MockProjectOpenService: ProjectOpenServing {
+    final class MockOpenProjectDelegate: OpenProjectDelegate {
         private let throwError: Bool
         private let branchStatus: LaunchBranchStatus?
 

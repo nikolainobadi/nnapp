@@ -70,7 +70,8 @@ extension Nnapp {
         let picker = makePicker()
         let repository = try makeRepository()
         let fileSystem = contextFactory.makeFileSystem()
-
-        return .init(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem)
+        let delegate = DefaultOpenProjectDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem)
+        
+        return .init(picker: picker, loader: repository, delegate: delegate)
     }
 }
