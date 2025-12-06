@@ -29,9 +29,8 @@ extension TerminalHandlerTests {
     @Test("Opens terminal with launch script when available")
     func opensTerminalWithLaunchScriptWhenAvailable() {
         let launchScript = "source ~/.zshrc && echo hi"
-        let shell = MockShell(results: [""])
         let envProvider = TestEnvironmentProvider(termProgram: "iTerm.app")
-        let sut = makeSUT(scriptToLoad: launchScript, shell: shell, environment: envProvider).sut
+        let (sut, shell) = makeSUT(scriptToLoad: launchScript, results: [""], environment: envProvider)
         
         sut.openDirectoryInTerminal(folderPath: folderPath, terminalOption: .onlyTerminal)
         
@@ -41,8 +40,7 @@ extension TerminalHandlerTests {
 
     @Test("Skips opening terminal when session already open")
     func skipsOpeningTerminalWhenSessionAlreadyOpen() {
-        let shell = MockShell(results: [folderPath])
-        let sut = makeSUT(shell: shell).sut
+        let (sut, shell) = makeSUT(results: [folderPath])
 
         sut.openDirectoryInTerminal(folderPath: folderPath, terminalOption: nil)
 
@@ -53,7 +51,8 @@ extension TerminalHandlerTests {
 
 // MARK: - SUT
 private extension TerminalHandlerTests {
-    func makeSUT(scriptToLoad: String? = nil, shell: MockShell = MockShell(), environment: any TerminalEnvironmentProviding = TestEnvironmentProvider()) -> (sut: TerminalHandler, shell: MockShell) {
+    func makeSUT(scriptToLoad: String? = nil, results: [String] = [], environment: any TerminalEnvironmentProviding = TestEnvironmentProvider()) -> (sut: TerminalHandler, shell: MockShell) {
+        let shell = MockLaunchShell(results: results)
         let loader = StubLoader(scriptToLoad: scriptToLoad)
         let sut = TerminalHandler(shell: shell, loader: loader, environment: environment)
 

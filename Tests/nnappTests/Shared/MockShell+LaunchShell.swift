@@ -9,7 +9,11 @@ import GitCommandGen
 import NnShellTesting
 @testable import nnapp
 
-extension MockShell: LaunchGitShell {
+final class MockLaunchShell: MockShell {
+    
+}
+
+extension MockLaunchShell: LaunchGitShell {
     public func remoteExists(path: String?) throws -> Bool {
         return true // TODO: -
     }

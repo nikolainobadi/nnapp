@@ -41,8 +41,8 @@ struct BranchStatusNotifierTests {
 
 // MARK: - SUT
 private extension BranchStatusNotifierTests {
-    func makeSUT() -> (sut: BranchStatusNotifier, shell: MockShell) {
-        let shell = MockShell()
+    func makeSUT() -> (sut: BranchStatusNotifier, shell: MockLaunchShell) {
+        let shell = MockLaunchShell()
         let sut = BranchStatusNotifier(shell: shell)
         
         return (sut, shell)

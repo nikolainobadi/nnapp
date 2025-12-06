@@ -59,8 +59,8 @@ struct URLHandlerTests {
 
 // MARK: - SUT
 private extension URLHandlerTests {
-    func makeSUT(selectionIndex: Int = 0) -> (sut: URLHandler, shell: MockShell) {
-        let shell = MockShell()
+    func makeSUT(selectionIndex: Int = 0) -> (sut: URLHandler, shell: MockLaunchShell) {
+        let shell = MockLaunchShell()
         let picker = MockSwiftPicker(selectionResult: .init(defaultSingle: .index(selectionIndex)))
         let sut = URLHandler(shell: shell, picker: picker)
 

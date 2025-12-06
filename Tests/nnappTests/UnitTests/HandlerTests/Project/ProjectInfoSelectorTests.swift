@@ -104,14 +104,14 @@ private extension ProjectInfoSelectorTests {
         permissionDefault: Bool = true,
         selectionIndex: Int = 0,
         gitHubURLResults: [String] = []
-    ) -> (sut: ProjectInfoSelector, shell: MockShell) {
+    ) -> (sut: ProjectInfoSelector, shell: MockLaunchShell) {
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
             permissionResult: .init(defaultValue: permissionDefault, type: .ordered(permissionResults)),
             selectionResult: .init(defaultSingle: .index(selectionIndex))
         )
         let infoLoader = StubProjectInfoLoader(projects: projects, groups: groups, linkNames: linkNames)
-        let shell = MockShell(results: gitHubURLResults)
+        let shell = MockLaunchShell(results: gitHubURLResults)
         let sut = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: infoLoader)
 
         return (sut, shell)

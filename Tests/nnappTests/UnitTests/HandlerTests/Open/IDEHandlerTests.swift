@@ -87,8 +87,8 @@ struct IDEHandlerTests {
 
 // MARK: - SUT
 private extension IDEHandlerTests {
-    func makeSUT(homeDirectoryPath: String = "/Users/test", directoryToLoad: MockDirectory? = nil) -> (sut: IDEHandler, shell: MockShell, fileSystem: MockFileSystem) {
-        let shell = MockShell()
+    func makeSUT(homeDirectoryPath: String = "/Users/test", directoryToLoad: MockDirectory? = nil) -> (sut: IDEHandler, shell: MockLaunchShell, fileSystem: MockFileSystem) {
+        let shell = MockLaunchShell()
         let picker = MockSwiftPicker(permissionResult: .init(defaultValue: true, type: .ordered([true])))
         let fileSystem = MockFileSystem(homeDirectory: .init(path: homeDirectoryPath), directoryToLoad: directoryToLoad)
         let sut = IDEHandler(shell: shell, picker: picker, fileSystem: fileSystem)

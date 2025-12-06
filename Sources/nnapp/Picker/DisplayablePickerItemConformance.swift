@@ -5,16 +5,8 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import Files
 import CodeLaunchKit
 import SwiftPickerKit
-
-// MARK: - Folder
-extension Folder: @retroactive DisplayablePickerItem {
-    public var displayName: String {
-        return name
-    }
-}
 
 // MARK: - LaunchCategory
 extension LaunchCategory: DisplayablePickerItem {

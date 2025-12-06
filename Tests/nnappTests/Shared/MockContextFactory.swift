@@ -13,14 +13,14 @@ import SwiftPickerTesting
 @testable import nnapp
 
 final class MockContextFactory {
-    private let shell: MockShell
+    private let shell: MockLaunchShell
     private let picker: MockSwiftPicker
     private let throwCategorySelectorError: Bool
     private var context: CodeLaunchContext?
     private let uniqueId: String
     private let folderBrowser: any DirectoryBrowser
 
-    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, folderBrowser: (any DirectoryBrowser)? = nil) {
+    init(shell: MockLaunchShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, folderBrowser: (any DirectoryBrowser)? = nil) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
