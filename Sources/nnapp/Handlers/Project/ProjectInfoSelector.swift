@@ -29,7 +29,7 @@ extension ProjectInfoSelector {
     ///   - group: The group this project will belong to.
     ///   - isMainProject: Indicates whether this project is the group's primary launch target.
     /// - Returns: A `ProjectInfo` struct with the collected input.
-    func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
+    func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
         try validateName(folder.name)
         let shortcut = try getShortcut(shortcut: shortcut, group: group, isMainProject: isMainProject)
         try validateShortcut(shortcut)
@@ -43,7 +43,6 @@ extension ProjectInfoSelector {
 
 // MARK: - Private Methods
 private extension ProjectInfoSelector {
-    /// Ensures the project name is unique within the persistence context.
     func validateName(_ name: String) throws {
         let projects = try infoLoader.loadProjects()
 
@@ -52,7 +51,6 @@ private extension ProjectInfoSelector {
         }
     }
 
-    /// Ensures the provided shortcut doesn't conflict with any existing group or project.
     func validateShortcut(_ shortcut: String?) throws {
         if let shortcut {
             let groups = try infoLoader.loadGroups()
@@ -65,7 +63,6 @@ private extension ProjectInfoSelector {
         }
     }
     
-    /// Prompts for or determines the project shortcut, optionally syncing with the group shortcut.
     func getShortcut(shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> String? {
         if let shortcut { return shortcut }
 
@@ -80,7 +77,6 @@ private extension ProjectInfoSelector {
         return try picker.getRequiredInput(prompt)
     }
 
-    /// Retrieves the remote GitHub URL for the folder, if available and confirmed by the user.
     func getRemote(folder: Directory) -> ProjectLink? {
         guard let githubURL = try? shell.getGitHubURL(at: folder.path),
               picker.getPermission("Is this the correct remote url: \(githubURL)?") else {

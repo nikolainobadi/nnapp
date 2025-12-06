@@ -74,13 +74,13 @@ private extension LaunchProjectHandler {
         return try groupSelector.selectGroup(name: name)
     }
     
-    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> LaunchProjectFolder {
-        let folderSelector = LaunchProjectFolderSelector(picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser)
+    func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
+        let folderSelector = ProjectFolderSelector(picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser)
         
         return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
     }
     
-    func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
+    func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
         let infoSelector = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: store)
         
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
@@ -139,7 +139,7 @@ private extension LaunchProjectHandler {
 
 // MARK: - Extension Dependencies
 private extension LaunchProject {
-    init(info: LaunchProjectInfo, type: ProjectType) {
+    init(info: ProjectInfo, type: ProjectType) {
         self.init(name: info.name, shortcut: info.shortcut, type: type, remote: info.remote, links: info.otherLinks)
     }
 }

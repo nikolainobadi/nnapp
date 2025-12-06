@@ -49,7 +49,7 @@ extension ProjectLink: DisplayablePickerItem {
 
 
 // MARK: - LaunchProjectFolder
-extension LaunchProjectFolder: DisplayablePickerItem {
+extension ProjectFolder: DisplayablePickerItem {
     var displayName: String {
         return name
     }

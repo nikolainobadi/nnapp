@@ -1,5 +1,5 @@
 //
-//  LaunchProjectFolder.swift
+//  ProjectFolder.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/4/25.
@@ -7,7 +7,7 @@
 
 import CodeLaunchKit
 
-struct LaunchProjectFolder {
+struct ProjectFolder {
     let folder: Directory
     let type: ProjectType
 
