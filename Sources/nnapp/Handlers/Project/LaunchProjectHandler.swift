@@ -81,7 +81,7 @@ private extension LaunchProjectHandler {
     }
     
     func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> LaunchProjectInfo {
-        let infoSelector = LaunchProjectInfoSelector(shell: shell, picker: picker, infoLoader: store)
+        let infoSelector = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: store)
         
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }

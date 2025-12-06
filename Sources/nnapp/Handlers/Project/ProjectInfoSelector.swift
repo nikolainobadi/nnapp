@@ -1,5 +1,5 @@
 //
-//  LaunchProjectInfoSelector.swift
+//  ProjectInfoSelector.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/4/25.
@@ -7,7 +7,7 @@
 
 import CodeLaunchKit
 
-struct LaunchProjectInfoSelector {
+struct ProjectInfoSelector {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let infoLoader: any LaunchProjectInfoLoader
@@ -21,7 +21,7 @@ struct LaunchProjectInfoSelector {
 
 
 // MARK: - Action
-extension LaunchProjectInfoSelector {
+extension ProjectInfoSelector {
     /// Prompts the user for project info (name, shortcut, remote, links) using the folder and group context.
     /// - Parameters:
     ///   - folder: The selected folder to create the project from.
@@ -42,7 +42,7 @@ extension LaunchProjectInfoSelector {
 
 
 // MARK: - Private Methods
-private extension LaunchProjectInfoSelector {
+private extension ProjectInfoSelector {
     /// Ensures the project name is unique within the persistence context.
     func validateName(_ name: String) throws {
         let projects = try infoLoader.loadProjects()
