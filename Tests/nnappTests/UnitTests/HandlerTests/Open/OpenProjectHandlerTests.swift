@@ -64,7 +64,14 @@ extension OpenProjectHandlerTests {
         let (sut, service) = makeSUT(branchStatus: nil)
 
         try sut.openInIDE(project, launchType: .xcode, terminalOption: .onlyTerminal)
+        
+        let folderPath = try #require(project.folderPath)
 
+        #expect(service.openedProjectData?.project.name == project.name)
+        #expect(service.openedProjectData?.type == .xcode)
+        #expect(service.terminalData?.path == folderPath)
+        #expect(service.terminalData?.option == .onlyTerminal)
+        #expect(service.notifyData == nil)
     }
 
     @Test("Notifies when branch status is behind")
@@ -74,6 +81,9 @@ extension OpenProjectHandlerTests {
 
         try sut.openInIDE(project, launchType: .vscode, terminalOption: nil)
 
+        #expect(service.openedProjectData?.type == .vscode)
+        #expect(service.notifyData?.status == .behind)
+        #expect(service.notifyData?.project.name == project.name)
     }
 
     @Test("Throws missing project when folder path is unavailable")
@@ -84,7 +94,9 @@ extension OpenProjectHandlerTests {
         #expect(throws: CodeLaunchError.missingProject) {
             try sut.openInIDE(project, launchType: .xcode, terminalOption: nil)
         }
-        
+        #expect(service.openedProjectData == nil)
+        #expect(service.terminalData == nil)
+        #expect(service.notifyData == nil)
     }
 }
 
@@ -99,6 +111,7 @@ extension OpenProjectHandlerTests {
 
         try sut.openRemoteURL(for: project)
 
+        #expect(service.remoteLink?.urlString == remote.urlString)
     }
 
     @Test("Opens project link through service")
@@ -109,7 +122,7 @@ extension OpenProjectHandlerTests {
 
         try sut.openProjectLink(for: project)
 
-        
+        #expect(service.projectLinks == links)
     }
 }
 
@@ -122,10 +135,10 @@ private extension OpenProjectHandlerTests {
         selectionIndex: Int = 0,
         branchStatus: LaunchBranchStatus? = nil,
         throwError: Bool = false
-    ) -> (sut: OpenProjectHandler, service: StubProjectOpenService) {
+    ) -> (sut: OpenProjectHandler, service: MockProjectOpenService) {
         let picker = MockSwiftPicker(selectionResult: .init(defaultSingle: .index(selectionIndex)))
         let loader = StubLoader(projects: projects, groups: groups)
-        let service = StubProjectOpenService(throwError: throwError, branchStatus: branchStatus)
+        let service = MockProjectOpenService(throwError: throwError, branchStatus: branchStatus)
         let sut = OpenProjectHandler(picker: picker, loader: loader, service: service)
 
         return (sut, service)
@@ -165,7 +178,7 @@ private extension OpenProjectHandlerTests {
         }
     }
     
-    final class StubProjectOpenService: ProjectOpenServing {
+    final class MockProjectOpenService: ProjectOpenServing {
         private let throwError: Bool
         private let branchStatus: LaunchBranchStatus?
         
