@@ -76,7 +76,7 @@ struct ProjectInfoSelectorTests {
         let folder = MockDirectory(path: "/tmp/newProject")
         let group = LaunchGroup.new(name: "Group", shortcut: nil)
         let gitHubURL = "https://github.com/example/repo"
-        let (sut, shell) = makeSUT(
+        let (sut, _) = makeSUT(
             inputResults: ["sc"],
             permissionResults: [false, false],
             permissionDefault: false,
@@ -118,26 +118,28 @@ private extension ProjectInfoSelectorTests {
 
 
 // MARK: - Mocks
-private final class StubProjectInfoLoader: ProjectInfoLoader {
-    private let projects: [LaunchProject]
-    private let groups: [LaunchGroup]
-    private let linkNames: [String]
-
-    init(projects: [LaunchProject] = [], groups: [LaunchGroup] = [], linkNames: [String] = []) {
-        self.projects = projects
-        self.groups = groups
-        self.linkNames = linkNames
-    }
-
-    func loadProjects() throws -> [LaunchProject] {
-        return projects
-    }
-
-    func loadGroups() throws -> [LaunchGroup] {
-        return groups
-    }
-
-    func loadProjectLinkNames() -> [String] {
-        return linkNames
+private extension ProjectInfoSelectorTests {
+    final class StubProjectInfoLoader: ProjectInfoLoader {
+        private let projects: [LaunchProject]
+        private let groups: [LaunchGroup]
+        private let linkNames: [String]
+        
+        init(projects: [LaunchProject] = [], groups: [LaunchGroup] = [], linkNames: [String] = []) {
+            self.projects = projects
+            self.groups = groups
+            self.linkNames = linkNames
+        }
+        
+        func loadProjects() throws -> [LaunchProject] {
+            return projects
+        }
+        
+        func loadGroups() throws -> [LaunchGroup] {
+            return groups
+        }
+        
+        func loadProjectLinkNames() -> [String] {
+            return linkNames
+        }
     }
 }
