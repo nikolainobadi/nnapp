@@ -9,23 +9,23 @@ import Foundation
 import CodeLaunchKit
 
 final class MockDirectoryBrowser: DirectoryBrowser {
-    private let selectedDirectory: (any Directory)?
+    var selectedDirectory: (any Directory)?
 
     private(set) var prompt: String?
     private(set) var startPath: String?
 
-    init(selectedDirectory: (any Directory)?) {
+    init(selectedDirectory: (any Directory)? = nil) {
         self.selectedDirectory = selectedDirectory
     }
 
     func browseForDirectory(prompt: String, startPath: String?) throws -> any Directory {
         self.prompt = prompt
         self.startPath = startPath
-        
-        if let selectedDirectory {
-            return selectedDirectory
+
+        guard let selectedDirectory else {
+            throw NSError(domain: "Test", code: 0)
         }
-        
-        throw NSError(domain: "Test", code: 0)
+
+        return selectedDirectory
     }
 }

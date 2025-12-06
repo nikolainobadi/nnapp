@@ -45,11 +45,11 @@ extension MockContextFactory: ContextFactory {
     }
     
     func makeFileSystem() -> any FileSystem {
-        fatalError()
+        return DefaultFileSystem()
     }
-    
+
     func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser {
-        fatalError()
+        return folderBrowser
     }
     
     func makeContext() throws -> CodeLaunchContext {
