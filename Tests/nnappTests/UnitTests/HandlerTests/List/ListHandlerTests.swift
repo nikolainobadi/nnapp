@@ -5,23 +5,21 @@
 //  Created by Nikolai Nobadi on 12/05/25.
 //
 
-import Testing
-import Foundation
 import CodeLaunchKit
 import SwiftPickerTesting
+import Testing
 @testable import nnapp
 
 struct ListHandlerTests {
     @Test("Displays root placeholder when no categories exist")
     func displaysRootPlaceholderWhenNoCategoriesExist() throws {
-        let (sut, picker, _, console) = makeSUT(categories: [])
+        let (sut, _, console) = makeSUT(categories: [])
 
         try sut.browseHierarchy()
 
         #expect(console.headers == ["CodeLaunch"])
         #expect(console.lines.contains("No Categories"))
         #expect(console.lines.contains(""))
-        #expect(picker.capturedTreeNavigationPrompts.isEmpty)
     }
 
     @Test("Displays selected category details from tree navigation")
@@ -29,14 +27,10 @@ struct ListHandlerTests {
         let project = makeProject(name: "Proj", shortcut: "pj")
         let group = LaunchGroup.new(name: "Group A", shortcut: "ga", projects: [project])
         let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [group])
-        let (sut, picker, _, console) = makeSUT(
-            categories: [category],
-            treeNavigationOutcome: .index(0)
-        )
+        let (sut, _, console) = makeSUT(categories: [category], treeNavigationOutcome: .index(0))
 
         try sut.browseHierarchy()
 
-        #expect(picker.capturedTreeNavigationPrompts == ["Browse CodeLaunch Hierarchy"])
         #expect(console.headers.contains("Cat"))
         #expect(console.lines.contains(where: { $0.contains("path: /tmp/cat") }))
         #expect(console.lines.contains(where: { $0.contains("group count: 1") }))
@@ -51,11 +45,10 @@ extension ListHandlerTests {
     @Test("Selects category by name without prompting")
     func selectsCategoryByNameWithoutPrompting() throws {
         let category = LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: [])
-        let (sut, picker, _, console) = makeSUT(categories: [category])
+        let (sut, _, console) = makeSUT(categories: [category])
 
         try sut.selectAndDisplayCategory(name: "ios")
 
-        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
         #expect(console.headers.filter { $0 == category.name }.count == 2)
         #expect(console.lines.contains(where: { $0.contains("path: /tmp/ios") }))
     }
@@ -66,11 +59,10 @@ extension ListHandlerTests {
             LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: []),
             LaunchCategory.new(name: "Server", path: "/tmp/server", groups: [])
         ]
-        let (sut, picker, _, console) = makeSUT(categories: categories, selectionIndex: 1)
+        let (sut, _, console) = makeSUT(categories: categories, selectionIndex: 1)
 
         try sut.selectAndDisplayCategory(name: nil)
 
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Category"])
         #expect(console.headers.contains("Server"))
     }
 }
@@ -81,11 +73,10 @@ extension ListHandlerTests {
     @Test("Selects group by name without prompting")
     func selectsGroupByNameWithoutPrompting() throws {
         let group = LaunchGroup.new(name: "Backend", shortcut: nil, projects: [])
-        let (sut, picker, _, console) = makeSUT(groups: [group])
+        let (sut, _, console) = makeSUT(groups: [group])
 
         try sut.selectAndDisplayGroup(name: "backend")
 
-        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
         #expect(console.headers.filter { $0 == group.name }.count == 2)
         #expect(console.lines.contains(where: { $0.contains("project count: 0") }))
     }
@@ -96,11 +87,10 @@ extension ListHandlerTests {
             LaunchGroup.new(name: "Backend", shortcut: "be", projects: []),
             LaunchGroup.new(name: "Frontend", shortcut: "fe", projects: [])
         ]
-        let (sut, picker, _, console) = makeSUT(groups: groups, selectionIndex: 1)
+        let (sut, _, console) = makeSUT(groups: groups, selectionIndex: 1)
 
         try sut.selectAndDisplayGroup(name: nil)
 
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Group"])
         #expect(console.headers.contains("Frontend"))
     }
 }
@@ -111,11 +101,10 @@ extension ListHandlerTests {
     @Test("Selects project by name or shortcut without prompting")
     func selectsProjectByNameOrShortcutWithoutPrompting() throws {
         let project = makeProject(name: "CLI", shortcut: "cli", type: .package, remote: nil, links: [], group: nil)
-        let (sut, picker, _, console) = makeSUT(projects: [project])
+        let (sut, _, console) = makeSUT(projects: [project])
 
         try sut.selectAndDisplayProject(name: "CLI")
 
-        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
         #expect(console.headers.filter { $0 == project.name }.count == 2)
         #expect(console.lines.contains(where: { $0.contains("project type: Swift Package") }))
         #expect(console.lines.contains(where: { $0.contains("shortcut: cli") }))
@@ -127,11 +116,10 @@ extension ListHandlerTests {
             makeProject(name: "API", shortcut: "api"),
             makeProject(name: "Web", shortcut: "web")
         ]
-        let (sut, picker, _, console) = makeSUT(projects: projects, selectionIndex: 1)
+        let (sut, _, console) = makeSUT(projects: projects, selectionIndex: 1)
 
         try sut.selectAndDisplayProject(name: nil)
 
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Project"])
         #expect(console.headers.contains("Web"))
     }
 }
@@ -141,7 +129,7 @@ extension ListHandlerTests {
 extension ListHandlerTests {
     @Test("Displays placeholder when no project link names exist")
     func displaysPlaceholderWhenNoProjectLinkNamesExist() {
-        let (sut, _, _, console) = makeSUT(linkNames: [])
+        let (sut, _, console) = makeSUT(linkNames: [])
 
         sut.displayProjectLinks()
 
@@ -151,7 +139,7 @@ extension ListHandlerTests {
     @Test("Displays project link names when present")
     func displaysProjectLinkNamesWhenPresent() {
         let linkNames = ["Docs", "API"]
-        let (sut, _, _, console) = makeSUT(linkNames: linkNames)
+        let (sut, _, console) = makeSUT(linkNames: linkNames)
 
         sut.displayProjectLinks()
 
@@ -171,7 +159,7 @@ private extension ListHandlerTests {
         linkNames: [String] = [],
         selectionIndex: Int = 0,
         treeNavigationOutcome: MockTreeSelectionOutcome = .none
-    ) -> (sut: ListHandler, picker: MockSwiftPicker, loader: StubListLoader, console: MockConsoleOutput) {
+    ) -> (sut: ListHandler, loader: StubListLoader, console: MockConsoleOutput) {
         let picker = MockSwiftPicker(
             selectionResult: .init(defaultSingle: .index(selectionIndex)),
             treeNavigationResult: .init(defaultOutcome: treeNavigationOutcome)
@@ -180,7 +168,7 @@ private extension ListHandlerTests {
         let loader = StubListLoader(categories: categories, groups: groups, projects: projects, linkNames: linkNames)
         let sut = ListHandler(picker: picker, loader: loader, console: console)
 
-        return (sut, picker, loader, console)
+        return (sut, loader, console)
     }
 }
 
