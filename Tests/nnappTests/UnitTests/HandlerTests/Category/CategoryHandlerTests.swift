@@ -69,7 +69,8 @@ extension CategoryHandlerTests {
     @Test("Create throws when parent contains subfolder with same name")
     func createThrowsWhenParentContainsSubfolderWithSameName() {
         let existingName = "existingname"
-        let parent = MockDirectory(path: "/tmp/\(existingName)")
+        let child = MockDirectory(path: "/tmp/\(existingName)")
+        let parent = MockDirectory(path: "/tmp", subdirectories: [child])
         let sut = makeSUT(inputResults: [existingName], selectedDirectory: parent).sut
 
         #expect(throws: CodeLaunchError.categoryPathTaken) {

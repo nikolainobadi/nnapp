@@ -116,7 +116,7 @@ private extension BranchSyncCheckerTests {
         shouldThrowOnGitResultExhaustion: Bool = false
     ) -> (sut: BranchSyncChecker, shell: MockLaunchShell, fileSystem: MockFileSystem, project: LaunchProject) {
         let folderPath = groupPath?.appendingPathComponent("Project")
-        let folder = directoryToLoad ?? folderPath.map(MockDirectory.init(path:))
+        let folder = directoryToLoad ?? folderPath.map { MockDirectory(path: $0) }
         let shell = MockLaunchShell(
             localExists: localExists,
             remoteExists: remoteExists,
