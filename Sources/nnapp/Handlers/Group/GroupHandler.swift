@@ -54,6 +54,12 @@ extension GroupHandler {
 
 // MARK: - Remove
 extension GroupHandler {
+    func deleteGroup(_ group: LaunchGroup) throws {
+        let category = categorySelector.getCategory(group: group)
+        
+        try store.deleteGroup(group, from: category)
+    }
+    
     func removeGroup(named name: String?) throws {
         let groups = try loadAllGroups()
         let groupToDelete: LaunchGroup
@@ -76,6 +82,12 @@ extension GroupHandler {
 
 // MARK: - LaunchProjectGroupSelector
 extension GroupHandler: ProjectGroupSelector {
+    func getProjectGroup(project: LaunchProject) throws -> LaunchGroup? {
+        return try loadAllGroups().first(where: { group in
+            return group.projects.contains(where: { $0.name.matches(project.name) })
+        })
+    }
+    
     func selectGroup(name: String?) throws -> LaunchGroup {
         let groups = try loadAllGroups()
         
@@ -265,12 +277,6 @@ private extension GroupHandler {
         }
 
         _ = try categoryFolder.createSubdirectory(named: group.name)
-    }
-    
-    func deleteGroup(_ group: LaunchGroup) throws {
-        let category = categorySelector.getCategory(group: group)
-        
-        try store.deleteGroup(group, from: category)
     }
     
     func makeGroupDetail(for group: LaunchGroup) -> String {

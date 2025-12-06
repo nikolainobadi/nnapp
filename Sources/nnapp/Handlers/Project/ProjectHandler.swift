@@ -42,7 +42,7 @@ extension ProjectHandler {
         let project = LaunchProject(info: info, type: projectFolder.type)
         
         try moveFolderIfNecessary(projectFolder.folder, parentPath: group.path)
-        try saveProject(project, in: group)
+        try saveProject(project, in: group, isMainProject: isMainProject)
     }
 }
 
@@ -126,13 +126,58 @@ private extension ProjectHandler {
         try folder.move(to: parentFolder)
     }
     
-    func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws {
-        // TODO: - apply project shortcut to group if necessary
-        try store.saveProject(project, in: group)
+    func saveProject(_ project: LaunchProject, in group: LaunchGroup, isMainProject: Bool) throws {
+        var updatedGroup = group
+        
+        if isMainProject || group.shortcut == nil {
+            updatedGroup.shortcut = project.shortcut
+        }
+        
+        try store.saveProject(project, in: updatedGroup)
     }
     
     func deleteProject(_ project: LaunchProject) throws {
-        try store.deleteProject(project, from: nil) // TODO: -
+        if let group = try groupSelector.getProjectGroup(project: project) {
+            if group.projects.count == 1 {
+                try store.deleteGroup(group)
+            } else {
+                if let groupShortcut = group.shortcut, groupShortcut == project.shortcut {
+                    var newMain = try selectNewMainProject(for: group, projectToDelete: project)
+                    
+                    try store.deleteProject(project)
+                    
+                    if let newMainShortcut = newMain.shortcut, try shouldUpdateGroupShortcut(group: group, project: newMain) {
+                        var updatedGroup = group
+                        updatedGroup.shortcut = newMainShortcut
+                        try store.updateGroup(updatedGroup)
+                    } else {
+                        newMain.shortcut = groupShortcut
+                        try store.updateProject(newMain)
+                    }
+                }
+            }
+        } else {
+            try store.deleteProject(project)
+        }
+    }
+    
+    func selectNewMainProject(for group: LaunchGroup, projectToDelete: LaunchProject) throws -> LaunchProject {
+        let prompt = """
+        \(projectToDelete.name) is the main project of \(group.name).
+        Please select another project to be the new MAIN project for \(group.name).
+        (NOTE: Groups are assigned the same shortcut as their main project.)
+        """
+        return try picker.requiredSingleSelection(prompt, items: group.projects.filter({ !$0.name.matches(projectToDelete.name) }), showSelectedItemText: false)
+    }
+    
+    func shouldUpdateGroupShortcut(group: LaunchGroup, project: LaunchProject) throws -> Bool {
+        let prompt = "Which shortcut would you like to use for the main project and group?"
+        let updateGroup = "\(group.shortcut!)"
+        let updateProject = "\(project.shortcut!)"
+        let options: [String] = [updateGroup, updateProject]
+        let selection = try picker.requiredSingleSelection(prompt, items: options, showSelectedItemText: false)
+
+        return selection == updateGroup
     }
 }
 

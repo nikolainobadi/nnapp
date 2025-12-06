@@ -47,7 +47,7 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, Project
 
 
 // MARK: - Stores
-extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, ProjectStore {
+extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore {
     public func saveCategory(_ category: LaunchCategory) throws {
         let storedCategory = categoryMapper.toSwiftData(category)
         try context.saveCategory(storedCategory)
@@ -92,8 +92,8 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, ProjectSto
         try context.saveProject(storedProject, in: storedGroup)
     }
 
-    public func deleteProject(_ project: LaunchProject, from group: LaunchGroup?) throws {
-        guard let storedProject = try fetchProject(named: project.name, shortcut: project.shortcut, groupName: group?.name) else {
+    public func deleteProject(_ project: LaunchProject) throws {
+        guard let storedProject = try fetchProject(named: project.name) else {
             throw CodeLaunchError.missingProject
         }
 
@@ -136,24 +136,7 @@ private extension SwiftDataLaunchRepository {
         }
     }
 
-    func fetchProject(named name: String, shortcut: String?, groupName: String?) throws -> SwiftDataLaunchProject? {
-        let projects = try context.loadProjects()
-
-        return projects.first { project in
-            let nameMatches = project.name.matches(name)
-            let shortcutMatches = {
-                guard let shortcut, let projectShortcut = project.shortcut else { return false }
-                return shortcut.matches(projectShortcut)
-            }()
-
-            let groupMatches: Bool
-            if let groupName {
-                groupMatches = groupName.matches(project.group?.name)
-            } else {
-                groupMatches = true
-            }
-
-            return groupMatches && (nameMatches || shortcutMatches)
-        }
+    func fetchProject(named name: String) throws -> SwiftDataLaunchProject? {
+        return try context.loadProjects().first(where: { $0.name.matches(name) })
     }
 }

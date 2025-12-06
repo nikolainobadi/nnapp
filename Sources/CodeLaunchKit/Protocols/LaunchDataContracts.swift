@@ -45,13 +45,17 @@ public protocol LaunchGroupStore: GroupLoading {
 // MARK: - Project
 public protocol ProjectGroupSelector {
     func selectGroup(name: String?) throws -> LaunchGroup
+    func getProjectGroup(project: LaunchProject) throws -> LaunchGroup?
 }
 
 public protocol ProjectInfoLoader: GroupLoading, ProjectLoading, ProjectLinkNameLoading { }
 
 public protocol ProjectStore: ProjectInfoLoader {
+    func updateGroup(_ group: LaunchGroup) throws
+    func deleteGroup(_ group: LaunchGroup) throws
+    func deleteProject(_ project: LaunchProject) throws
+    func updateProject(_ project: LaunchProject) throws
     func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws
-    func deleteProject(_ project: LaunchProject, from group: LaunchGroup?) throws
 }
 
 
