@@ -15,7 +15,7 @@ struct OpenProjectHandler {
     private let terminalManager: TerminalHandler
     private let urlLauncher: URLHandler
     private let branchSyncChecker: any BranchSyncChecker
-    private let branchStatusNotifier: DefaultBranchStatusNotifier
+    private let branchStatusNotifier: BranchStatusNotifier
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(

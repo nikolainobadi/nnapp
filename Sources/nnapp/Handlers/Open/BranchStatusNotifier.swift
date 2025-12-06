@@ -1,14 +1,13 @@
 //
-//  DefaultBranchStatusNotifier.swift
+//  BranchStatusNotifier.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import NnShellKit
 import CodeLaunchKit
 
-struct DefaultBranchStatusNotifier {
+struct BranchStatusNotifier {
     private let shell: any LaunchShell
 
     init(shell: any LaunchShell) {
@@ -18,7 +17,7 @@ struct DefaultBranchStatusNotifier {
 
 
 // MARK: - BranchStatusNotifier
-extension DefaultBranchStatusNotifier {
+extension BranchStatusNotifier {
     func notify(status: LaunchBranchStatus, for project: LaunchProject) {
         let title = "Branch Status Alert"
         let message: String
