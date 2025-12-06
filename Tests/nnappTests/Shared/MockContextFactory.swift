@@ -23,9 +23,9 @@ final class MockContextFactory {
     init(shell: MockLaunchShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, folderBrowser: (any DirectoryBrowser)? = nil) {
         self.shell = shell
         self.picker = picker
-        self.throwCategorySelectorError = throwCategorySelectorError
         self.uniqueId = UUID().uuidString
-        self.folderBrowser = folderBrowser ?? MockFolderBrowser()
+        self.throwCategorySelectorError = throwCategorySelectorError
+        self.folderBrowser = folderBrowser ?? MockFolderBrowser(selectedDirectory: nil)
     }
 }
 
@@ -84,28 +84,4 @@ private extension MockContextFactory {
 
 
 // MARK: - Mocks
-final class MockFolderBrowser: DirectoryBrowser {
-    private(set) var browseCallCount = 0
-    private(set) var capturedPrompt: String?
-    private(set) var capturedStartPath: String?
-    var folderToReturn: Directory?
-    var error: Error?
 
-    func browseForDirectory(prompt: String, startPath: String?) throws -> Directory {
-        fatalError()
-//        browseCallCount += 1
-//        capturedPrompt = prompt
-//        capturedStartPath = startPath
-//
-//        if let error {
-//            throw error
-//        }
-//
-//        if let folderToReturn {
-//            return folderToReturn
-//        }
-//
-//        let folder = try Folder.temporary.createSubfolder(named: "MockFolderBrowser-\(UUID().uuidString)")
-//        return FilesDirectoryAdapter(folder: folder)
-    }
-}
