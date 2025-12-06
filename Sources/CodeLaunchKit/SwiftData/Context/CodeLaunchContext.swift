@@ -142,6 +142,22 @@ public extension CodeLaunchContext {
 }
 
 
+// MARK: - Update
+public extension CodeLaunchContext {
+    /// Persists changes to an existing launch group.
+    /// - Parameters:
+    ///   - group: The stored group instance to update.
+    ///   - name: The updated display name for the group.
+    ///   - shortcut: The shortcut to associate with the group.
+    func updateGroup(_ group: SwiftDataLaunchGroup, name: String, shortcut: String?) throws {
+        group.name = name
+        group.shortcut = shortcut
+
+        try context.save()
+    }
+}
+
+
 // MARK: - Delete
 public extension CodeLaunchContext {
     /// Deletes a category and all associated groups and projects.

@@ -27,12 +27,10 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, Project
     }
 
     public func loadGroups() throws -> [LaunchGroup] {
-        // TODO: - need to set LaunchProject.category
         return try loadCategories().flatMap(\.groups)
     }
 
     public func loadProjects() throws -> [LaunchProject] {
-        // TODO: - need to set LaunchProject.group
         return try loadGroups().flatMap(\.projects)
     }
 
@@ -45,9 +43,8 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, Project
     }
 }
 
-
-// MARK: - Stores
-extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore {
+// MARK: - CategoryStore
+extension SwiftDataLaunchRepository: CategoryStore {
     public func saveCategory(_ category: LaunchCategory) throws {
         let storedCategory = categoryMapper.toSwiftData(category)
         try context.saveCategory(storedCategory)
@@ -60,7 +57,11 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore {
 
         try context.deleteCategory(storedCategory)
     }
+}
 
+
+// MARK: - GroupStore
+extension SwiftDataLaunchRepository: LaunchGroupStore {
     public func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
         let storedCategory: SwiftDataLaunchCategory
         if let existingCategory = try fetchCategory(named: category.name) {
@@ -70,19 +71,32 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore {
             try context.saveCategory(newCategory)
             storedCategory = newCategory
         }
-
+        
         let storedGroup = groupMapper.toSwiftData(group)
         try context.saveGroup(storedGroup, in: storedCategory)
     }
+    
+    public func updateGroup(_ group: LaunchGroup) throws {
+        guard let storedGroup = try fetchGroup(named: group.name, categoryName: group.categoryName) else {
+            throw CodeLaunchError.missingGroup
+        }
 
+        try context.updateGroup(storedGroup, name: group.name, shortcut: group.shortcut)
+    }
+    
     public func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws {
         guard let storedGroup = try fetchGroup(named: group.name, categoryName: category?.name) else {
             throw CodeLaunchError.missingGroup
         }
-
+        
         try context.deleteGroup(storedGroup)
     }
+}
 
+
+
+// MARK: - ProjectStore
+extension SwiftDataLaunchRepository {
     public func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws {
         guard let storedGroup = try fetchGroup(named: group.name, categoryName: group.categoryName) else {
             throw CodeLaunchError.missingGroup
@@ -99,7 +113,7 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore {
 
         try context.deleteProject(storedProject)
     }
-    
+
     public func saveProjectLinkNames(_ names: [String]) {
         context.saveProjectLinkNames(names)
     }
