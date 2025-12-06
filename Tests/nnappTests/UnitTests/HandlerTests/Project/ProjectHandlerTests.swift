@@ -9,6 +9,7 @@ import Testing
 import Foundation
 import CodeLaunchKit
 import NnShellTesting
+import SwiftPickerKit
 import SwiftPickerTesting
 @testable import nnapp
 
@@ -237,6 +238,120 @@ extension ProjectHandlerTests {
         #expect(delegate.groupToUpdate == nil)
         #expect(delegate.projectToUpdate?.shortcut == group.shortcut)
     }
+
+    @Test("Removes non-main project without affecting shortcuts")
+    func removesNonMainProjectWithoutAffectingShortcuts() throws {
+        let mainProject = makeProject(name: "Main", shortcut: "grp")
+        let otherProject = makeProject(name: "Other", shortcut: "other")
+        let group = makeGroup(name: "Group", shortcut: "grp", projects: [mainProject, otherProject])
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [mainProject, otherProject],
+            projectGroupToGet: group,
+            permissionResults: [true]
+        )
+
+        try sut.removeProject(name: "Other", shortcut: nil)
+
+        #expect(delegate.projectToDelete?.name == otherProject.name)
+        #expect(delegate.groupToUpdate == nil)
+        #expect(delegate.projectToUpdate == nil)
+        #expect(delegate.groupToDelete == nil)
+    }
+
+    @Test("Finds project by name using case-insensitive matching")
+    func findsProjectByNameUsingCaseInsensitiveMatching() throws {
+        let project = makeProject(name: "MyProject", shortcut: "mp")
+        let other = makeProject(name: "Other", shortcut: "grp")
+        let group = makeGroup(name: "Group", shortcut: "grp", projects: [project, other])
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project, other],
+            projectGroupToGet: group,
+            permissionResults: [true]
+        )
+
+        try sut.removeProject(name: "myproject", shortcut: nil)
+
+        #expect(delegate.projectToDelete?.name == "MyProject")
+    }
+
+    @Test("Finds project by shortcut when provided")
+    func findsProjectByShortcutWhenProvided() throws {
+        let project = makeProject(name: "Project", shortcut: "proj")
+        let main = makeProject(name: "Main", shortcut: "grp")
+        let group = makeGroup(name: "Group", shortcut: "grp", projects: [project, main])
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project, main],
+            projectGroupToGet: group,
+            permissionResults: [true]
+        )
+
+        try sut.removeProject(name: nil, shortcut: "proj")
+
+        #expect(delegate.projectToDelete?.name == "Project")
+    }
+
+    @Test("Prompts selection when name not found")
+    func promptsSelectionWhenNameNotFound() throws {
+        let project1 = makeProject(name: "First", shortcut: "f")
+        let project2 = makeProject(name: "Second", shortcut: "s")
+        let group = makeGroup(name: "Group", shortcut: "grp", projects: [project1, project2])
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project1, project2],
+            projectGroupToGet: group,
+            permissionResults: [true],
+            selectionIndices: [1]
+        )
+
+        try sut.removeProject(name: "NonExistent", shortcut: nil)
+
+        #expect(delegate.projectToDelete?.name == "Second")
+    }
+
+    @Test("Prompts selection when no name or shortcut provided")
+    func promptsSelectionWhenNoNameOrShortcutProvided() throws {
+        let project1 = makeProject(name: "First", shortcut: "f")
+        let project2 = makeProject(name: "Second", shortcut: "s")
+        let group = makeGroup(name: "Group", shortcut: "grp", projects: [project1, project2])
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project1, project2],
+            projectGroupToGet: group,
+            permissionResults: [true],
+            selectionIndices: [0]
+        )
+
+        try sut.removeProject(name: nil, shortcut: nil)
+
+        #expect(delegate.projectToDelete?.name == "First")
+    }
+
+    @Test("Throws when user denies removal permission")
+    func throwsWhenUserDeniesRemovalPermission() {
+        let project = makeProject(name: "Project", shortcut: "p")
+        let sut = makeSUT(
+            projectsToLoad: [project],
+            permissionResults: [false]
+        ).sut
+
+        #expect(throws: SwiftPickerError.selectionCancelled) {
+            try sut.removeProject(name: "Project", shortcut: nil)
+        }
+    }
+
+    @Test("Removes orphaned project without group")
+    func removesOrphanedProjectWithoutGroup() throws {
+        let project = makeProject(name: "Orphan", shortcut: "o")
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project],
+            projectGroupToGet: nil,
+            permissionResults: [true]
+        )
+
+        try sut.removeProject(name: "Orphan", shortcut: nil)
+
+        #expect(delegate.projectToDelete?.name == "Orphan")
+        #expect(delegate.groupToDelete == nil)
+        #expect(delegate.groupToUpdate == nil)
+    }
 }
 
 
@@ -285,7 +400,8 @@ private extension ProjectHandlerTests {
             groupsToLoad: groupsToLoad,
             projectsToLoad: projectsToLoad,
             projectLinkNamesToLoad: projectLinkNamesToLoad,
-            projectGroupToGet: projectGroupToGet
+            projectGroupToGet: projectGroupToGet,
+            allowOrphanedProject: projectGroupToGet == nil && !throwError
         )
         let sut = ProjectHandler(shell: shell, store: delegate, picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser, groupSelector: delegate)
 
@@ -311,21 +427,23 @@ private extension ProjectHandlerTests {
         private let projectGroupToGet: LaunchGroup?
         private let projectsToLoad: [LaunchProject]
         private let projectLinkNamesToLoad: [String]
-        
+        private let allowOrphanedProject: Bool
+
         private(set) var groupToUpdate: LaunchGroup?
         private(set) var groupToDelete: LaunchGroup?
         private(set) var projectToSave: LaunchProject?
         private(set) var projectToDelete: LaunchProject?
         private(set) var projectToUpdate: LaunchProject?
         private(set) var savedGroup: LaunchGroup?
-        
-        init(throwError: Bool, groupToSelect: LaunchGroup?, groupsToLoad: [LaunchGroup], projectsToLoad: [LaunchProject], projectLinkNamesToLoad: [String], projectGroupToGet: LaunchGroup?) {
+
+        init(throwError: Bool, groupToSelect: LaunchGroup?, groupsToLoad: [LaunchGroup], projectsToLoad: [LaunchProject], projectLinkNamesToLoad: [String], projectGroupToGet: LaunchGroup?, allowOrphanedProject: Bool = false) {
             self.throwError = throwError
             self.groupToSelect = groupToSelect
             self.groupsToLoad = groupsToLoad
             self.projectsToLoad = projectsToLoad
             self.projectGroupToGet = projectGroupToGet
             self.projectLinkNamesToLoad = projectLinkNamesToLoad
+            self.allowOrphanedProject = allowOrphanedProject
         }
         
         func loadGroups() throws -> [LaunchGroup] {
@@ -353,10 +471,14 @@ private extension ProjectHandlerTests {
         }
         
         func getProjectGroup(project: LaunchProject) throws -> LaunchGroup? {
+            if allowOrphanedProject && projectGroupToGet == nil {
+                return nil
+            }
+
             guard let projectGroupToGet else {
                 throw NSError(domain: "Test", code: 0)
             }
-            
+
             return projectGroupToGet
         }
         

@@ -143,9 +143,9 @@ private extension ProjectHandler {
             } else {
                 if let groupShortcut = group.shortcut, groupShortcut == project.shortcut {
                     var newMain = try selectNewMainProject(for: group, projectToDelete: project)
-                    
+
                     try store.deleteProject(project)
-                    
+
                     if let newMainShortcut = newMain.shortcut, try shouldUpdateGroupShortcut(group: group, project: newMain) {
                         var updatedGroup = group
                         updatedGroup.shortcut = newMainShortcut
@@ -154,6 +154,8 @@ private extension ProjectHandler {
                         newMain.shortcut = groupShortcut
                         try store.updateProject(newMain)
                     }
+                } else {
+                    try store.deleteProject(project)
                 }
             }
         } else {
