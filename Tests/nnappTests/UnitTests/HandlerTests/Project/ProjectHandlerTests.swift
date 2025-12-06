@@ -64,6 +64,118 @@ extension ProjectHandlerTests {
             try sut.addProject(path: nil, shortcut: nil, groupName: group.name, isMainProject: false, fromDesktop: false)
         }
     }
+
+    @Test("Skips move when folder already in correct location")
+    func skipsMoveWhenFolderAlreadyInCorrectLocation() throws {
+        let shortcut = "test"
+        let projectName = "ExistingProject"
+        let group = makeGroup(name: "Group", category: makeGroupCategory(path: "/tmp/groups"))
+        let groupPath = group.path ?? "/tmp/groups/Group"
+        let projectPath = "\(groupPath)/\(projectName)"
+        let projectFolder = makeMoveTrackingDirectory(path: projectPath, containedFiles: ["Package.swift"])
+        let parentDirectory = makeMoveTrackingDirectory(path: groupPath, subdirectories: [projectFolder])
+        let directoryMap: [String: any Directory] = [groupPath: parentDirectory, projectPath: projectFolder]
+        let (sut, delegate, _) = makeSUT(
+            groupToSelect: group,
+            permissionResults: [false, false],
+            inputResults: [shortcut],
+            projectFolderPath: projectPath,
+            shellResults: ["https://github.com/example/repo"],
+            moveTrackingDirectory: projectFolder,
+            customDirectoryMap: directoryMap
+        )
+
+        try sut.addProject(path: projectPath, shortcut: shortcut, groupName: group.name, isMainProject: true, fromDesktop: false)
+
+        #expect(projectFolder.movedToParents.isEmpty)
+        #expect(delegate.projectToSave?.name == projectName)
+    }
+
+    @Test("Adds non-main project without updating group shortcut")
+    func addsNonMainProjectWithoutUpdatingGroupShortcut() throws {
+        let groupShortcut = "grp"
+        let projectShortcut = "proj"
+        let group = makeGroup(name: "Group", shortcut: groupShortcut, category: makeGroupCategory(path: "/tmp/groups"))
+        let projectPath = "/tmp/elsewhere/NonMainProject"
+        let projectFolder = makeMoveTrackingDirectory(path: projectPath, containedFiles: ["Package.swift"])
+        let (sut, delegate, _) = makeSUT(
+            groupToSelect: group,
+            permissionResults: [false, false],
+            inputResults: [projectShortcut],
+            shellResults: ["https://github.com/example/repo"],
+            moveTrackingDirectory: projectFolder
+        )
+
+        try sut.addProject(path: projectPath, shortcut: projectShortcut, groupName: group.name, isMainProject: false, fromDesktop: false)
+
+        #expect(delegate.projectToSave?.shortcut == projectShortcut)
+        #expect(delegate.savedGroup?.shortcut == groupShortcut)
+    }
+
+    @Test("Throws folder name taken when different folder exists with same name")
+    func throwsFolderNameTakenWhenDifferentFolderExistsWithSameName() {
+        let projectName = "Conflict"
+        let group = makeGroup(name: "Group", category: makeGroupCategory(path: "/tmp/groups"))
+        let groupPath = group.path ?? "/tmp/groups/Group"
+        let existingPath = "\(groupPath)/\(projectName)"
+        let newPath = "/tmp/elsewhere/\(projectName)"
+        let existingFolder = makeMoveTrackingDirectory(path: existingPath)
+        let newFolder = makeMoveTrackingDirectory(path: newPath, containedFiles: ["Package.swift"])
+        let parentDirectory = makeMoveTrackingDirectory(path: groupPath, subdirectories: [existingFolder])
+        let directoryMap: [String: any Directory] = [groupPath: parentDirectory, newPath: newFolder]
+        let sut = makeSUT(
+            groupToSelect: group,
+            permissionResults: [false, false],
+            inputResults: ["conflict"],
+            projectFolderPath: newPath,
+            shellResults: [""],
+            moveTrackingDirectory: newFolder,
+            customDirectoryMap: directoryMap
+        ).sut
+
+        #expect(throws: CodeLaunchError.folderNameTaken) {
+            try sut.addProject(path: newPath, shortcut: nil, groupName: group.name, isMainProject: false, fromDesktop: false)
+        }
+    }
+
+    @Test("Updates group shortcut when group has no shortcut")
+    func updatesGroupShortcutWhenGroupHasNoShortcut() throws {
+        let projectShortcut = "proj"
+        let group = makeGroup(name: "Group", shortcut: nil, category: makeGroupCategory(path: "/tmp/groups"))
+        let projectPath = "/tmp/elsewhere/Project"
+        let projectFolder = makeMoveTrackingDirectory(path: projectPath, containedFiles: ["Package.swift"])
+        let (sut, delegate, _) = makeSUT(
+            groupToSelect: group,
+            permissionResults: [false, false],
+            inputResults: [projectShortcut],
+            shellResults: ["https://github.com/example/repo"],
+            moveTrackingDirectory: projectFolder
+        )
+
+        try sut.addProject(path: projectPath, shortcut: projectShortcut, groupName: group.name, isMainProject: false, fromDesktop: false)
+
+        #expect(delegate.projectToSave?.shortcut == projectShortcut)
+        #expect(delegate.savedGroup?.shortcut == projectShortcut)
+    }
+
+    @Test("Detects xcode project type")
+    func detectsXcodeProjectType() throws {
+        let projectPath = "/tmp/elsewhere/XcodeProject"
+        let xcodeproj = makeMoveTrackingDirectory(path: "\(projectPath)/XcodeProject.xcodeproj", ext: "xcodeproj")
+        let projectFolder = makeMoveTrackingDirectory(path: projectPath, subdirectories: [xcodeproj])
+        let group = makeGroup(name: "Group", category: makeGroupCategory(path: "/tmp/groups"))
+        let (sut, delegate, _) = makeSUT(
+            groupToSelect: group,
+            permissionResults: [false, false],
+            inputResults: ["xc"],
+            shellResults: [""],
+            moveTrackingDirectory: projectFolder
+        )
+
+        try sut.addProject(path: projectPath, shortcut: "xc", groupName: group.name, isMainProject: false, fromDesktop: false)
+
+        #expect(delegate.projectToSave?.type == .project)
+    }
 }
 
 
@@ -144,6 +256,7 @@ private extension ProjectHandlerTests {
         shouldThrowOnExistingSubdirectory: Bool = false,
         shellResults: [String] = [],
         moveTrackingDirectory: MockDirectory? = nil,
+        customDirectoryMap: [String: any Directory]? = nil,
         throwError: Bool = false
     ) -> (sut: ProjectHandler, delegate: MockDelegate, fileSystem: MockFileSystem) {
         let selectionOutcomes = selectionIndices.map { MockSingleSelectionOutcome.index($0) }
@@ -158,9 +271,9 @@ private extension ProjectHandlerTests {
         let parentDirectory = makeMoveTrackingDirectory(path: parentPath, shouldThrowOnSubdirectory: shouldThrowOnExistingSubdirectory)
         let desktopDirectory = makeMoveTrackingDirectory(path: "/Users/test/Desktop")
         let homeDirectory = makeMoveTrackingDirectory(path: "/Users/test", subdirectories: [desktopDirectory])
-        var directoryMap: [String: any Directory] = [parentPath: parentDirectory]
+        var directoryMap: [String: any Directory] = customDirectoryMap ?? [parentPath: parentDirectory]
 
-        if let projectFolderPath, let folder {
+        if customDirectoryMap == nil, let projectFolderPath, let folder {
             directoryMap[projectFolderPath] = folder
         }
 
@@ -183,8 +296,8 @@ private extension ProjectHandlerTests {
 
 // MARK: - Test Helpers
 private extension ProjectHandlerTests {
-    func makeMoveTrackingDirectory(path: String, subdirectories: [any Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, autoCreateSubdirectories: Bool = false) -> MockDirectory {
-        return MockDirectory(path: path, subdirectories: subdirectories, containedFiles: containedFiles, shouldThrowOnSubdirectory: shouldThrowOnSubdirectory, autoCreateSubdirectories: autoCreateSubdirectories)
+    func makeMoveTrackingDirectory(path: String, subdirectories: [any Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, autoCreateSubdirectories: Bool = false, ext: String? = nil) -> MockDirectory {
+        return MockDirectory(path: path, subdirectories: subdirectories, containedFiles: containedFiles, shouldThrowOnSubdirectory: shouldThrowOnSubdirectory, autoCreateSubdirectories: autoCreateSubdirectories, ext: ext)
     }
 }
 
