@@ -15,14 +15,16 @@ final class MockDirectory: Directory {
     var subdirectories: [Directory]
     var containedFiles: Set<String>
     private let shouldThrowOnSubdirectory: Bool
+    private let autoCreateSubdirectories: Bool
     private(set) var movedToParents: [String] = []
 
-    init(path: String, subdirectories: [Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, ext: String? = nil) {
+    init(path: String, subdirectories: [Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, autoCreateSubdirectories: Bool = true, ext: String? = nil) {
         self.path = path
         self.name = (path as NSString).lastPathComponent
         self.subdirectories = subdirectories
         self.containedFiles = containedFiles
         self.shouldThrowOnSubdirectory = shouldThrowOnSubdirectory
+        self.autoCreateSubdirectories = autoCreateSubdirectories
         self.extension = ext
     }
 
@@ -39,7 +41,11 @@ final class MockDirectory: Directory {
             return match
         }
 
-        return MockDirectory(path: path.appendingPathComponent(name))
+        if autoCreateSubdirectories {
+            return MockDirectory(path: path.appendingPathComponent(name))
+        }
+
+        throw NSError(domain: "MockDirectory", code: 2)
     }
 
     func createSubdirectory(named name: String) throws -> Directory {

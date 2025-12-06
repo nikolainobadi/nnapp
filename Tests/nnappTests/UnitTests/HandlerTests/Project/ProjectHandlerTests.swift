@@ -183,8 +183,8 @@ private extension ProjectHandlerTests {
 
 // MARK: - Test Helpers
 private extension ProjectHandlerTests {
-    func makeMoveTrackingDirectory(path: String, subdirectories: [any Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false) -> MockDirectory {
-        return MockDirectory(path: path, subdirectories: subdirectories, containedFiles: containedFiles, shouldThrowOnSubdirectory: shouldThrowOnSubdirectory)
+    func makeMoveTrackingDirectory(path: String, subdirectories: [any Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, autoCreateSubdirectories: Bool = false) -> MockDirectory {
+        return MockDirectory(path: path, subdirectories: subdirectories, containedFiles: containedFiles, shouldThrowOnSubdirectory: shouldThrowOnSubdirectory, autoCreateSubdirectories: autoCreateSubdirectories)
     }
 }
 
