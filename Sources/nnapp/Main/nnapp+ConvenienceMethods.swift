@@ -37,11 +37,10 @@ extension Nnapp {
         let groupSelector = try makeGroupHandler(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
         let fileSystem = contextFactory.makeFileSystem()
-        let store = ProjectStoreAdapter(groupHandler: groupSelector, repository: repository)
 
         return .init(
             shell: shell,
-            store: store,
+            store: repository,
             picker: picker,
             fileSystem: fileSystem,
             folderBrowser: folderBrowser,

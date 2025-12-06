@@ -54,12 +54,6 @@ extension GroupHandler {
 
 // MARK: - Remove
 extension GroupHandler {
-    func deleteGroup(_ group: LaunchGroup) throws {
-        let category = categorySelector.getCategory(group: group)
-        
-        try store.deleteGroup(group, from: category)
-    }
-    
     func removeGroup(named name: String?) throws {
         let groups = try loadAllGroups()
         let groupToDelete: LaunchGroup
@@ -75,7 +69,7 @@ extension GroupHandler {
         }
         
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
-        try deleteGroup(groupToDelete)
+        try store.deleteGroup(groupToDelete)
     }
 }
 

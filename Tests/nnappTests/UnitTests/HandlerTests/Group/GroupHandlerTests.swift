@@ -370,7 +370,7 @@ private extension GroupHandlerTests {
             groups.append(group)
         }
 
-        func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws {
+        func deleteGroup(_ group: LaunchGroup) throws {
             deletedGroups.append(group)
         }
     }

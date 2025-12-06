@@ -77,15 +77,15 @@ extension SwiftDataLaunchRepository: LaunchGroupStore {
     }
     
     public func updateGroup(_ group: LaunchGroup) throws {
-        guard let storedGroup = try fetchGroup(named: group.name, categoryName: group.categoryName) else {
+        guard let storedGroup = try fetchGroup(named: group.name) else {
             throw CodeLaunchError.missingGroup
         }
 
         try context.updateGroup(storedGroup, name: group.name, shortcut: group.shortcut)
     }
     
-    public func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws {
-        guard let storedGroup = try fetchGroup(named: group.name, categoryName: category?.name) else {
+    public func deleteGroup(_ group: LaunchGroup) throws {
+        guard let storedGroup = try fetchGroup(named: group.name) else {
             throw CodeLaunchError.missingGroup
         }
         
@@ -96,14 +96,18 @@ extension SwiftDataLaunchRepository: LaunchGroupStore {
 
 
 // MARK: - ProjectStore
-extension SwiftDataLaunchRepository {
+extension SwiftDataLaunchRepository: ProjectStore {
     public func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws {
-        guard let storedGroup = try fetchGroup(named: group.name, categoryName: group.categoryName) else {
+        guard let storedGroup = try fetchGroup(named: group.name) else {
             throw CodeLaunchError.missingGroup
         }
 
         let storedProject = projectMapper.toSwiftData(project)
         try context.saveProject(storedProject, in: storedGroup)
+    }
+    
+    public func updateProject(_ project: LaunchProject) throws {
+        // TODO: - 
     }
 
     public func deleteProject(_ project: LaunchProject) throws {
@@ -134,20 +138,8 @@ private extension SwiftDataLaunchRepository {
         return try context.loadCategories().first(where: { $0.name.matches(name) })
     }
 
-    func fetchGroup(named name: String, categoryName: String?) throws -> SwiftDataLaunchGroup? {
-        let groups = try context.loadGroups()
-
-        return groups.first { group in
-            guard group.name.matches(name) else {
-                return false
-            }
-
-            if let categoryName {
-                return categoryName.matches(group.category?.name)
-            }
-
-            return true
-        }
+    func fetchGroup(named name: String) throws -> SwiftDataLaunchGroup? {
+        return try context.loadGroups().first(where: { $0.name.matches(name) })
     }
 
     func fetchProject(named name: String) throws -> SwiftDataLaunchProject? {

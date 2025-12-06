@@ -38,7 +38,7 @@ public protocol LaunchGroupCategorySelector {
 
 public protocol LaunchGroupStore: GroupLoading {
     func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws
-    func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws
+    func deleteGroup(_ group: LaunchGroup) throws
 }
 
 
