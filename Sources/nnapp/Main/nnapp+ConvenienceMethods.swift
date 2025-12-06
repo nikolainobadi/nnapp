@@ -6,6 +6,33 @@
 //
 
 extension Nnapp {
+    static func makeListHandler() throws -> ListHandler {
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let console = contextFactory.makeConsoleOutput()
+
+        return .init(picker: picker, loader: repository, console: console)
+    }
+
+    static func makeFinderHandler() throws -> FinderHandler {
+        let shell = makeShell()
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let console = contextFactory.makeConsoleOutput()
+
+        return .init(shell: shell, picker: picker, loader: repository, console: console)
+    }
+
+    static func makeOpenManager() throws -> OpenProjectHandler {
+        let shell = makeShell()
+        let picker = makePicker()
+        let repository = try makeRepository()
+        let fileSystem = contextFactory.makeFileSystem()
+        let delegate = DefaultOpenProjectDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem)
+        
+        return .init(picker: picker, loader: repository, delegate: delegate)
+    }
+    
     static func makeCategoryHandler(picker: (any LaunchPicker)? = nil) throws -> CategoryHandler {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
@@ -46,32 +73,5 @@ extension Nnapp {
             folderBrowser: folderBrowser,
             groupSelector: groupSelector
         )
-    }
-
-    static func makeListHandler() throws -> ListHandler {
-        let picker = makePicker()
-        let repository = try makeRepository()
-        let console = contextFactory.makeConsoleOutput()
-
-        return .init(picker: picker, loader: repository, console: console)
-    }
-
-    static func makeFinderHandler() throws -> FinderHandler {
-        let shell = makeShell()
-        let picker = makePicker()
-        let repository = try makeRepository()
-        let console = contextFactory.makeConsoleOutput()
-
-        return .init(shell: shell, picker: picker, loader: repository, console: console)
-    }
-
-    static func makeOpenManager() throws -> OpenProjectHandler {
-        let shell = makeShell()
-        let picker = makePicker()
-        let repository = try makeRepository()
-        let fileSystem = contextFactory.makeFileSystem()
-        let delegate = DefaultOpenProjectDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem)
-        
-        return .init(picker: picker, loader: repository, delegate: delegate)
     }
 }

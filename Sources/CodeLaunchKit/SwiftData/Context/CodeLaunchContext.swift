@@ -155,6 +155,31 @@ public extension CodeLaunchContext {
 
         try context.save()
     }
+
+    /// Persists changes to an existing launch project.
+    /// - Parameters:
+    ///   - project: The stored project instance to update.
+    ///   - name: The updated display name for the project.
+    ///   - shortcut: The shortcut to associate with the project.
+    ///   - type: The updated project type.
+    ///   - remote: The remote link to associate with the project, if any.
+    ///   - links: The collection of links associated with the project.
+    func updateProject(
+        _ project: SwiftDataLaunchProject,
+        name: String,
+        shortcut: String?,
+        type: FirstSchema.ProjectType,
+        remote: FirstSchema.ProjectLink?,
+        links: [FirstSchema.ProjectLink]
+    ) throws {
+        project.name = name
+        project.shortcut = shortcut
+        project.type = type
+        project.remote = remote
+        project.links = links
+
+        try context.save()
+    }
 }
 
 

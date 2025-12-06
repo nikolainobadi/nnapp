@@ -19,7 +19,7 @@ public final class SwiftDataLaunchRepository {
 }
 
 
-// MARK: - Loaders
+// MARK: - Load
 extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, ProjectInfoLoader {
     public func loadCategories() throws -> [LaunchCategory] {
         let categories = try context.loadCategories()
@@ -43,7 +43,7 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, Project
     }
 }
 
-// MARK: - CategoryStore
+// MARK: - Category
 extension SwiftDataLaunchRepository: CategoryStore {
     public func saveCategory(_ category: LaunchCategory) throws {
         let storedCategory = categoryMapper.toSwiftData(category)
@@ -60,7 +60,7 @@ extension SwiftDataLaunchRepository: CategoryStore {
 }
 
 
-// MARK: - GroupStore
+// MARK: - Group
 extension SwiftDataLaunchRepository: LaunchGroupStore {
     public func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
         let storedCategory: SwiftDataLaunchCategory
@@ -95,7 +95,7 @@ extension SwiftDataLaunchRepository: LaunchGroupStore {
 
 
 
-// MARK: - ProjectStore
+// MARK: - Project
 extension SwiftDataLaunchRepository: ProjectStore {
     public func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws {
         guard let storedGroup = try fetchGroup(named: group.name) else {
@@ -107,7 +107,19 @@ extension SwiftDataLaunchRepository: ProjectStore {
     }
     
     public func updateProject(_ project: LaunchProject) throws {
-        // TODO: - 
+        guard let storedProject = try fetchProject(named: project.name) else {
+            throw CodeLaunchError.missingProject
+        }
+
+        let mappedProject = projectMapper.toSwiftData(project)
+        try context.updateProject(
+            storedProject,
+            name: mappedProject.name,
+            shortcut: mappedProject.shortcut,
+            type: mappedProject.type,
+            remote: mappedProject.remote,
+            links: mappedProject.links
+        )
     }
 
     public func deleteProject(_ project: LaunchProject) throws {
