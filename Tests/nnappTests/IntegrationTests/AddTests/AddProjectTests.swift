@@ -25,7 +25,7 @@ final class AddProjectTests: MainActorBaseAddTests {
 }
 
 
-// MARK: - Unit Tests
+// MARK: - Tests
 extension AddProjectTests {
     @Test("Throws an error if no group is selected")
     func throwsErrorWhenNoGroupSelected() throws {

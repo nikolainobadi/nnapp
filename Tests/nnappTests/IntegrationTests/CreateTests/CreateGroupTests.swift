@@ -25,7 +25,7 @@ final class CreateGroupTests: MainActorBaseCreateTests {
 }
 
 
-// MARK: - Unit Tests
+// MARK: - Tests
 extension CreateGroupTests {
     @Test("Throws error when no Category is selected")
     func throwsErrorWhenNoCategorySelected() throws {

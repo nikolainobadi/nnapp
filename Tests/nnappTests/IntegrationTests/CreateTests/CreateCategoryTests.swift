@@ -21,7 +21,7 @@ final class CreateCategoryTests: MainActorBaseCreateTests {
 }
 
 
-// MARK: - Unit Tests
+// MARK: - Tests
 extension CreateCategoryTests {
     @Test("Throws an error when a folder already exists in the parent directory with same name")
     func throwsErrorWhenFolderAlreadyExists() throws {
