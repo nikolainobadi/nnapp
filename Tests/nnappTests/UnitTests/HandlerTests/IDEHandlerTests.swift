@@ -36,7 +36,8 @@ struct IDEHandlerTests {
         #expect(fileSystem.capturedPaths.contains(folderPath))
         #expect(shell.executedCommand(containing: "open"))
         #expect(shell.executedCommand(containing: filePath))
-        #expect(!shell.executedCommand(containing: "git clone"))
+        #expect(!shell.executedCommand(containing: "git"))
+        #expect(!shell.executedCommand(containing: "clone"))
     }
 
     @Test("Clones project when missing locally and remote exists", arguments: [LaunchType.xcode, LaunchType.vscode])
@@ -66,7 +67,20 @@ struct IDEHandlerTests {
         #expect(fileSystem.capturedPaths.contains(folderPath))
         #expect(shell.executedCommand(containing: "code"))
         #expect(shell.executedCommand(containing: folderPath))
-        #expect(!shell.executedCommand(containing: "git clone"))
+        #expect(!shell.executedCommand(containing: "git"))
+        #expect(!shell.executedCommand(containing: "clone"))
+    }
+
+    @Test("Throws when missing locally and no remote exists")
+    func throwsWhenMissingLocallyAndNoRemoteExists() {
+        let projectGroup = makeProjectGroup()
+        let project = makeProject(name: "NoRemote", remote: nil, group: projectGroup)
+        let (sut, shell, _) = makeSUT(directoryToLoad: nil)
+        
+        #expect(throws: CodeLaunchError.noRemoteRepository) {
+            try sut.openInIDE(project, launchType: .xcode)
+        }
+        #expect(shell.executedCommands.isEmpty)
     }
 }
 
