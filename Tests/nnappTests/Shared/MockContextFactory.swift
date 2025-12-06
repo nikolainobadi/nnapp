@@ -22,16 +22,14 @@ final class MockContextFactory {
     private var context: CodeLaunchContext?
     private let uniqueId: String
     private let branchSyncChecker: (any BranchSyncChecker)?
-    private let branchStatusNotifier: (any BranchStatusNotifier)?
     private let folderBrowser: any DirectoryBrowser
 
-    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, branchStatusNotifier: (any BranchStatusNotifier)? = nil, folderBrowser: (any DirectoryBrowser)? = nil) {
+    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, folderBrowser: (any DirectoryBrowser)? = nil) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
         self.uniqueId = UUID().uuidString
         self.branchSyncChecker = branchSyncChecker
-        self.branchStatusNotifier = branchStatusNotifier
         self.folderBrowser = folderBrowser ?? MockFolderBrowser()
     }
 }
@@ -48,10 +46,6 @@ extension MockContextFactory: ContextFactory {
     }
     
     func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {
-        fatalError()
-    }
-    
-    func makeBranchStatusNotifier(shell: any LaunchShell) -> any BranchStatusNotifier {
         fatalError()
     }
     
@@ -91,10 +85,6 @@ extension MockContextFactory: ContextFactory {
     func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
         return branchSyncChecker ?? MockBranchSyncChecker()
     }
-
-    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier {
-        return branchStatusNotifier ?? MockBranchStatusNotifier()
-    }
 }
 
 
@@ -120,18 +110,6 @@ final class MockBranchSyncChecker: BranchSyncChecker {
         checkCallCount += 1
         lastProject = project
         return result
-    }
-}
-
-final class MockBranchStatusNotifier: BranchStatusNotifier {
-    private(set) var notifyCallCount = 0
-    private(set) var lastStatus: LaunchBranchStatus?
-    private(set) var lastProject: LaunchProject?
-
-    func notify(status: LaunchBranchStatus, for project: LaunchProject) {
-        notifyCallCount += 1
-        lastStatus = status
-        lastProject = project
     }
 }
 
