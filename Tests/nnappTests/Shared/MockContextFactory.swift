@@ -5,12 +5,9 @@
 //  Created by Nikolai Nobadi on 3/28/25.
 //
 
-import Files
 import SwiftData
 import Foundation
-import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 import NnShellTesting
 import SwiftPickerTesting
 @testable import nnapp
@@ -37,6 +34,18 @@ final class MockContextFactory {
 
 // MARK: - ContextFactory
 extension MockContextFactory: ContextFactory {
+    func makeShell() -> any LaunchShell {
+        return shell
+    }
+    
+    func makePicker() -> any LaunchPicker {
+        return picker
+    }
+    
+    func makeConsoleOutput() -> any ConsoleOutput {
+        return MockConsoleOutput()
+    }
+    
     func makeFileSystem() -> any FileSystem {
         fatalError()
     }
@@ -47,14 +56,6 @@ extension MockContextFactory: ContextFactory {
     
     func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {
         fatalError()
-    }
-    
-    func makeShell() -> any LaunchShell {
-        return shell
-    }
-    
-    func makePicker() -> any LaunchPicker {
-        return picker
     }
     
     func makeContext() throws -> CodeLaunchContext {
@@ -72,18 +73,6 @@ extension MockContextFactory: ContextFactory {
         self.context = context
 
         return context
-    }
-
-    func makeConsoleOutput() -> any ConsoleOutput {
-        return MockConsoleOutput()
-    }
-
-    func makeFolderBrowser(picker: any CommandLinePicker) -> any DirectoryBrowser {
-        return folderBrowser
-    }
-
-    func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker {
-        return branchSyncChecker ?? MockBranchSyncChecker()
     }
 }
 
