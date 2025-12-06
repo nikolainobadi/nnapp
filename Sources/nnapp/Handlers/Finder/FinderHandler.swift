@@ -24,7 +24,6 @@ struct FinderHandler {
 
 // MARK: - Browse All
 extension FinderHandler {
-    /// Opens an interactive browser to select and open any folder type.
     func browseAll() throws {
         let categories = try loader.loadCategories()
 
@@ -49,8 +48,6 @@ extension FinderHandler {
 
 // MARK: - Category Operations
 extension FinderHandler {
-    /// Opens a category folder in Finder.
-    /// - Parameter name: Optional category name. If nil, prompts user to select.
     func openCategory(name: String?) throws {
         let path = try resolveCategoryPath(name: name)
         try openInFinder(path: path)
@@ -60,8 +57,6 @@ extension FinderHandler {
 
 // MARK: - Group Operations
 extension FinderHandler {
-    /// Opens a group folder in Finder.
-    /// - Parameter name: Optional group name or shortcut. If nil, prompts user to select.
     func openGroup(name: String?) throws {
         let path = try resolveGroupPath(name: name)
         try openInFinder(path: path)
@@ -71,8 +66,6 @@ extension FinderHandler {
 
 // MARK: - Project Operations
 extension FinderHandler {
-    /// Opens a project folder in Finder.
-    /// - Parameter name: Optional project name or shortcut. If nil, prompts user to select.
     func openProject(name: String?) throws {
         let path = try resolveProjectPath(name: name)
         try openInFinder(path: path)
@@ -82,8 +75,6 @@ extension FinderHandler {
 
 // MARK: - Private Methods
 private extension FinderHandler {
-    /// Opens the specified path in Finder.
-    /// - Parameter path: The file system path to open.
     func openInFinder(path: String) throws {
         try shell.runAndPrint(bash: "open -a Finder \(path)")
     }
