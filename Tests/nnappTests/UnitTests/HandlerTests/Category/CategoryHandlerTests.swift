@@ -144,25 +144,27 @@ private extension CategoryHandlerTests {
 
 
 // MARK: - Mocks
-private final class MockCategoryStore: CategoryStore {
-    private(set) var categories: [LaunchCategory]
-    private(set) var savedCategories: [LaunchCategory] = []
-    private(set) var deletedCategories: [LaunchCategory] = []
-
-    init(categories: [LaunchCategory]) {
-        self.categories = categories
-    }
-
-    func loadCategories() throws -> [LaunchCategory] {
-        return categories
-    }
-
-    func saveCategory(_ category: LaunchCategory) throws {
-        savedCategories.append(category)
-        categories.append(category)
-    }
-
-    func deleteCategory(_ category: LaunchCategory) throws {
-        deletedCategories.append(category)
+private extension CategoryHandlerTests {
+    final class MockCategoryStore: CategoryStore {
+        private(set) var categories: [LaunchCategory]
+        private(set) var savedCategories: [LaunchCategory] = []
+        private(set) var deletedCategories: [LaunchCategory] = []
+        
+        init(categories: [LaunchCategory]) {
+            self.categories = categories
+        }
+        
+        func loadCategories() throws -> [LaunchCategory] {
+            return categories
+        }
+        
+        func saveCategory(_ category: LaunchCategory) throws {
+            savedCategories.append(category)
+            categories.append(category)
+        }
+        
+        func deleteCategory(_ category: LaunchCategory) throws {
+            deletedCategories.append(category)
+        }
     }
 }

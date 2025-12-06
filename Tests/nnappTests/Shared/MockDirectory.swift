@@ -29,10 +29,7 @@ struct MockDirectory: Directory {
     }
     
     func createSubdirectory(named name: String) throws -> Directory {
-        var updatedSubdirectories = subdirectories
-        let newDirectory = try subdirectory(named: name)
-        updatedSubdirectories.append(newDirectory)
-        return MockDirectory(path: path, subdirectories: updatedSubdirectories)
+        return try subdirectory(named: name)
     }
     
     func move(to parent: Directory) throws {

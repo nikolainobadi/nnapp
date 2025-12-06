@@ -77,6 +77,7 @@ extension CategoryHandler: LaunchGroupCategorySelector {
             category.groups.contains(where: { $0.name.matches(group.name) })
         })
     }
+    
     func selectCategory(named name: String?) throws -> LaunchCategory {
         let categories = try loadAllCategories()
         
