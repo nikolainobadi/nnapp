@@ -8,7 +8,7 @@
 import CodeLaunchKit
 
 struct ProjectFolder {
-    let folder: Directory
+    let folder: any Directory
     let type: ProjectType
 
     /// The name of the folder, used as the project name.

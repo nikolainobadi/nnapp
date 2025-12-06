@@ -41,6 +41,7 @@ extension ProjectFolderSelector {
     func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
         if let path, let directory = try? fileSystem.directory(at: path) {
             let projectType = try getProjectType(folder: directory)
+            
             return .init(folder: directory, type: projectType)
         }
         
@@ -62,16 +63,14 @@ extension ProjectFolderSelector {
 
         let groupFolder = try fileSystem.directory(at: groupPath)
         let availableFolders = getAvailableSubfolders(group: group, folder: groupFolder)
+        let permissionPrompt = "Would you like to select a project from the \(groupFolder.name) folder?"
 
-        if !availableFolders.isEmpty,
-           picker.getPermission("Would you like to select a project from the \(groupFolder.name) folder?") {
+        if !availableFolders.isEmpty, picker.getPermission(permissionPrompt) {
             return try picker.requiredSingleSelection("Select a folder", items: availableFolders)
         }
 
-        let folder = try folderBrowser.browseForDirectory(
-            prompt: "Browse to select a folder to use for your Project",
-            startPath: groupPath
-        )
+        let browsePrompt = "Browse to select a folder to use for your Project"
+        let folder = try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: groupPath)
         let projectType = try getProjectType(folder: folder)
 
         return .init(folder: folder, type: projectType)
@@ -81,7 +80,7 @@ extension ProjectFolderSelector {
 
 // MARK: - Private Methods
 private extension ProjectFolderSelector {
-    func getProjectType(folder: Directory) throws -> ProjectType {
+    func getProjectType(folder: any Directory) throws -> ProjectType {
         if folder.containsFile(named: "Package.swift") {
             return .package
         }
@@ -94,10 +93,12 @@ private extension ProjectFolderSelector {
         throw CodeLaunchError.noProjectInFolder
     }
 
-    func getAvailableSubfolders(group: LaunchGroup, folder: Directory) -> [ProjectFolder] {
+    func getAvailableSubfolders(group: LaunchGroup, folder: any Directory) -> [ProjectFolder] {
         return folder.subdirectories.compactMap { subFolder in
-            guard !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
-                  let projectType = try? getProjectType(folder: subFolder) else {
+            guard
+                !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
+                let projectType = try? getProjectType(folder: subFolder)
+            else {
                 return nil
             }
 
