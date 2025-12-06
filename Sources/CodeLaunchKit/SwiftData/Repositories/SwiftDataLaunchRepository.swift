@@ -47,7 +47,7 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, Project
 
 
 // MARK: - Stores
-extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, LaunchProjectStore {
+extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, ProjectStore {
     public func saveCategory(_ category: LaunchCategory) throws {
         let storedCategory = categoryMapper.toSwiftData(category)
         try context.saveCategory(storedCategory)

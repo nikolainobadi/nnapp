@@ -11,17 +11,17 @@ struct ProjectHandler {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
-    private let store: any LaunchProjectStore
+    private let store: any ProjectStore
     private let folderBrowser: any DirectoryBrowser
-    private let groupSelector: any LaunchProjectGroupSelector
+    private let groupSelector: any ProjectGroupSelector
     
     init(
         shell: any LaunchShell,
-        store: any LaunchProjectStore,
+        store: any ProjectStore,
         picker: any LaunchPicker,
         fileSystem: any FileSystem,
         folderBrowser: any DirectoryBrowser,
-        groupSelector: any LaunchProjectGroupSelector
+        groupSelector: any ProjectGroupSelector
     ) {
         self.shell = shell
         self.store = store

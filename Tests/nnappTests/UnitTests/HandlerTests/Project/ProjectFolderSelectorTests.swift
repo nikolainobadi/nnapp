@@ -228,8 +228,7 @@ private extension ProjectFolderSelectorTests {
             selectionResult: .init(defaultSingle: .index(selectionIndex))
         )
         let browser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let homeDirectory = MockDirectory(path: "/Users/test")
-        let fileSystem = MockFileSystem(homeDirectory: homeDirectory, directoryToLoad: directoryToLoad, desktop: desktop)
+        let fileSystem = MockFileSystem(directoryToLoad: directoryToLoad, desktop: desktop)
         let sut = ProjectFolderSelector(picker: picker, fileSystem: fileSystem, folderBrowser: browser)
 
         return (sut, browser, fileSystem)

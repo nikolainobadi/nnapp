@@ -75,7 +75,7 @@ extension GroupHandler {
 
 
 // MARK: - LaunchProjectGroupSelector
-extension GroupHandler: LaunchProjectGroupSelector {
+extension GroupHandler: ProjectGroupSelector {
     func selectGroup(name: String?) throws -> LaunchGroup {
         let groups = try loadAllGroups()
         

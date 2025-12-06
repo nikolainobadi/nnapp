@@ -16,7 +16,7 @@ final class MockFileSystem: FileSystem {
 
     let homeDirectory: any Directory
 
-    init(homeDirectory: MockDirectory, directoryToLoad: MockDirectory?, desktop: MockDirectory? = nil) {
+    init(homeDirectory: MockDirectory = .init(path: "/Users/test"), directoryToLoad: MockDirectory? = nil, desktop: MockDirectory? = nil) {
         self.homeDirectory = homeDirectory
         self.directoryToLoad = directoryToLoad
         self.desktop = desktop ?? .init(path: homeDirectory.path.appendingPathComponent("Desktop"))
