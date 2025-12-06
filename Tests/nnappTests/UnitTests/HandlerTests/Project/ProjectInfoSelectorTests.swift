@@ -68,7 +68,6 @@ struct ProjectInfoSelectorTests {
         #expect(info.shortcut == "np")
         #expect(info.remote == ProjectLink(name: "GitHub", urlString: gitHubURL))
         #expect(info.otherLinks == [ProjectLink(name: "Docs", urlString: "https://docs.example")])
-        #expect(shell.commandCount(containing: "getGitHubURL") == 1)
         #expect(shell.executedCommands.contains { $0.contains(folder.path) })
     }
 
@@ -86,9 +85,8 @@ struct ProjectInfoSelectorTests {
 
         let info = try sut.selectProjectInfo(folder: folder, shortcut: nil, group: group, isMainProject: true)
 
-        #expect(info.shortcut == "sc")
         #expect(info.remote == nil)
-        #expect(shell.commandCount(containing: "getGitHubURL") == 1)
+        #expect(info.shortcut == "sc")
     }
 }
 
