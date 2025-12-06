@@ -5,9 +5,9 @@
 //  Created by Nikolai Nobadi on 12/05/25.
 //
 
+import Testing
 import CodeLaunchKit
 import SwiftPickerTesting
-import Testing
 @testable import nnapp
 
 struct FinderHandlerTests {
@@ -79,10 +79,11 @@ extension FinderHandlerTests {
 
 // MARK: - Group
 extension FinderHandlerTests {
-    @Test("Open group uses direct match without prompts", .disabled())
+    @Test("Open group uses direct match without prompts")
     func openGroupUsesDirectMatchWithoutPrompts() throws {
-        let group = LaunchGroup.new(name: "Backend", shortcut: "be", projects: [])
-        let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [group])
+        let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [])
+        let groupCategory = makeGroupCategory(name: category.name, path: category.path)
+        let group = makeGroup(name: "Backend", shortcut: "be", projects: [], category: groupCategory)
         let (sut, shell, _) = makeSUT(categories: [category], groups: [group])
 
         try sut.openGroup(name: "BE")
@@ -90,11 +91,11 @@ extension FinderHandlerTests {
         #expect(shell.executedCommand(containing: try #require(group.path)))
     }
 
-    @Test("Open group prompts then selects when name missing", .disabled())
+    @Test("Open group prompts then selects when name missing")
     func openGroupPromptsThenSelectsWhenNameMissing() throws {
         let groups = [
-            LaunchGroup.new(name: "Backend", shortcut: "be", projects: []),
-            LaunchGroup.new(name: "Frontend", shortcut: "fe", projects: [])
+            makeGroup(name: "Backend", shortcut: "be", projects: [], category: makeGroupCategory(path: "/tmp/backend")),
+            makeGroup(name: "Frontend", shortcut: "fe", projects: [], category: makeGroupCategory(path: "/tmp/frontend"))
         ]
         let (sut, shell, _) = makeSUT(groups: groups, selectionIndex: 1)
 
