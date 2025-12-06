@@ -10,12 +10,8 @@ import CodeLaunchKit
 /// Coordinates project opening operations by delegating to specialized components.
 struct OpenProjectHandler {
     private let picker: any LaunchPicker
-    private let loader: any LaunchHierarchyLoader
-    private let urlLauncher: URLHandler
-    private let ideLauncher: IDEHandler
-    private let terminalManager: TerminalHandler
-    private let branchSyncChecker: BranchSyncChecker
-    private let branchStatusNotifier: BranchStatusNotifier
+    private let loader: any Loader
+    private let service: any ProjectOpenServing
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(
@@ -26,11 +22,22 @@ struct OpenProjectHandler {
     ) {
         self.picker = picker
         self.loader = loader
-        self.ideLauncher = .init(shell: shell, picker: picker, fileSystem: fileSystem)
-        self.terminalManager = .init(shell: shell, loader: loader)
-        self.urlLauncher = .init(shell: shell, picker: picker)
-        self.branchSyncChecker = .init(shell: shell, fileSystem: fileSystem)
-        self.branchStatusNotifier = .init(shell: shell)
+        self.service = DefaultProjectOpenService(
+            shell: shell,
+            picker: picker,
+            loader: loader,
+            fileSystem: fileSystem
+        )
+    }
+
+    init(
+        picker: any LaunchPicker,
+        loader: any Loader,
+        service: any ProjectOpenServing
+    ) {
+        self.picker = picker
+        self.loader = loader
+        self.service = service
     }
 }
 
@@ -74,18 +81,14 @@ extension OpenProjectHandler {
     ///   - terminalOption: Controls terminal launch behavior.
     func openInIDE(_ project: LaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
         guard let folderPath = project.folderPath else {
-            print("fuck you")
             throw CodeLaunchError.missingProject
         }
 
-        try ideLauncher.openInIDE(project, launchType: launchType)
-        terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
+        try service.openIDE(project, launchType: launchType)
+        service.openTerminal(folderPath: folderPath, option: terminalOption)
 
-        if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
-            print("found status, preparing to notify")
-            branchStatusNotifier.notify(status: status, for: project)
-        } else {
-            print("\(project.name) is up to date")
+        if let status = service.checkBranchStatus(for: project) {
+            service.notifyBranchStatus(status, for: project)
         }
     }
 }
@@ -96,13 +99,13 @@ extension OpenProjectHandler {
     /// Opens the remote repository URL in the browser.
     /// - Parameter project: The project whose remote URL to open.
     func openRemoteURL(for project: LaunchProject) throws {
-        try urlLauncher.openRemoteURL(remote: project.remote)
+        try service.openRemoteURL(for: project.remote)
     }
 
     /// Opens one of the project's custom links, prompting if multiple exist.
     /// - Parameter project: The project whose link to open.
     func openProjectLink(for project: LaunchProject) throws {
-        try urlLauncher.openProjectLink(links: project.links)
+        try service.openProjectLink(project.links)
     }
 }
 
@@ -110,4 +113,58 @@ extension OpenProjectHandler {
 // MARK: - Dependencies
 enum LaunchBranchStatus {
     case behind, diverged
+}
+
+protocol ProjectOpenServing {
+    func openIDE(_ project: LaunchProject, launchType: LaunchType) throws
+    func openTerminal(folderPath: String, option: TerminalOption?)
+    func checkBranchStatus(for project: LaunchProject) -> LaunchBranchStatus?
+    func notifyBranchStatus(_ status: LaunchBranchStatus, for project: LaunchProject)
+    func openRemoteURL(for remote: ProjectLink?) throws
+    func openProjectLink(_ links: [ProjectLink]) throws
+}
+
+struct DefaultProjectOpenService: ProjectOpenServing {
+    private let ideLauncher: IDEHandler
+    private let terminalManager: TerminalHandler
+    private let urlLauncher: URLHandler
+    private let branchSyncChecker: BranchSyncChecker
+    private let branchStatusNotifier: BranchStatusNotifier
+
+    init(
+        shell: any LaunchGitShell,
+        picker: any LaunchPicker,
+        loader: any OpenProjectHandler.Loader,
+        fileSystem: any FileSystem
+    ) {
+        self.ideLauncher = .init(shell: shell, picker: picker, fileSystem: fileSystem)
+        self.terminalManager = .init(shell: shell, loader: loader)
+        self.urlLauncher = .init(shell: shell, picker: picker)
+        self.branchSyncChecker = .init(shell: shell, fileSystem: fileSystem)
+        self.branchStatusNotifier = .init(shell: shell)
+    }
+
+    func openIDE(_ project: LaunchProject, launchType: LaunchType) throws {
+        try ideLauncher.openInIDE(project, launchType: launchType)
+    }
+
+    func openTerminal(folderPath: String, option: TerminalOption?) {
+        terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: option)
+    }
+
+    func checkBranchStatus(for project: LaunchProject) -> LaunchBranchStatus? {
+        return branchSyncChecker.checkBranchSyncStatus(for: project)
+    }
+
+    func notifyBranchStatus(_ status: LaunchBranchStatus, for project: LaunchProject) {
+        branchStatusNotifier.notify(status: status, for: project)
+    }
+
+    func openRemoteURL(for remote: ProjectLink?) throws {
+        try urlLauncher.openRemoteURL(remote: remote)
+    }
+
+    func openProjectLink(_ links: [ProjectLink]) throws {
+        try urlLauncher.openProjectLink(links: links)
+    }
 }
