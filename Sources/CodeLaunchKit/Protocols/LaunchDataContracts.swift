@@ -47,9 +47,9 @@ public protocol LaunchProjectGroupSelector {
     func selectGroup(name: String?) throws -> LaunchGroup
 }
 
-public protocol LaunchProjectInfoLoader: GroupLoading, ProjectLoading, ProjectLinkNameLoading { }
+public protocol ProjectInfoLoader: GroupLoading, ProjectLoading, ProjectLinkNameLoading { }
 
-public protocol LaunchProjectStore: LaunchProjectInfoLoader {
+public protocol LaunchProjectStore: ProjectInfoLoader {
     func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws
     func deleteProject(_ project: LaunchProject, from group: LaunchGroup?) throws
 }

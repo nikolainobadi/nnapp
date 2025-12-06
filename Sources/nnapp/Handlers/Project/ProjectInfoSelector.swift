@@ -10,9 +10,9 @@ import CodeLaunchKit
 struct ProjectInfoSelector {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
-    private let infoLoader: any LaunchProjectInfoLoader
+    private let infoLoader: any ProjectInfoLoader
 
-    init(shell: any LaunchShell, picker: any LaunchPicker, infoLoader: any LaunchProjectInfoLoader) {
+    init(shell: any LaunchShell, picker: any LaunchPicker, infoLoader: any ProjectInfoLoader) {
         self.shell = shell
         self.picker = picker
         self.infoLoader = infoLoader

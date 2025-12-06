@@ -20,7 +20,7 @@ public final class SwiftDataLaunchRepository {
 
 
 // MARK: - Loaders
-extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, LaunchProjectInfoLoader {
+extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, ProjectInfoLoader {
     public func loadCategories() throws -> [LaunchCategory] {
         let categories = try context.loadCategories()
         return categories.map { categoryMapper.toDomain($0) }
