@@ -181,46 +181,53 @@ private extension OpenProjectHandlerTests {
     final class MockProjectOpenService: ProjectOpenServing {
         private let throwError: Bool
         private let branchStatus: LaunchBranchStatus?
-        
+
         private(set) var remoteLink: ProjectLink?
         private(set) var projectLinks: [ProjectLink] = []
         private(set) var terminalData: (path: String, option: TerminalOption?)?
         private(set) var openedProjectData: (project: LaunchProject, type: LaunchType)?
         private(set) var notifyData: (status: LaunchBranchStatus, project: LaunchProject)?
-        
-        init(throwError: Bool, branchStatus: LaunchBranchStatus?) {
+
+        init(throwError: Bool = false, branchStatus: LaunchBranchStatus? = nil) {
             self.throwError = throwError
             self.branchStatus = branchStatus
         }
-        
+
         func openIDE(_ project: LaunchProject, launchType: LaunchType) throws {
-            if throwError { throw NSError(domain: "Test", code: 0) }
-            
+            if throwError {
+                throw NSError(domain: "MockProjectOpenService", code: 1)
+            }
+
             openedProjectData = (project, launchType)
         }
-        
+
         func openTerminal(folderPath: String, option: TerminalOption?) {
             terminalData = (folderPath, option)
         }
-        
+
         func checkBranchStatus(for project: LaunchProject) -> LaunchBranchStatus? {
             return branchStatus
         }
-        
+
         func notifyBranchStatus(_ status: LaunchBranchStatus, for project: LaunchProject) {
             notifyData = (status, project)
         }
-        
+
         func openRemoteURL(for remote: ProjectLink?) throws {
-            if throwError { throw NSError(domain: "Test", code: 0) }
-            
+            if throwError {
+                throw NSError(domain: "MockProjectOpenService", code: 2)
+            }
+
             remoteLink = remote
         }
-        
+
         func openProjectLink(_ links: [ProjectLink]) throws {
-            if throwError { throw NSError(domain: "Test", code: 0) }
-            
+            if throwError {
+                throw NSError(domain: "MockProjectOpenService", code: 3)
+            }
+
             projectLinks = links
         }
     }
+
 }

@@ -1,201 +1,222 @@
-////
-////  ListHandlerTests.swift
-////  nnapp
-////
-////  Created by Nikolai Nobadi on 12/3/25.
-////
 //
-//import Testing
-//import Foundation
-//import SwiftPickerTesting
-//@testable import nnapp
+//  ListHandlerTests.swift
+//  nnapp
 //
-//@MainActor
-//final class ListHandlerTests: MainActorTempFolderDatasource {
-//    private let existingCategoryName = "TestCategory"
-//    private let existingGroupName = "TestGroup"
-//    private let existingProjectName = "TestProject"
+//  Created by Nikolai Nobadi on 12/05/25.
 //
-//    init() throws {
-//        let testProjectFolder = TestFolder(name: existingProjectName, subFolders: [])
-//        let testGroupFolder = TestFolder(name: existingGroupName, subFolders: [testProjectFolder])
-//        let testCategoryFolder = TestFolder(name: existingCategoryName, subFolders: [testGroupFolder])
-//
-//        try super.init(testFolder: .init(name: "ListHandlerTests", subFolders: [testCategoryFolder]))
-//    }
-//}
-//
-//
-//// MARK: - Browse Hierarchy Tests
-//extension ListHandlerTests {
-//    @Test("Displays no categories message when empty")
-//    func displaysNoCategoriesWhenEmpty() throws {
-//        let (sut, console, _) = try makeSUT()
-//
-//        try sut.browseHierarchy()
-//
-//        #expect(console.headers.contains("CodeLaunch"))
-//        #expect(console.lines.contains("No Categories"))
-//    }
-//
-//    @Test("Displays tree navigation when categories exist")
-//    func displaysTreeNavigationWhenCategoriesExist() throws {
-//        let (sut, console, context) = try makeSUT()
-//        let category = makeCategory(name: "MyCategory", path: tempFolder.path)
-//        try context.saveCategory(category)
-//
-//        // Tree navigation will be triggered but won't select anything in tests
-//        try sut.browseHierarchy()
-//
-//        // If there are categories, we don't print the "No Categories" message
-//        #expect(!console.lines.contains("No Categories"))
-//    }
-//}
-//
-//
-//// MARK: - Category Display Tests
-//extension ListHandlerTests {
-//    @Test("Displays category details correctly")
-//    func displaysCategoryDetailsCorrectly() throws {
-//        let (sut, console, context) = try makeSUT()
-//        let category = makeCategory(name: "MyCategory", path: tempFolder.path)
-//        try context.saveCategory(category)
-//
-//        try sut.selectAndDisplayCategory(name: "MyCategory")
-//
-//        #expect(console.headers.contains("MyCategory"))
-//        #expect(console.lines.contains { $0.contains("path:") })
-//        #expect(console.lines.contains { $0.contains("group count:") })
-//    }
-//
-//    @Test("Displays category with groups and projects")
-//    func displaysCategoryWithGroupsAndProjects() throws {
-//        let (sut, console, context) = try makeSUT()
-//        let category = makeCategory(name: "MyCategory", path: tempFolder.path)
-//        let group = makeGroup(name: "MyGroup", shortcut: "mg")
-//        let project = makeProject(name: "MyProject", shortcut: "mp")
-//
-//        try context.saveCategory(category)
-//        try context.saveGroup(group, in: category)
-//        try context.saveProject(project, in: group)
-//
-//        try sut.selectAndDisplayCategory(name: "MyCategory")
-//
-//        #expect(console.lines.contains { $0.contains("MyGroup") })
-//        #expect(console.lines.contains { $0.contains("MyProject") })
-//    }
-//}
-//
-//
-//// MARK: - Group Display Tests
-//extension ListHandlerTests {
-//    @Test("Displays group details correctly")
-//    func displaysGroupDetailsCorrectly() throws {
-//        let (sut, console, context) = try makeSUT()
-//        let category = makeCategory(name: "MyCategory", path: tempFolder.path)
-//        let group = makeGroup(name: "MyGroup", shortcut: "mg")
-//
-//        try context.saveCategory(category)
-//        try context.saveGroup(group, in: category)
-//
-//        try sut.selectAndDisplayGroup(name: "MyGroup")
-//
-//        #expect(console.headers.contains("MyGroup"))
-//        #expect(console.lines.contains { $0.contains("category: MyCategory") })
-//        #expect(console.lines.contains { $0.contains("project count:") })
-//    }
-//
-//    @Test("Displays group with projects")
-//    func displaysGroupWithProjects() throws {
-//        let (sut, console, context) = try makeSUT()
-//        let category = makeCategory(name: "TestCat", path: tempFolder.path)
-//        let group = makeGroup(name: "MyGroup", shortcut: "mg")
-//        let project = makeProject(name: "MyProject", shortcut: "mp")
-//
-//        try context.saveCategory(category)
-//        try context.saveGroup(group, in: category)
-//        try context.saveProject(project, in: group)
-//
-//        try sut.selectAndDisplayGroup(name: "MyGroup")
-//
-//        #expect(console.lines.contains { $0.contains("MyProject") })
-//    }
-//}
-//
-//
-//// MARK: - Project Display Tests
-//extension ListHandlerTests {
-//    @Test("Displays project details correctly")
-//    func displaysProjectDetailsCorrectly() throws {
-//        let (sut, console, context) = try makeSUT()
-//        let category = makeCategory(name: "TestCat", path: tempFolder.path)
-//        let group = makeGroup(name: "MyGroup")
-//        let project = makeProject(name: "MyProject", shortcut: "mp")
-//
-//        try context.saveCategory(category)
-//        try context.saveGroup(group, in: category)
-//        try context.saveProject(project, in: group)
-//
-//        try sut.selectAndDisplayProject(name: "MyProject")
-//
-//        #expect(console.headers.contains("MyProject"))
-//        #expect(console.lines.contains { $0.contains("group: MyGroup") })
-//        #expect(console.lines.contains { $0.contains("shortcut: mp") })
-//        #expect(console.lines.contains { $0.contains("project type:") })
-//    }
-//
-//    @Test("Displays project with remote repository")
-//    func displaysProjectWithRemoteRepository() throws {
-//        let (sut, console, context) = try makeSUT()
-//        let category = makeCategory(name: "TestCat", path: tempFolder.path)
-//        let group = makeGroup(name: "MyGroup")
-//        let remote = SwiftDataProjectLink(name: "origin", urlString: "https://github.com/test/repo.git")
-//        let project = makeProject(name: "MyProject", remote: remote)
-//
-//        try context.saveCategory(category)
-//        try context.saveGroup(group, in: category)
-//        try context.saveProject(project, in: group)
-//
-//        try sut.selectAndDisplayProject(name: "MyProject")
-//
-//        #expect(console.lines.contains { $0.contains("remote repository:") && $0.contains("origin") })
-//    }
-//}
-//
-//
-//// MARK: - Link Display Tests
-//extension ListHandlerTests {
-//    @Test("Displays no links message when empty")
-//    func displaysNoLinksMessageWhenEmpty() throws {
-//        let (sut, console, _) = try makeSUT()
-//
-//        sut.displayProjectLinks()
-//
-//        #expect(console.lines.contains("No saved Project Link names"))
-//    }
-//
-//    @Test("Displays link names when available")
-//    func displaysLinkNamesWhenAvailable() throws {
-//        let (sut, console, context) = try makeSUT()
-//        context.saveProjectLinkNames(["Documentation", "API Reference"])
-//
-//        sut.displayProjectLinks()
-//
-//        #expect(console.headers.contains("Project Link Names"))
-//        #expect(console.lines.contains("Documentation"))
-//        #expect(console.lines.contains("API Reference"))
-//    }
-//}
-//
-//
-//// MARK: - Helper Methods
-//private extension ListHandlerTests {
-//    func makeSUT() throws -> (sut: ListHandler, console: MockConsoleOutput, context: CodeLaunchContext) {
-//        let console = MockConsoleOutput()
-//        let picker = MockSwiftPicker()
-//        let context = try MockContextFactory().makeContext()
-//        let sut = ListHandler(picker: picker, context: context, console: console)
-//
-//        return (sut, console, context)
-//    }
-//}
+
+import Testing
+import Foundation
+import CodeLaunchKit
+import SwiftPickerTesting
+@testable import nnapp
+
+struct ListHandlerTests {
+    @Test("Displays root placeholder when no categories exist")
+    func displaysRootPlaceholderWhenNoCategoriesExist() throws {
+        let (sut, picker, _, console) = makeSUT(categories: [])
+
+        try sut.browseHierarchy()
+
+        #expect(console.headers == ["CodeLaunch"])
+        #expect(console.lines.contains("No Categories"))
+        #expect(console.lines.contains(""))
+        #expect(picker.capturedTreeNavigationPrompts.isEmpty)
+    }
+
+    @Test("Displays selected category details from tree navigation")
+    func displaysSelectedCategoryDetailsFromTreeNavigation() throws {
+        let project = makeProject(name: "Proj", shortcut: "pj")
+        let group = LaunchGroup.new(name: "Group A", shortcut: "ga", projects: [project])
+        let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [group])
+        let (sut, picker, _, console) = makeSUT(
+            categories: [category],
+            treeNavigationOutcome: .index(0)
+        )
+
+        try sut.browseHierarchy()
+
+        #expect(picker.capturedTreeNavigationPrompts == ["Browse CodeLaunch Hierarchy"])
+        #expect(console.headers.contains("Cat"))
+        #expect(console.lines.contains(where: { $0.contains("path: /tmp/cat") }))
+        #expect(console.lines.contains(where: { $0.contains("group count: 1") }))
+        #expect(console.lines.contains(where: { $0.contains("Group A") }))
+        #expect(console.lines.contains(where: { $0.contains("Proj") }))
+    }
+}
+
+
+// MARK: - Category Operations
+extension ListHandlerTests {
+    @Test("Selects category by name without prompting")
+    func selectsCategoryByNameWithoutPrompting() throws {
+        let category = LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: [])
+        let (sut, picker, _, console) = makeSUT(categories: [category])
+
+        try sut.selectAndDisplayCategory(name: "ios")
+
+        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
+        #expect(console.headers.filter { $0 == category.name }.count == 2)
+        #expect(console.lines.contains(where: { $0.contains("path: /tmp/ios") }))
+    }
+
+    @Test("Prompts to select category when name missing")
+    func promptsToSelectCategoryWhenNameMissing() throws {
+        let categories = [
+            LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: []),
+            LaunchCategory.new(name: "Server", path: "/tmp/server", groups: [])
+        ]
+        let (sut, picker, _, console) = makeSUT(categories: categories, selectionIndex: 1)
+
+        try sut.selectAndDisplayCategory(name: nil)
+
+        #expect(picker.capturedSingleSelectionPrompts == ["Select a Category"])
+        #expect(console.headers.contains("Server"))
+    }
+}
+
+
+// MARK: - Group Operations
+extension ListHandlerTests {
+    @Test("Selects group by name without prompting")
+    func selectsGroupByNameWithoutPrompting() throws {
+        let group = LaunchGroup.new(name: "Backend", shortcut: nil, projects: [])
+        let (sut, picker, _, console) = makeSUT(groups: [group])
+
+        try sut.selectAndDisplayGroup(name: "backend")
+
+        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
+        #expect(console.headers.filter { $0 == group.name }.count == 2)
+        #expect(console.lines.contains(where: { $0.contains("project count: 0") }))
+    }
+
+    @Test("Prompts to select group when name missing")
+    func promptsToSelectGroupWhenNameMissing() throws {
+        let groups = [
+            LaunchGroup.new(name: "Backend", shortcut: "be", projects: []),
+            LaunchGroup.new(name: "Frontend", shortcut: "fe", projects: [])
+        ]
+        let (sut, picker, _, console) = makeSUT(groups: groups, selectionIndex: 1)
+
+        try sut.selectAndDisplayGroup(name: nil)
+
+        #expect(picker.capturedSingleSelectionPrompts == ["Select a Group"])
+        #expect(console.headers.contains("Frontend"))
+    }
+}
+
+
+// MARK: - Project Operations
+extension ListHandlerTests {
+    @Test("Selects project by name or shortcut without prompting")
+    func selectsProjectByNameOrShortcutWithoutPrompting() throws {
+        let project = makeProject(name: "CLI", shortcut: "cli", type: .package, remote: nil, links: [], group: nil)
+        let (sut, picker, _, console) = makeSUT(projects: [project])
+
+        try sut.selectAndDisplayProject(name: "CLI")
+
+        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
+        #expect(console.headers.filter { $0 == project.name }.count == 2)
+        #expect(console.lines.contains(where: { $0.contains("project type: Swift Package") }))
+        #expect(console.lines.contains(where: { $0.contains("shortcut: cli") }))
+    }
+
+    @Test("Prompts to select project when name missing")
+    func promptsToSelectProjectWhenNameMissing() throws {
+        let projects = [
+            makeProject(name: "API", shortcut: "api"),
+            makeProject(name: "Web", shortcut: "web")
+        ]
+        let (sut, picker, _, console) = makeSUT(projects: projects, selectionIndex: 1)
+
+        try sut.selectAndDisplayProject(name: nil)
+
+        #expect(picker.capturedSingleSelectionPrompts == ["Select a Project"])
+        #expect(console.headers.contains("Web"))
+    }
+}
+
+
+// MARK: - Link Operations
+extension ListHandlerTests {
+    @Test("Displays placeholder when no project link names exist")
+    func displaysPlaceholderWhenNoProjectLinkNamesExist() {
+        let (sut, _, _, console) = makeSUT(linkNames: [])
+
+        sut.displayProjectLinks()
+
+        #expect(console.lines.contains("No saved Project Link names"))
+    }
+
+    @Test("Displays project link names when present")
+    func displaysProjectLinkNamesWhenPresent() {
+        let linkNames = ["Docs", "API"]
+        let (sut, _, _, console) = makeSUT(linkNames: linkNames)
+
+        sut.displayProjectLinks()
+
+        #expect(console.headers == ["Project Link Names"])
+        #expect(console.lines.contains("Docs"))
+        #expect(console.lines.contains("API"))
+    }
+}
+
+
+// MARK: - SUT
+private extension ListHandlerTests {
+    func makeSUT(
+        categories: [LaunchCategory] = [],
+        groups: [LaunchGroup] = [],
+        projects: [LaunchProject] = [],
+        linkNames: [String] = [],
+        selectionIndex: Int = 0,
+        treeNavigationOutcome: MockTreeSelectionOutcome = .none
+    ) -> (sut: ListHandler, picker: MockSwiftPicker, loader: StubListLoader, console: MockConsoleOutput) {
+        let picker = MockSwiftPicker(
+            selectionResult: .init(defaultSingle: .index(selectionIndex)),
+            treeNavigationResult: .init(defaultOutcome: treeNavigationOutcome)
+        )
+        let console = MockConsoleOutput()
+        let loader = StubListLoader(categories: categories, groups: groups, projects: projects, linkNames: linkNames)
+        let sut = ListHandler(picker: picker, loader: loader, console: console)
+
+        return (sut, picker, loader, console)
+    }
+}
+
+
+// MARK: - Mocks
+private final class StubListLoader: LaunchListLoader {
+    private let categories: [LaunchCategory]
+    private let groups: [LaunchGroup]
+    private let projects: [LaunchProject]
+    private let linkNames: [String]
+
+    init(
+        categories: [LaunchCategory],
+        groups: [LaunchGroup],
+        projects: [LaunchProject],
+        linkNames: [String]
+    ) {
+        self.categories = categories
+        self.groups = groups
+        self.projects = projects
+        self.linkNames = linkNames
+    }
+
+    func loadCategories() throws -> [LaunchCategory] {
+        return categories
+    }
+
+    func loadGroups() throws -> [LaunchGroup] {
+        return groups
+    }
+
+    func loadProjects() throws -> [LaunchProject] {
+        return projects
+    }
+
+    func loadProjectLinkNames() -> [String] {
+        return linkNames
+    }
+}
