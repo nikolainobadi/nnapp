@@ -30,7 +30,7 @@ extension Nnapp {
         )
     }
     
-    static func makeProjectHandler() throws -> LaunchProjectHandler {
+    static func makeProjectHandler() throws -> ProjectHandler {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()

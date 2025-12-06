@@ -1,5 +1,5 @@
 //
-//  LaunchProjectHandler.swift
+//  ProjectHandler.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/4/25.
@@ -7,7 +7,7 @@
 
 import CodeLaunchKit
 
-struct LaunchProjectHandler {
+struct ProjectHandler {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
@@ -34,7 +34,7 @@ struct LaunchProjectHandler {
 
 
 // MARK: - Add
-extension LaunchProjectHandler {
+extension ProjectHandler {
     func addProject(path: String?, shortcut: String?, groupName: String?, isMainProject: Bool, fromDesktop: Bool) throws {
         let group = try selectGroup(named: groupName)
         let projectFolder = try selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
@@ -48,7 +48,7 @@ extension LaunchProjectHandler {
 
 
 // MARK: - Remove
-extension LaunchProjectHandler {
+extension ProjectHandler {
     func removeProject(name: String?, shortcut: String?) throws {
         let projectToDelete = try getProjectToDelete(name: name, shortcut: shortcut)
         
@@ -60,7 +60,7 @@ extension LaunchProjectHandler {
 
 
 // MARK: - Evict (placeholder)
-extension LaunchProjectHandler {
+extension ProjectHandler {
     func evictProject(name: String?, shortcut: String?) throws {
         // TODO: - implement eviction flow (trash folder but keep registration)
         throw CodeLaunchError.invalidInput
@@ -69,7 +69,7 @@ extension LaunchProjectHandler {
 
 
 // MARK: - Private Methods
-private extension LaunchProjectHandler {
+private extension ProjectHandler {
     func selectGroup(named name: String?) throws -> LaunchGroup {
         return try groupSelector.selectGroup(name: name)
     }
