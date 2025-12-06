@@ -199,26 +199,28 @@ private extension FinderHandlerTests {
 
 
 // MARK: - Mocks
-private final class StubFinderLoader: FinderInfoLoader {
-    private let categories: [LaunchCategory]
-    private let groups: [LaunchGroup]
-    private let projects: [LaunchProject]
-
-    init(categories: [LaunchCategory], groups: [LaunchGroup], projects: [LaunchProject]) {
-        self.categories = categories
-        self.groups = groups
-        self.projects = projects
-    }
-
-    func loadCategories() throws -> [LaunchCategory] {
-        return categories
-    }
-
-    func loadGroups() throws -> [LaunchGroup] {
-        return groups
-    }
-
-    func loadProjects() throws -> [LaunchProject] {
-        return projects
+private extension FinderHandlerTests {
+    final class StubFinderLoader: FinderInfoLoader {
+        private let categories: [LaunchCategory]
+        private let groups: [LaunchGroup]
+        private let projects: [LaunchProject]
+        
+        init(categories: [LaunchCategory], groups: [LaunchGroup], projects: [LaunchProject]) {
+            self.categories = categories
+            self.groups = groups
+            self.projects = projects
+        }
+        
+        func loadCategories() throws -> [LaunchCategory] {
+            return categories
+        }
+        
+        func loadGroups() throws -> [LaunchGroup] {
+            return groups
+        }
+        
+        func loadProjects() throws -> [LaunchProject] {
+            return projects
+        }
     }
 }
