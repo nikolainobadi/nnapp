@@ -25,7 +25,7 @@ final class MockContextFactory {
         self.picker = picker
         self.uniqueId = UUID().uuidString
         self.throwCategorySelectorError = throwCategorySelectorError
-        self.folderBrowser = folderBrowser ?? MockFolderBrowser(selectedDirectory: nil)
+        self.folderBrowser = folderBrowser ?? MockDirectoryBrowser(selectedDirectory: nil)
     }
 }
 

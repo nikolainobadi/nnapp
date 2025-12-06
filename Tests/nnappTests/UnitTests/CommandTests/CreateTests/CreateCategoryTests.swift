@@ -65,7 +65,7 @@
 //    @Test("Creates a new folder for the new category", arguments: TestInfo.testOptions)
 //    func createCategoryFolder(info: TestInfo) throws {
 //        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info))))
-//        let folderBrowser = MockFolderBrowser()
+//        let folderBrowser = MockDirectoryBrowser()
 //        folderBrowser.folderToReturn = tempFolder
 //        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
 //
@@ -79,7 +79,7 @@
 //    @Test("Saves the new category", arguments: TestInfo.testOptions)
 //    func savesNewCategory(info: TestInfo) throws {
 //        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info))))
-//        let folderBrowser = MockFolderBrowser()
+//        let folderBrowser = MockDirectoryBrowser()
 //        folderBrowser.folderToReturn = tempFolder
 //        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
 //        

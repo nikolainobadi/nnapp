@@ -1,5 +1,5 @@
 //
-//  MockFolderBrowser.swift
+//  MockDirectoryBrowser.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/5/25.
@@ -8,7 +8,7 @@
 import Foundation
 import CodeLaunchKit
 
-final class MockFolderBrowser: DirectoryBrowser {
+final class MockDirectoryBrowser: DirectoryBrowser {
     private let selectedDirectory: MockDirectory?
     
     private(set) var prompt: String?

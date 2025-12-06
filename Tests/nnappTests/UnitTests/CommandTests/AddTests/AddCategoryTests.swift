@@ -40,7 +40,7 @@
 //        let categoryFolderToImport = try tempFolder.createSubfolder(named: "newCategory")
 //        let path = categoryFolderToImport.path
 //        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(useArg ? [] : [path])))
-//        let folderBrowser = MockFolderBrowser()
+//        let folderBrowser = MockDirectoryBrowser()
 //        folderBrowser.folderToReturn = categoryFolderToImport
 //        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
 //        let context = try factory.makeContext()
