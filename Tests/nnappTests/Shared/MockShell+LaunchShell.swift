@@ -5,10 +5,23 @@
 //  Created by Nikolai Nobadi on 12/5/25.
 //
 
+import GitCommandGen
 import NnShellTesting
 @testable import nnapp
 
-extension MockShell: LaunchShell {
+extension MockShell: LaunchGitShell {
+    public func remoteExists(path: String?) throws -> Bool {
+        return true // TODO: -
+    }
+    
+    public func localGitExists(at path: String?) throws -> Bool {
+        return true // TODO: -
+    }
+    
+    public func runGitCommandWithOutput(_ command: GitShellCommand, path: String?) throws -> String {
+        return "" // TODO: -
+    }
+    
     public func getGitHubURL(at path: String?) throws -> String {
         let pathDescription = path ?? "nil"
         let command = "getGitHubURL \(pathDescription)"

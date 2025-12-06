@@ -1,5 +1,5 @@
 //
-//  DefaultBranchSyncChecker.swift
+//  BranchSyncChecker.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/26/25.
@@ -8,7 +8,7 @@
 import CodeLaunchKit
 import GitCommandGen
 
-struct DefaultBranchSyncChecker {
+struct BranchSyncChecker {
     private let shell: any LaunchGitShell
     private let fileSystem: any FileSystem
 
@@ -20,7 +20,7 @@ struct DefaultBranchSyncChecker {
 
 
 // MARK: - BranchSyncChecker
-extension DefaultBranchSyncChecker: BranchSyncChecker {
+extension BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
         // Skip if project doesn't have a remote
         guard project.remote != nil else {
@@ -81,7 +81,7 @@ extension DefaultBranchSyncChecker: BranchSyncChecker {
 
 
 // MARK: - Private Helpers
-private extension DefaultBranchSyncChecker {
+private extension BranchSyncChecker {
     /// Determines the sync status of a local branch compared to its remote counterpart.
     /// - Parameters:
     ///   - branch: The local branch name.

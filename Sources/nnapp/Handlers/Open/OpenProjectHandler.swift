@@ -11,10 +11,10 @@ import CodeLaunchKit
 struct OpenProjectHandler {
     private let picker: any LaunchPicker
     private let loader: any LaunchHierarchyLoader
+    private let urlLauncher: URLHandler
     private let ideLauncher: IDEHandler
     private let terminalManager: TerminalHandler
-    private let urlLauncher: URLHandler
-    private let branchSyncChecker: DefaultBranchSyncChecker
+    private let branchSyncChecker: BranchSyncChecker
     private let branchStatusNotifier: BranchStatusNotifier
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
@@ -110,8 +110,4 @@ extension OpenProjectHandler {
 // MARK: - Dependencies
 enum LaunchBranchStatus {
     case behind, diverged
-}
-
-protocol BranchSyncChecker {
-    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
 }

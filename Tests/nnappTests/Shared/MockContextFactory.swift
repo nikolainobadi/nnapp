@@ -18,15 +18,13 @@ final class MockContextFactory {
     private let throwCategorySelectorError: Bool
     private var context: CodeLaunchContext?
     private let uniqueId: String
-    private let branchSyncChecker: (any BranchSyncChecker)?
     private let folderBrowser: any DirectoryBrowser
 
-    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, branchSyncChecker: (any BranchSyncChecker)? = nil, folderBrowser: (any DirectoryBrowser)? = nil) {
+    init(shell: MockShell = .init(), picker: MockSwiftPicker = .init(), throwCategorySelectorError: Bool = false, folderBrowser: (any DirectoryBrowser)? = nil) {
         self.shell = shell
         self.picker = picker
         self.throwCategorySelectorError = throwCategorySelectorError
         self.uniqueId = UUID().uuidString
-        self.branchSyncChecker = branchSyncChecker
         self.folderBrowser = folderBrowser ?? MockFolderBrowser()
     }
 }
@@ -34,7 +32,7 @@ final class MockContextFactory {
 
 // MARK: - ContextFactory
 extension MockContextFactory: ContextFactory {
-    func makeShell() -> any LaunchShell {
+    func makeShell() -> any LaunchGitShell {
         return shell
     }
     
@@ -51,10 +49,6 @@ extension MockContextFactory: ContextFactory {
     }
     
     func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser {
-        fatalError()
-    }
-    
-    func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {
         fatalError()
     }
     
@@ -90,18 +84,6 @@ private extension MockContextFactory {
 
 
 // MARK: - Mocks
-final class MockBranchSyncChecker: BranchSyncChecker {
-    private(set) var checkCallCount = 0
-    private(set) var lastProject: LaunchProject?
-    var result: LaunchBranchStatus?
-
-    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
-        checkCallCount += 1
-        lastProject = project
-        return result
-    }
-}
-
 final class MockFolderBrowser: DirectoryBrowser {
     private(set) var browseCallCount = 0
     private(set) var capturedPrompt: String?
