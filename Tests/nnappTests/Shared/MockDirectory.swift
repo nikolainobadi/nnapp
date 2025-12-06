@@ -8,18 +8,21 @@
 import Foundation
 import CodeLaunchKit
 
-struct MockDirectory: Directory {
+final class MockDirectory: Directory {
     let path: String
     let name: String
     let `extension`: String?
     var subdirectories: [Directory]
     var containedFiles: Set<String>
+    private let shouldThrowOnSubdirectory: Bool
+    private(set) var movedToParents: [String] = []
 
-    init(path: String, subdirectories: [Directory] = [], containedFiles: Set<String> = [], ext: String? = nil) {
+    init(path: String, subdirectories: [Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, ext: String? = nil) {
         self.path = path
         self.name = (path as NSString).lastPathComponent
         self.subdirectories = subdirectories
         self.containedFiles = containedFiles
+        self.shouldThrowOnSubdirectory = shouldThrowOnSubdirectory
         self.extension = ext
     }
 
@@ -28,6 +31,14 @@ struct MockDirectory: Directory {
     }
 
     func subdirectory(named name: String) throws -> Directory {
+        if shouldThrowOnSubdirectory {
+            throw NSError(domain: "MockDirectory", code: 1)
+        }
+
+        if let match = subdirectories.first(where: { $0.name == name }) {
+            return match
+        }
+
         return MockDirectory(path: path.appendingPathComponent(name))
     }
 
@@ -36,6 +47,6 @@ struct MockDirectory: Directory {
     }
 
     func move(to parent: Directory) throws {
-        // TODO: -
+        movedToParents.append(parent.path)
     }
 }

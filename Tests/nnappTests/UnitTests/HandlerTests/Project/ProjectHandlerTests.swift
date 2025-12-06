@@ -143,9 +143,9 @@ private extension ProjectHandlerTests {
         projectFolderFiles: Set<String> = [],
         shouldThrowOnExistingSubdirectory: Bool = false,
         shellResults: [String] = [],
-        moveTrackingDirectory: MoveTrackingDirectory? = nil,
+        moveTrackingDirectory: MockDirectory? = nil,
         throwError: Bool = false
-    ) -> (sut: ProjectHandler, delegate: MockDelegate, fileSystem: StubFileSystem) {
+    ) -> (sut: ProjectHandler, delegate: MockDelegate, fileSystem: MockFileSystem) {
         let selectionOutcomes = selectionIndices.map { MockSingleSelectionOutcome.index($0) }
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
@@ -164,8 +164,8 @@ private extension ProjectHandlerTests {
             directoryMap[projectFolderPath] = folder
         }
 
-        let fileSystem = StubFileSystem(homeDirectory: homeDirectory, directoryMap: directoryMap, desktop: desktopDirectory)
-        let folderBrowser = StubDirectoryBrowser(selectedDirectory: folder)
+        let fileSystem = MockFileSystem(homeDirectory: homeDirectory, directoryMap: directoryMap, desktop: desktopDirectory)
+        let folderBrowser = MockDirectoryBrowser(selectedDirectory: folder)
         let delegate = MockDelegate(
             throwError: throwError,
             groupToSelect: groupToSelect,
@@ -183,106 +183,14 @@ private extension ProjectHandlerTests {
 
 // MARK: - Test Helpers
 private extension ProjectHandlerTests {
-    func makeMoveTrackingDirectory(path: String, subdirectories: [any Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false) -> MoveTrackingDirectory {
-        return MoveTrackingDirectory(path: path, subdirectories: subdirectories, containedFiles: containedFiles, shouldThrowOnSubdirectory: shouldThrowOnSubdirectory)
+    func makeMoveTrackingDirectory(path: String, subdirectories: [any Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false) -> MockDirectory {
+        return MockDirectory(path: path, subdirectories: subdirectories, containedFiles: containedFiles, shouldThrowOnSubdirectory: shouldThrowOnSubdirectory)
     }
 }
 
 
 // MARK: - Mocks
 private extension ProjectHandlerTests {
-    final class MoveTrackingDirectory: Directory {
-        let path: String
-        let name: String
-        let `extension`: String?
-        var subdirectories: [Directory]
-        private let containedFiles: Set<String>
-        private let shouldThrowOnSubdirectory: Bool
-        private(set) var movedToParents: [String] = []
-
-        init(path: String, subdirectories: [Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, ext: String? = nil) {
-            self.path = path
-            self.name = (path as NSString).lastPathComponent
-            self.subdirectories = subdirectories
-            self.containedFiles = containedFiles
-            self.shouldThrowOnSubdirectory = shouldThrowOnSubdirectory
-            self.extension = ext
-        }
-
-        func containsFile(named name: String) -> Bool {
-            return containedFiles.contains(name)
-        }
-
-        func subdirectory(named name: String) throws -> Directory {
-            if shouldThrowOnSubdirectory {
-                throw NSError(domain: "MoveTrackingDirectory", code: 1)
-            }
-
-            if let match = subdirectories.first(where: { $0.name == name }) {
-                return match
-            }
-
-            throw NSError(domain: "MoveTrackingDirectory", code: 2)
-        }
-
-        func createSubdirectory(named name: String) throws -> Directory {
-            return try subdirectory(named: name)
-        }
-
-        func move(to parent: Directory) throws {
-            movedToParents.append(parent.path)
-        }
-    }
-
-    final class StubDirectoryBrowser: DirectoryBrowser {
-        private let selectedDirectory: (any Directory)?
-        private(set) var prompt: String?
-        private(set) var startPath: String?
-
-        init(selectedDirectory: (any Directory)?) {
-            self.selectedDirectory = selectedDirectory
-        }
-
-        func browseForDirectory(prompt: String, startPath: String?) throws -> any Directory {
-            self.prompt = prompt
-            self.startPath = startPath
-
-            if let selectedDirectory {
-                return selectedDirectory
-            }
-
-            throw NSError(domain: "StubDirectoryBrowser", code: 0)
-        }
-    }
-
-    final class StubFileSystem: FileSystem {
-        private let directoryMap: [String: any Directory]
-        private let desktop: any Directory
-        private(set) var capturedPaths: [String] = []
-
-        let homeDirectory: any Directory
-
-        init(homeDirectory: any Directory, directoryMap: [String: any Directory], desktop: any Directory) {
-            self.homeDirectory = homeDirectory
-            self.directoryMap = directoryMap
-            self.desktop = desktop
-        }
-
-        func directory(at path: String) throws -> any Directory {
-            capturedPaths.append(path)
-
-            if let directory = directoryMap[path] {
-                return directory
-            }
-
-            throw NSError(domain: "StubFileSystem", code: 0)
-        }
-
-        func desktopDirectory() throws -> any Directory {
-            return desktop
-        }
-    }
-
     final class MockDelegate: ProjectStore, ProjectGroupSelector {
         private let throwError: Bool
         private let groupToSelect: LaunchGroup?

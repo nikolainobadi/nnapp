@@ -123,10 +123,7 @@ private extension BranchSyncCheckerTests {
             results: gitResults,
             shouldThrowErrorOnFinal: shouldThrowOnGitResultExhaustion
         )
-        let fileSystem = MockFileSystem(
-            homeDirectory: .init(path: "/Users/test"),
-            directoryToLoad: folder
-        )
+        let fileSystem = MockFileSystem(homeDirectory: MockDirectory(path: "/Users/test"), directoryToLoad: folder)
         let group = makeProjectGroup(name: "Group", path: groupPath)
         let remote = remoteExists ? makeProjectLink() : nil
         let project = makeProject(name: "Project", remote: remote, group: group)

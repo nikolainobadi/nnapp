@@ -9,12 +9,12 @@ import Foundation
 import CodeLaunchKit
 
 final class MockDirectoryBrowser: DirectoryBrowser {
-    private let selectedDirectory: MockDirectory?
-    
+    private let selectedDirectory: (any Directory)?
+
     private(set) var prompt: String?
     private(set) var startPath: String?
-    
-    init(selectedDirectory: MockDirectory?) {
+
+    init(selectedDirectory: (any Directory)?) {
         self.selectedDirectory = selectedDirectory
     }
 
