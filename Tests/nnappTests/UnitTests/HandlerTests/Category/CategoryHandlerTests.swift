@@ -238,8 +238,8 @@ extension CategoryHandlerTests {
 
 // MARK: - Select Category
 extension CategoryHandlerTests {
-    @Test("Select category returns existing match without prompting")
-    func selectCategoryReturnsExistingMatchWithoutPrompting() throws {
+    @Test("Returns matching category by name without prompting")
+    func returnsMatchingCategoryByNameWithoutPrompting() throws {
         let category = makeCategory(name: "Match")
         let (sut, _, _) = makeSUT(categories: [category])
 
@@ -248,8 +248,8 @@ extension CategoryHandlerTests {
         #expect(selected.name == category.name)
     }
 
-    @Test("Select category uses case-insensitive name matching")
-    func selectCategoryUsesCaseInsensitiveNameMatching() throws {
+    @Test("Finds category using case-insensitive matching")
+    func findsCategoryUsingCaseInsensitiveMatching() throws {
         let category = makeCategory(name: "MixedCase")
         let sut = makeSUT(categories: [category]).sut
 
@@ -258,8 +258,8 @@ extension CategoryHandlerTests {
         #expect(selected.name == "MixedCase")
     }
 
-    @Test("Select category imports when name not found and user chooses import")
-    func selectCategoryImportsWhenNameNotFoundAndUserChoosesImport() throws {
+    @Test("Imports new category when requested name not found")
+    func importsNewCategoryWhenRequestedNameNotFound() throws {
         let directory = MockDirectory(path: "/tmp/imported")
         let (sut, store, _) = makeSUT(
             categories: [],
@@ -273,8 +273,8 @@ extension CategoryHandlerTests {
         #expect(store.savedCategories.first?.name == directory.name)
     }
 
-    @Test("Select category creates when name not found and user chooses create")
-    func selectCategoryCreatesWhenNameNotFoundAndUserChoosesCreate() throws {
+    @Test("Creates new category using provided name when not found")
+    func createsNewCategoryUsingProvidedNameWhenNotFound() throws {
         let parent = MockDirectory(path: "/tmp")
         let (sut, store, _) = makeSUT(
             categories: [],
@@ -288,8 +288,8 @@ extension CategoryHandlerTests {
         #expect(store.savedCategories.first?.name == "NotFound")
     }
 
-    @Test("Select category selects existing when name not found and user chooses select")
-    func selectCategorySelectsExistingWhenNameNotFoundAndUserChoosesSelect() throws {
+    @Test("Allows choosing from existing categories when name not found")
+    func allowsChoosingFromExistingCategoriesWhenNameNotFound() throws {
         let existing = makeCategory(name: "Existing")
         let (sut, _, _) = makeSUT(
             categories: [existing],
@@ -302,8 +302,8 @@ extension CategoryHandlerTests {
         #expect(selected.name == "Existing")
     }
 
-    @Test("Select category imports when name is nil and user chooses import")
-    func selectCategoryImportsWhenNameIsNilAndUserChoosesImport() throws {
+    @Test("Imports category when no name provided and import chosen")
+    func importsCategoryWhenNoNameProvidedAndImportChosen() throws {
         let directory = MockDirectory(path: "/tmp/imported")
         let (sut, store, _) = makeSUT(
             categories: [],
@@ -317,8 +317,8 @@ extension CategoryHandlerTests {
         #expect(store.savedCategories.first?.name == directory.name)
     }
 
-    @Test("Select category creates when name is nil and user chooses create")
-    func selectCategoryCreatesWhenNameIsNilAndUserChoosesCreate() throws {
+    @Test("Creates category with prompted name when no name provided")
+    func createsCategoryWithPromptedNameWhenNoNameProvided() throws {
         let parent = MockDirectory(path: "/tmp")
         let (sut, store, _) = makeSUT(
             categories: [],
@@ -333,8 +333,8 @@ extension CategoryHandlerTests {
         #expect(store.savedCategories.first?.name == "NewCategory")
     }
 
-    @Test("Select category selects existing when name is nil and user chooses select")
-    func selectCategorySelectsExistingWhenNameIsNilAndUserChoosesSelect() throws {
+    @Test("Allows choosing from existing categories when no name provided")
+    func allowsChoosingFromExistingCategoriesWhenNoNameProvided() throws {
         let existing = makeCategory(name: "Existing")
         let (sut, _, _) = makeSUT(
             categories: [existing],
