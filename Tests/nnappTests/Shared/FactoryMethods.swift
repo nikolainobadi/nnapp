@@ -8,6 +8,10 @@
 @testable import CodeLaunchKit
 
 // MARK: - Domain Models
+func makeCategory(name: String = "TestCategory", path: String = "/tmp/testcategory", groups: [LaunchGroup] = []) -> LaunchCategory {
+    return .init(name: name, path: path, groups: groups)
+}
+
 func makeGroup(name: String = "TestGroup", shortcut: String? = nil, projects: [LaunchProject] = [], category: LaunchGroup.Category? = nil) -> LaunchGroup {
     return .init(name: name, shortcut: shortcut, projects: projects, category: category)
 }

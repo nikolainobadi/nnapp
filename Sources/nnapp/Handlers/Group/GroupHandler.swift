@@ -1,5 +1,5 @@
 //
-//  LaunchGroupHandler.swift
+//  GroupHandler.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/4/25.
@@ -7,7 +7,7 @@
 
 import CodeLaunchKit
 
-struct LaunchGroupHandler {
+struct GroupHandler {
     private let store: any LaunchGroupStore
     private let picker: any LaunchPicker
     private let folderBrowser: any DirectoryBrowser
@@ -31,7 +31,7 @@ struct LaunchGroupHandler {
 
 
 // MARK: - Add
-extension LaunchGroupHandler {
+extension GroupHandler {
     @discardableResult
     func importGroup(path: String?, categoryName: String?) throws -> LaunchGroup {
         let category = try selectCategory(name: categoryName)
@@ -53,7 +53,7 @@ extension LaunchGroupHandler {
 
 
 // MARK: - Remove
-extension LaunchGroupHandler {
+extension GroupHandler {
     func removeGroup(named name: String?) throws {
         let groups = try loadAllGroups()
         let groupToDelete: LaunchGroup
@@ -75,7 +75,7 @@ extension LaunchGroupHandler {
 
 
 // MARK: - LaunchProjectGroupSelector
-extension LaunchGroupHandler: LaunchProjectGroupSelector {
+extension GroupHandler: LaunchProjectGroupSelector {
     func selectGroup(name: String?) throws -> LaunchGroup {
         let groups = try loadAllGroups()
         
@@ -99,7 +99,7 @@ extension LaunchGroupHandler: LaunchProjectGroupSelector {
 
 
 // MARK: - SetMainProject
-extension LaunchGroupHandler {
+extension GroupHandler {
     func setMainProject(group: String?) throws {
         let groups = try loadAllGroups()
         let selectedGroup: LaunchGroup
@@ -192,7 +192,7 @@ extension LaunchGroupHandler {
 
 
 // MARK: - Private Methods
-private extension LaunchGroupHandler {
+private extension GroupHandler {
     func selectCategory(name: String?) throws -> LaunchCategory {
         return try categorySelector.selectCategory(named: name)
     }

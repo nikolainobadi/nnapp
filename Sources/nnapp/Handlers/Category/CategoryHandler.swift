@@ -1,5 +1,5 @@
 //
-//  LaunchCategoryHandler.swift
+//  CategoryHandler.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/4/25.
@@ -7,7 +7,7 @@
 
 import CodeLaunchKit
 
-struct LaunchCategoryHandler {
+struct CategoryHandler {
     private let store: any CategoryStore
     private let picker: any LaunchPicker
     private let folderBrowser: any DirectoryBrowser
@@ -21,7 +21,7 @@ struct LaunchCategoryHandler {
 
 
 // MARK: - Add
-extension LaunchCategoryHandler {
+extension CategoryHandler {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
         let categories = try loadAllCategories()
@@ -45,7 +45,7 @@ extension LaunchCategoryHandler {
 
 
 // MARK: - Remove
-extension LaunchCategoryHandler {
+extension CategoryHandler {
     func removeCategory(named name: String?) throws {
         let categories = try loadAllCategories()
         let categoryToDelete: LaunchCategory
@@ -67,7 +67,7 @@ extension LaunchCategoryHandler {
 
 
 // MARK: - LaunchGroupCategorySelector
-extension LaunchCategoryHandler: LaunchGroupCategorySelector {
+extension CategoryHandler: LaunchGroupCategorySelector {
     func getCategory(group: LaunchGroup) -> LaunchCategory? {
         guard let categories = try? loadAllCategories() else {
             return nil
@@ -101,7 +101,7 @@ extension LaunchCategoryHandler: LaunchGroupCategorySelector {
 
 
 // MARK: - Private Methods
-private extension LaunchCategoryHandler {
+private extension CategoryHandler {
     func loadAllCategories() throws -> [LaunchCategory] {
         return try store.loadCategories()
     }

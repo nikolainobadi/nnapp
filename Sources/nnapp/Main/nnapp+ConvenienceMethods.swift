@@ -6,7 +6,7 @@
 //
 
 extension Nnapp {
-    static func makeCategoryHandler(picker: (any LaunchPicker)? = nil) throws -> LaunchCategoryHandler {
+    static func makeCategoryHandler(picker: (any LaunchPicker)? = nil) throws -> CategoryHandler {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
         let folderBrowser = makeFolderBrowser(picker: picker)
@@ -14,7 +14,7 @@ extension Nnapp {
         return .init(store: repository, picker: picker, folderBrowser: folderBrowser)
     }
     
-    static func makeGroupHandler(picker: (any LaunchPicker)? = nil) throws -> LaunchGroupHandler {
+    static func makeGroupHandler(picker: (any LaunchPicker)? = nil) throws -> GroupHandler {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
         let categorySelector = try makeCategoryHandler(picker: picker)
