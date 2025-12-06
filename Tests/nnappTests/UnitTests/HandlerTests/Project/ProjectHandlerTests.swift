@@ -32,9 +32,9 @@ extension ProjectHandlerTests {
     @Test("Saves project and moves folder into selected group when added")
     func savesProjectAndMovesFolderIntoSelectedGroupWhenAdded() throws {
         let shortcut = "np"
-        let projectFolderPath: String? = "/tmp/elsewhere/NewProject"
-        let projectFolderFiles: Set<String> = ["Package.swift"]
-        let moveTrackingDirectory = projectFolderPath.map({ makeMoveTrackingDirectory(path: $0, containedFiles: projectFolderFiles) })
+        let newProjectName = "NewProject"
+        let projectFolderPath = "/tmp/elsewhere/\(newProjectName)"
+        let moveTrackingDirectory = makeMoveTrackingDirectory(path: projectFolderPath, containedFiles: ["Package.swift"])
         let group = makeGroup(name: "Group", category: makeGroupCategory(path: "/tmp/groups"))
         let (sut, delegate, fileSystem) = makeSUT(
             groupToSelect: group,
@@ -45,19 +45,13 @@ extension ProjectHandlerTests {
             moveTrackingDirectory: moveTrackingDirectory
         )
 
-        try sut.addProject(
-            path: "/tmp/elsewhere/NewProject",
-            shortcut: shortcut,
-            groupName: group.name,
-            isMainProject: true,
-            fromDesktop: false
-        )
+        try sut.addProject(path: projectFolderPath, shortcut: shortcut, groupName: group.name, isMainProject: true, fromDesktop: false)
         
         #expect(delegate.projectToSave?.name == "NewProject")
-        #expect(delegate.projectToSave?.shortcut == "np")
+        #expect(delegate.projectToSave?.shortcut == shortcut)
         #expect(delegate.projectToSave?.type == .package)
-        #expect(delegate.savedGroup?.shortcut == "np")
-//        #expect(moveTrackingDirectory?.movedToParents.contains(where: { $0 == group.path }))
+        #expect(delegate.savedGroup?.shortcut == shortcut)
+        #expect(moveTrackingDirectory.movedToParents.contains(where: { $0 == group.path }))
         #expect(fileSystem.capturedPaths.contains(where: { $0 == group.path }))
     }
 
@@ -228,7 +222,7 @@ private extension ProjectHandlerTests {
                 return match
             }
 
-            return MoveTrackingDirectory(path: path.appendingPathComponent(name))
+            throw NSError(domain: "MoveTrackingDirectory", code: 2)
         }
 
         func createSubdirectory(named name: String) throws -> Directory {
