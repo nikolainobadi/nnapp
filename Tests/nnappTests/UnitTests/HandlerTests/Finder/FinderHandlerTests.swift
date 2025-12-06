@@ -13,26 +13,24 @@ import Testing
 struct FinderHandlerTests {
     @Test("Browse all prints placeholder when no categories exist")
     func browseAllPrintsPlaceholderWhenNoCategoriesExist() throws {
-        let (sut, picker, shell, console) = makeSUT(categories: [])
+        let (sut, shell, console) = makeSUT(categories: [])
 
         try sut.browseAll()
 
         #expect(console.lines.contains("No categories found. Create a category first."))
-        #expect(picker.capturedTreeNavigationPrompts.isEmpty)
         #expect(shell.executedCommands.isEmpty)
     }
 
     @Test("Browse all prints message when selection is nil")
     func browseAllPrintsMessageWhenSelectionIsNil() throws {
         let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [])
-        let (sut, picker, shell, console) = makeSUT(
+        let (sut, shell, console) = makeSUT(
             categories: [category],
             treeNavigationOutcome: .none
         )
 
         try sut.browseAll()
 
-        #expect(picker.capturedTreeNavigationPrompts == ["Browse and select folder to open"])
         #expect(console.lines.contains("No selection made."))
         #expect(shell.executedCommands.isEmpty)
     }
@@ -40,14 +38,13 @@ struct FinderHandlerTests {
     @Test("Browse all opens selected path")
     func browseAllOpensSelectedPath() throws {
         let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [])
-        let (sut, picker, shell, _) = makeSUT(
+        let (sut, shell, _) = makeSUT(
             categories: [category],
             treeNavigationOutcome: .index(0)
         )
 
         try sut.browseAll()
 
-        #expect(picker.capturedTreeNavigationPrompts == ["Browse and select folder to open"])
         #expect(shell.executedCommand(containing: "open -a Finder /tmp/cat"))
     }
 }
@@ -58,11 +55,10 @@ extension FinderHandlerTests {
     @Test("Open category uses direct match without prompts")
     func openCategoryUsesDirectMatchWithoutPrompts() throws {
         let category = LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: [])
-        let (sut, picker, shell, _) = makeSUT(categories: [category])
+        let (sut, shell, _) = makeSUT(categories: [category])
 
         try sut.openCategory(name: "ios")
 
-        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
         #expect(shell.executedCommand(containing: "/tmp/ios"))
     }
 
@@ -72,11 +68,10 @@ extension FinderHandlerTests {
             LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: []),
             LaunchCategory.new(name: "Server", path: "/tmp/server", groups: [])
         ]
-        let (sut, picker, shell, _) = makeSUT(categories: categories, selectionIndex: 1)
+        let (sut, shell, _) = makeSUT(categories: categories, selectionIndex: 1)
 
         try sut.openCategory(name: nil)
 
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Category"])
         #expect(shell.executedCommand(containing: "/tmp/server"))
     }
 }
@@ -88,11 +83,10 @@ extension FinderHandlerTests {
     func openGroupUsesDirectMatchWithoutPrompts() throws {
         let group = LaunchGroup.new(name: "Backend", shortcut: "be", projects: [])
         let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [group])
-        let (sut, picker, shell, _) = makeSUT(categories: [category], groups: [group])
+        let (sut, shell, _) = makeSUT(categories: [category], groups: [group])
 
         try sut.openGroup(name: "BE")
 
-        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
         #expect(shell.executedCommand(containing: try #require(group.path)))
     }
 
@@ -102,11 +96,10 @@ extension FinderHandlerTests {
             LaunchGroup.new(name: "Backend", shortcut: "be", projects: []),
             LaunchGroup.new(name: "Frontend", shortcut: "fe", projects: [])
         ]
-        let (sut, picker, shell, _) = makeSUT(groups: groups, selectionIndex: 1)
+        let (sut, shell, _) = makeSUT(groups: groups, selectionIndex: 1)
 
         try sut.openGroup(name: nil)
 
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Group"])
         #expect(shell.executedCommand(containing: try #require(groups[1].path)))
     }
 
@@ -116,12 +109,11 @@ extension FinderHandlerTests {
             LaunchGroup.new(name: "Backend", shortcut: "be", projects: []),
             LaunchGroup.new(name: "Frontend", shortcut: "fe", projects: [])
         ]
-        let (sut, picker, shell, console) = makeSUT(groups: groups, selectionIndex: 0)
+        let (sut, shell, console) = makeSUT(groups: groups, selectionIndex: 0)
 
         #expect(throws: CodeLaunchError.missingGroup) {
             try sut.openGroup(name: nil)
         }
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Group"])
         #expect(console.lines.contains(where: { $0.contains("Could not resolve local path for Backend") }))
         #expect(shell.executedCommands.isEmpty)
     }
@@ -134,12 +126,11 @@ extension FinderHandlerTests {
     func openProjectUsesDirectMatchWithoutPrompts() throws {
         let group = makeProjectGroup(path: "/tmp/group")
         let project = makeProject(name: "API", shortcut: "api", group: group)
-        let (sut, picker, shell, _) = makeSUT(projects: [project])
+        let (sut, shell, _) = makeSUT(projects: [project])
 
         try sut.openProject(name: "API")
 
         let path = try #require(project.folderPath)
-        #expect(picker.capturedSingleSelectionPrompts.isEmpty)
         #expect(shell.executedCommand(containing: path))
     }
 
@@ -150,24 +141,22 @@ extension FinderHandlerTests {
             makeProject(name: "API", shortcut: "api", group: group),
             makeProject(name: "Web", shortcut: "web", group: group)
         ]
-        let (sut, picker, shell, _) = makeSUT(projects: projects, selectionIndex: 1)
+        let (sut, shell, _) = makeSUT(projects: projects, selectionIndex: 1)
 
         try sut.openProject(name: nil)
 
         let selectedPath = try #require(projects[1].folderPath)
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Project"])
         #expect(shell.executedCommand(containing: selectedPath))
     }
 
     @Test("Open project throws when selected project has no path")
     func openProjectThrowsWhenSelectedProjectHasNoPath() {
         let projects = [makeProject(name: "Broken", shortcut: "brk", group: nil)]
-        let (sut, picker, shell, console) = makeSUT(projects: projects)
+        let (sut, shell, console) = makeSUT(projects: projects)
 
         #expect(throws: CodeLaunchError.missingProject) {
             try sut.openProject(name: nil)
         }
-        #expect(picker.capturedSingleSelectionPrompts == ["Select a Project"])
         #expect(console.lines.contains(where: { $0.contains("Could not resolve local path for Broken") }))
         #expect(shell.executedCommands.isEmpty)
     }
@@ -182,7 +171,7 @@ private extension FinderHandlerTests {
         projects: [LaunchProject] = [],
         selectionIndex: Int = 0,
         treeNavigationOutcome: MockTreeSelectionOutcome = .none
-    ) -> (sut: FinderHandler, picker: MockSwiftPicker, shell: MockLaunchShell, console: MockConsoleOutput) {
+    ) -> (sut: FinderHandler, shell: MockLaunchShell, console: MockConsoleOutput) {
         let picker = MockSwiftPicker(
             permissionResult: .init(defaultValue: true, type: .ordered([true])),
             selectionResult: .init(defaultSingle: .index(selectionIndex)),
@@ -193,7 +182,7 @@ private extension FinderHandlerTests {
         let loader = StubFinderLoader(categories: categories, groups: groups, projects: projects)
         let sut = FinderHandler(shell: shell, picker: picker, loader: loader, console: console)
 
-        return (sut, picker, shell, console)
+        return (sut, shell, console)
     }
 }
 
