@@ -69,15 +69,8 @@ extension Nnapp {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
-        let branchSyncChecker = contextFactory.makeBranchSyncChecker(shell: shell)
         let fileSystem = contextFactory.makeFileSystem()
 
-        return .init(
-            shell: shell,
-            picker: picker,
-            loader: repository,
-            branchSyncChecker: branchSyncChecker,
-            fileSystem: fileSystem
-        )
+        return .init(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem)
     }
 }

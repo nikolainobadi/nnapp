@@ -5,18 +5,15 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import GitShellKit
-import GitCommandGen
 import CodeLaunchKit
+import GitCommandGen
 
 struct DefaultBranchSyncChecker {
-    private let shell: any LaunchShell
-    private let gitShell: any GitShell
+    private let shell: any LaunchGitShell
     private let fileSystem: any FileSystem
 
-    init(shell: any LaunchShell, fileSystem: any FileSystem) {
+    init(shell: any LaunchGitShell, fileSystem: any FileSystem) {
         self.shell = shell
-        self.gitShell = GitShellAdapter(shell: shell)
         self.fileSystem = fileSystem
     }
 }
@@ -38,12 +35,12 @@ extension DefaultBranchSyncChecker: BranchSyncChecker {
         }
 
         // Skip if Git repo doesn't exist or has no remote
-        guard (try? gitShell.localGitExists(at: folder.path)) == true, (try? gitShell.remoteExists(path: folder.path)) == true else {
+        guard (try? shell.localGitExists(at: folder.path)) == true, (try? shell.remoteExists(path: folder.path)) == true else {
             print("no local or remote repo")
             return nil
         }
         
-        let originResult = try? gitShell.runGitCommandWithOutput(.fetchOrigin, path: folder.path)
+        let originResult = try? shell.runGitCommandWithOutput(.fetchOrigin, path: folder.path)
         
         if originResult == nil {
             print("failed to fetch origin for \(project.name)")

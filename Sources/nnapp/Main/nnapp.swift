@@ -33,7 +33,7 @@ struct Nnapp: ParsableCommand {
 
 // MARK: - Essential Factory Methods
 extension Nnapp {
-    static func makeShell() -> any LaunchShell {
+    static func makeShell() -> any LaunchGitShell {
         return contextFactory.makeShell()
     }
     
@@ -53,11 +53,10 @@ extension Nnapp {
 
 // MARK: - Dependencies
 protocol ContextFactory {
-    func makeShell() -> any LaunchShell
+    func makeShell() -> any LaunchGitShell
     func makePicker() -> any LaunchPicker
     func makeFileSystem() -> any FileSystem
     func makeConsoleOutput() -> any ConsoleOutput
     func makeContext() throws -> CodeLaunchContext
     func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser
-    func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker
 }

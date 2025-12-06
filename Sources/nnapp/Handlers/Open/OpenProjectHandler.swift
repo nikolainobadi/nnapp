@@ -14,15 +14,14 @@ struct OpenProjectHandler {
     private let ideLauncher: IDEHandler
     private let terminalManager: TerminalHandler
     private let urlLauncher: URLHandler
-    private let branchSyncChecker: any BranchSyncChecker
+    private let branchSyncChecker: DefaultBranchSyncChecker
     private let branchStatusNotifier: BranchStatusNotifier
 
     typealias Loader = LaunchHierarchyLoader & ScriptLoader
     init(
-        shell: any LaunchShell,
+        shell: any LaunchGitShell,
         picker: any LaunchPicker,
         loader: any Loader,
-        branchSyncChecker: any BranchSyncChecker,
         fileSystem: any FileSystem
     ) {
         self.picker = picker
@@ -30,7 +29,7 @@ struct OpenProjectHandler {
         self.ideLauncher = .init(shell: shell, picker: picker, fileSystem: fileSystem)
         self.terminalManager = .init(shell: shell, loader: loader)
         self.urlLauncher = .init(shell: shell, picker: picker)
-        self.branchSyncChecker = branchSyncChecker
+        self.branchSyncChecker = .init(shell: shell, fileSystem: fileSystem)
         self.branchStatusNotifier = .init(shell: shell)
     }
 }

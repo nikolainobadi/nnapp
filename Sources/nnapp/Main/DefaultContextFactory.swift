@@ -5,14 +5,13 @@
 //  Created by Nikolai Nobadi on 3/29/25.
 //
 
-import NnShellKit
 import Foundation
 import CodeLaunchKit
 import SwiftPickerKit
 
 final class DefaultContextFactory: ContextFactory {
-    func makeShell() -> any LaunchShell {
-        return NnShell()
+    func makeShell() -> any LaunchGitShell {
+        return DefaultShell()
     }
 
     func makePicker() -> any LaunchPicker {
@@ -37,9 +36,5 @@ final class DefaultContextFactory: ContextFactory {
             fileSystem: makeFileSystem(),
             homeDirectoryURL: FileManager.default.homeDirectoryForCurrentUser
         )
-    }
-
-    func makeBranchSyncChecker(shell: any LaunchShell) -> any BranchSyncChecker {
-        return DefaultBranchSyncChecker(shell: shell, fileSystem: makeFileSystem())
     }
 }
