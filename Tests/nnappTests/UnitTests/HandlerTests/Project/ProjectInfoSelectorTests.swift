@@ -6,6 +6,7 @@
 //
 
 import CodeLaunchKit
+import NnShellTesting
 import SwiftPickerTesting
 import Testing
 @testable import nnapp
@@ -67,7 +68,7 @@ struct ProjectInfoSelectorTests {
         let (sut, _, infoLoader, shell) = makeSUT(
             inputResults: ["np", "Docs", "https://docs.example"],
             permissionResults: [true, true, false],
-            gitHubURLResult: .success(gitHubURL)
+            gitHubURLResults: [gitHubURL]
         )
 
         let info = try sut.selectProjectInfo(folder: folder, shortcut: nil, group: group, isMainProject: true)
@@ -76,8 +77,8 @@ struct ProjectInfoSelectorTests {
         #expect(info.shortcut == "np")
         #expect(info.remote == ProjectLink(name: "GitHub", urlString: gitHubURL))
         #expect(info.otherLinks == [ProjectLink(name: "Docs", urlString: "https://docs.example")])
-        #expect(shell.capturedGitHubURLPath == folder.path)
-        #expect(shell.getGitHubURLCallCount == 1)
+        #expect(shell.commandCount(containing: "getGitHubURL") == 1)
+        #expect(shell.executedCommands.contains { $0.contains(folder.path) })
         #expect(infoLoader.loadProjectsCallCount == 1)
         #expect(infoLoader.loadGroupsCallCount == 1)
         #expect(infoLoader.loadProjectLinkNamesCallCount == 1)
@@ -92,14 +93,14 @@ struct ProjectInfoSelectorTests {
             inputResults: ["sc"],
             permissionResults: [false, false],
             permissionDefault: false,
-            gitHubURLResult: .success(gitHubURL)
+            gitHubURLResults: [gitHubURL]
         )
 
         let info = try sut.selectProjectInfo(folder: folder, shortcut: nil, group: group, isMainProject: true)
 
         #expect(info.shortcut == "sc")
         #expect(info.remote == nil)
-        #expect(shell.getGitHubURLCallCount == 1)
+        #expect(shell.commandCount(containing: "getGitHubURL") == 1)
         #expect(infoLoader.loadProjectsCallCount == 1)
         #expect(infoLoader.loadGroupsCallCount == 1)
         #expect(infoLoader.loadProjectLinkNamesCallCount == 1)
@@ -117,15 +118,15 @@ private extension ProjectInfoSelectorTests {
         permissionResults: [Bool] = [],
         permissionDefault: Bool = true,
         selectionIndex: Int = 0,
-        gitHubURLResult: Result<String, Error> = .failure(MockLaunchShell.MockError.missingGitHubURL)
-    ) -> (sut: ProjectInfoSelector, picker: MockSwiftPicker, infoLoader: MockProjectInfoLoader, shell: MockLaunchShell) {
+        gitHubURLResults: [String] = []
+    ) -> (sut: ProjectInfoSelector, picker: MockSwiftPicker, infoLoader: MockProjectInfoLoader, shell: MockShell) {
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
             permissionResult: .init(defaultValue: permissionDefault, type: .ordered(permissionResults)),
             selectionResult: .init(defaultSingle: .index(selectionIndex))
         )
         let infoLoader = MockProjectInfoLoader(projects: projects, groups: groups, linkNames: linkNames)
-        let shell = MockLaunchShell(gitHubURLResult: gitHubURLResult)
+        let shell = MockShell(results: gitHubURLResults)
         let sut = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: infoLoader)
 
         return (sut, picker, infoLoader, shell)
@@ -161,44 +162,5 @@ private final class MockProjectInfoLoader: LaunchProjectInfoLoader {
     func loadProjectLinkNames() -> [String] {
         loadProjectLinkNamesCallCount += 1
         return linkNames
-    }
-}
-
-
-private final class MockLaunchShell: LaunchShell {
-    private let gitHubURLResult: Result<String, Error>
-    private(set) var getGitHubURLCallCount = 0
-    private(set) var capturedGitHubURLPath: String?
-    private(set) var executedCommands: [String] = []
-
-    init(gitHubURLResult: Result<String, Error> = .failure(MockError.missingGitHubURL)) {
-        self.gitHubURLResult = gitHubURLResult
-    }
-
-    func bash(_ command: String) throws -> String {
-        executedCommands.append(command)
-        return ""
-    }
-
-    func runAndPrint(bash command: String) throws {
-        executedCommands.append(command)
-    }
-
-    func getGitHubURL(at path: String?) throws -> String {
-        getGitHubURLCallCount += 1
-        capturedGitHubURLPath = path
-        return try gitHubURLResult.get()
-    }
-
-    func run(_ program: String, args: [String]) throws -> String {
-        executedCommands.append(([program] + args).joined(separator: " "))
-        return ""
-    }
-}
-
-
-private extension MockLaunchShell {
-    enum MockError: Error {
-        case missingGitHubURL
     }
 }
