@@ -21,6 +21,14 @@ enum LaunchProjectMapper {
 
         return .init(name: project.name, shortcut: project.shortcut, type: type, remote: remote, links: links)
     }
+
+    static func apply(_ project: LaunchProject, to storedProject: SwiftDataLaunchProject) {
+        storedProject.name = project.name
+        storedProject.shortcut = project.shortcut
+        storedProject.type = mapType(project.type)
+        storedProject.remote = project.remote.map(mapLink)
+        storedProject.links = project.links.map(mapLink)
+    }
 }
 
 

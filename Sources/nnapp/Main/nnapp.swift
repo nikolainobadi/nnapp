@@ -7,7 +7,6 @@
 
 import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 import ArgumentParser
 
 @main
@@ -34,11 +33,11 @@ struct Nnapp: ParsableCommand {
 
 // MARK: - Essential Factory Methods
 extension Nnapp {
-    static func makeShell() -> any Shell {
+    static func makeShell() -> any LaunchGitShell {
         return contextFactory.makeShell()
     }
     
-    static func makePicker() -> any CommandLinePicker {
+    static func makePicker() -> any LaunchPicker {
         return contextFactory.makePicker()
     }
 
@@ -46,7 +45,7 @@ extension Nnapp {
         return .init(context: try contextFactory.makeContext())
     }
 
-    static func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser {
+    static func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser {
         return contextFactory.makeFolderBrowser(picker: picker)
     }
 }
@@ -54,11 +53,10 @@ extension Nnapp {
 
 // MARK: - Dependencies
 protocol ContextFactory {
-    func makeShell() -> any Shell
-    func makePicker() -> any CommandLinePicker
-    func makeContext() throws -> CodeLaunchContext
+    func makeShell() -> any LaunchGitShell
+    func makePicker() -> any LaunchPicker
+    func makeFileSystem() -> any FileSystem
     func makeConsoleOutput() -> any ConsoleOutput
-    func makeFolderBrowser(picker: any CommandLinePicker) -> any FolderBrowser
-    func makeBranchSyncChecker(shell: any Shell) -> any BranchSyncChecker
-    func makeBranchStatusNotifier(shell: any Shell) -> any BranchStatusNotifier
+    func makeContext() throws -> CodeLaunchContext
+    func makeFolderBrowser(picker: any LaunchPicker) -> any DirectoryBrowser
 }

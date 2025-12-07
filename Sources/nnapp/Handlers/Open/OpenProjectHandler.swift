@@ -5,35 +5,18 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 
-/// Coordinates project opening operations by delegating to specialized components.
 struct OpenProjectHandler {
-    private let picker: any CommandLinePicker
-    private let loader: any LaunchHierarchyLoader
-    private let ideLauncher: IDELauncher
-    private let terminalManager: TerminalHandler
-    private let urlLauncher: URLLauncher
-    private let branchSyncChecker: any BranchSyncChecker
-    private let branchStatusNotifier: any BranchStatusNotifier
+    private let picker: any LaunchPicker
+    private let loader: any Loader
+    private let delegate: any OpenProjectDelegate
 
-    typealias Loader = LaunchHierarchyLoader & ScriptLoader
-    init(
-        shell: any Shell,
-        picker: any CommandLinePicker,
-        loader: any Loader,
-        branchSyncChecker: any BranchSyncChecker,
-        branchStatusNotifier: any BranchStatusNotifier
-    ) {
+    typealias Loader = ScriptLoader & LaunchHierarchyLoader
+    init(picker: any LaunchPicker, loader: any Loader, delegate: any OpenProjectDelegate) {
         self.picker = picker
         self.loader = loader
-        self.ideLauncher = .init(shell: shell, picker: picker)
-        self.terminalManager = .init(shell: shell, loader: loader)
-        self.urlLauncher = .init(shell: shell, picker: picker)
-        self.branchSyncChecker = branchSyncChecker
-        self.branchStatusNotifier = branchStatusNotifier
+        self.delegate = delegate
     }
 }
 
@@ -77,18 +60,14 @@ extension OpenProjectHandler {
     ///   - terminalOption: Controls terminal launch behavior.
     func openInIDE(_ project: LaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
         guard let folderPath = project.folderPath else {
-            print("fuck you")
             throw CodeLaunchError.missingProject
         }
 
-        try ideLauncher.openInIDE(project, launchType: launchType)
-        terminalManager.openDirectoryInTerminal(folderPath: folderPath, terminalOption: terminalOption)
+        try delegate.openIDE(project, launchType: launchType)
+        delegate.openTerminal(folderPath: folderPath, option: terminalOption)
 
-        if let status = branchSyncChecker.checkBranchSyncStatus(for: project) {
-            print("found status, preparing to notify")
-            branchStatusNotifier.notify(status: status, for: project)
-        } else {
-            print("\(project.name) is up to date")
+        if let status = delegate.checkBranchStatus(for: project) {
+            delegate.notifyBranchStatus(status, for: project)
         }
     }
 }
@@ -99,26 +78,23 @@ extension OpenProjectHandler {
     /// Opens the remote repository URL in the browser.
     /// - Parameter project: The project whose remote URL to open.
     func openRemoteURL(for project: LaunchProject) throws {
-        try urlLauncher.openRemoteURL(remote: project.remote)
+        try delegate.openRemoteURL(for: project.remote)
     }
 
     /// Opens one of the project's custom links, prompting if multiple exist.
     /// - Parameter project: The project whose link to open.
     func openProjectLink(for project: LaunchProject) throws {
-        try urlLauncher.openProjectLink(links: project.links)
+        try delegate.openProjectLink(project.links)
     }
 }
 
 
 // MARK: - Dependencies
-enum LaunchBranchStatus {
-    case behind, diverged
-}
-
-protocol BranchSyncChecker {
-    func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus?
-}
-
-protocol BranchStatusNotifier {
-    func notify(status: LaunchBranchStatus, for project: LaunchProject)
+protocol OpenProjectDelegate {
+    func openIDE(_ project: LaunchProject, launchType: LaunchType) throws
+    func openTerminal(folderPath: String, option: TerminalOption?)
+    func checkBranchStatus(for project: LaunchProject) -> LaunchBranchStatus?
+    func notifyBranchStatus(_ status: LaunchBranchStatus, for project: LaunchProject)
+    func openRemoteURL(for remote: ProjectLink?) throws
+    func openProjectLink(_ links: [ProjectLink]) throws
 }

@@ -5,17 +5,15 @@
 //  Created by Nikolai Nobadi on 12/3/25.
 //
 
-import NnShellKit
 import CodeLaunchKit
-import SwiftPickerKit
 
 struct FinderHandler {
-    private let shell: any Shell
-    private let picker: any CommandLinePicker
+    private let shell: any LaunchShell
+    private let picker: any LaunchPicker
     private let console: any ConsoleOutput
     private let loader: any FinderInfoLoader
 
-    init(shell: any Shell, picker: any CommandLinePicker, loader: any FinderInfoLoader, console: any ConsoleOutput) {
+    init(shell: any LaunchShell, picker: any LaunchPicker, loader: any FinderInfoLoader, console: any ConsoleOutput) {
         self.shell = shell
         self.picker = picker
         self.loader = loader
@@ -26,7 +24,6 @@ struct FinderHandler {
 
 // MARK: - Browse All
 extension FinderHandler {
-    /// Opens an interactive browser to select and open any folder type.
     func browseAll() throws {
         let categories = try loader.loadCategories()
 
@@ -36,8 +33,7 @@ extension FinderHandler {
         }
 
         let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
-        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
-        let selection = picker.treeNavigation("Browse and select folder to open", root: root, newScreen: true, showPromptText: false)
+        let selection = picker.treeNavigation("Browse and select folder to open", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
 
         guard let selectedNode = selection else {
             console.printLine("No selection made.")
@@ -52,8 +48,6 @@ extension FinderHandler {
 
 // MARK: - Category Operations
 extension FinderHandler {
-    /// Opens a category folder in Finder.
-    /// - Parameter name: Optional category name. If nil, prompts user to select.
     func openCategory(name: String?) throws {
         let path = try resolveCategoryPath(name: name)
         try openInFinder(path: path)
@@ -63,8 +57,6 @@ extension FinderHandler {
 
 // MARK: - Group Operations
 extension FinderHandler {
-    /// Opens a group folder in Finder.
-    /// - Parameter name: Optional group name or shortcut. If nil, prompts user to select.
     func openGroup(name: String?) throws {
         let path = try resolveGroupPath(name: name)
         try openInFinder(path: path)
@@ -74,8 +66,6 @@ extension FinderHandler {
 
 // MARK: - Project Operations
 extension FinderHandler {
-    /// Opens a project folder in Finder.
-    /// - Parameter name: Optional project name or shortcut. If nil, prompts user to select.
     func openProject(name: String?) throws {
         let path = try resolveProjectPath(name: name)
         try openInFinder(path: path)
@@ -85,8 +75,6 @@ extension FinderHandler {
 
 // MARK: - Private Methods
 private extension FinderHandler {
-    /// Opens the specified path in Finder.
-    /// - Parameter path: The file system path to open.
     func openInFinder(path: String) throws {
         try shell.runAndPrint(bash: "open -a Finder \(path)")
     }

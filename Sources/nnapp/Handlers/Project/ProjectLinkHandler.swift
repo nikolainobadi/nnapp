@@ -6,18 +6,17 @@
 //
 
 import CodeLaunchKit
-import SwiftPickerKit
 
 /// Handles interactive prompting for custom project links beyond the primary remote.
 struct ProjectLinkHandler {
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let linkOptions: [String]
     
     /// Initializes the handler used to collect additional project links.
     /// - Parameters:
     ///   - picker: Utility used for user prompts and permissions.
     ///   - linkOptions: Pre-existing link names to present as quick selections.
-    init(picker: any CommandLinePicker, linkOptions: [String]) {
+    init(picker: any LaunchPicker, linkOptions: [String]) {
         self.picker = picker
         self.linkOptions = linkOptions
     }
@@ -26,22 +25,6 @@ struct ProjectLinkHandler {
 
 // MARK: - Action
 extension ProjectLinkHandler {
-    /// Recursively prompts the user to add custom links and returns all captured entries.
-    /// - Returns: An array of `ProjectLink` objects created from user input.
-    func getOtherLinks() -> [SwiftDataProjectLink] {
-        guard picker.getPermission("Would you like to add a custom link?"), let name = getName() else {
-            return []
-        }
-        
-        let url = picker.getInput("Enter the url for your \(name) link.")
-        
-        guard !name.isEmpty, !url.isEmpty else {
-            return []
-        }
-        
-        return [.init(name: name, urlString: url)] + getOtherLinks()
-    }
-    
     /// Recursively prompts the user to add custom links and returns all captured entries.
     /// - Returns: An array of `ProjectLink` objects created from user input.
     func getOtherLinks() -> [ProjectLink] {

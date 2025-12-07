@@ -5,9 +5,7 @@
 //  Created by OpenAI Codex on 2024-06-06.
 //
 
-import Foundation
 import ArgumentParser
-import SwiftPickerKit
 
 extension Nnapp {
     struct Script: ParsableCommand {

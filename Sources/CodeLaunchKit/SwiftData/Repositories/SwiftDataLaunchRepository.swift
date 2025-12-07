@@ -19,20 +19,18 @@ public final class SwiftDataLaunchRepository {
 }
 
 
-// MARK: - Loaders
-extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, LaunchProjectInfoLoader {
+// MARK: - Load
+extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, ProjectInfoLoader {
     public func loadCategories() throws -> [LaunchCategory] {
         let categories = try context.loadCategories()
         return categories.map { categoryMapper.toDomain($0) }
     }
 
     public func loadGroups() throws -> [LaunchGroup] {
-        // TODO: - need to set LaunchProject.category
         return try loadCategories().flatMap(\.groups)
     }
 
     public func loadProjects() throws -> [LaunchProject] {
-        // TODO: - need to set LaunchProject.group
         return try loadGroups().flatMap(\.projects)
     }
 
@@ -45,9 +43,8 @@ extension SwiftDataLaunchRepository: LaunchListLoader, FinderInfoLoader, LaunchP
     }
 }
 
-
-// MARK: - Stores
-extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, LaunchProjectStore {
+// MARK: - Category
+extension SwiftDataLaunchRepository: CategoryStore {
     public func saveCategory(_ category: LaunchCategory) throws {
         let storedCategory = categoryMapper.toSwiftData(category)
         try context.saveCategory(storedCategory)
@@ -60,7 +57,11 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, LaunchProj
 
         try context.deleteCategory(storedCategory)
     }
+}
 
+
+// MARK: - Group
+extension SwiftDataLaunchRepository: LaunchGroupStore {
     public func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
         let storedCategory: SwiftDataLaunchCategory
         if let existingCategory = try fetchCategory(named: category.name) {
@@ -70,36 +71,65 @@ extension SwiftDataLaunchRepository: CategoryStore, LaunchGroupStore, LaunchProj
             try context.saveCategory(newCategory)
             storedCategory = newCategory
         }
-
+        
         let storedGroup = groupMapper.toSwiftData(group)
         try context.saveGroup(storedGroup, in: storedCategory)
     }
-
-    public func deleteGroup(_ group: LaunchGroup, from category: LaunchCategory?) throws {
-        guard let storedGroup = try fetchGroup(named: group.name, categoryName: category?.name) else {
+    
+    public func updateGroup(_ group: LaunchGroup) throws {
+        guard let storedGroup = try fetchGroup(named: group.name) else {
             throw CodeLaunchError.missingGroup
         }
 
+        try context.updateGroup(storedGroup, name: group.name, shortcut: group.shortcut)
+    }
+    
+    public func deleteGroup(_ group: LaunchGroup) throws {
+        guard let storedGroup = try fetchGroup(named: group.name) else {
+            throw CodeLaunchError.missingGroup
+        }
+        
         try context.deleteGroup(storedGroup)
     }
+}
 
+
+
+// MARK: - Project
+extension SwiftDataLaunchRepository: ProjectStore {
     public func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws {
-        guard let storedGroup = try fetchGroup(named: group.name, categoryName: group.categoryName) else {
+        guard let storedGroup = try fetchGroup(named: group.name) else {
             throw CodeLaunchError.missingGroup
         }
 
         let storedProject = projectMapper.toSwiftData(project)
         try context.saveProject(storedProject, in: storedGroup)
     }
+    
+    public func updateProject(_ project: LaunchProject) throws {
+        guard let storedProject = try fetchProject(named: project.name) else {
+            throw CodeLaunchError.missingProject
+        }
 
-    public func deleteProject(_ project: LaunchProject, from group: LaunchGroup?) throws {
-        guard let storedProject = try fetchProject(named: project.name, shortcut: project.shortcut, groupName: group?.name) else {
+        let mappedProject = projectMapper.toSwiftData(project)
+        try context.updateProject(
+            storedProject,
+            name: mappedProject.name,
+            shortcut: mappedProject.shortcut,
+            type: mappedProject.type,
+            remote: mappedProject.remote,
+            links: mappedProject.links
+        )
+    }
+
+    public func deleteProject(_ project: LaunchProject) throws {
+        guard let storedProject = try fetchProject(named: project.name) else {
             throw CodeLaunchError.missingProject
         }
 
         try context.deleteProject(storedProject)
     }
-    
+
     public func saveProjectLinkNames(_ names: [String]) {
         context.saveProjectLinkNames(names)
     }
@@ -120,40 +150,11 @@ private extension SwiftDataLaunchRepository {
         return try context.loadCategories().first(where: { $0.name.matches(name) })
     }
 
-    func fetchGroup(named name: String, categoryName: String?) throws -> SwiftDataLaunchGroup? {
-        let groups = try context.loadGroups()
-
-        return groups.first { group in
-            guard group.name.matches(name) else {
-                return false
-            }
-
-            if let categoryName {
-                return categoryName.matches(group.category?.name)
-            }
-
-            return true
-        }
+    func fetchGroup(named name: String) throws -> SwiftDataLaunchGroup? {
+        return try context.loadGroups().first(where: { $0.name.matches(name) })
     }
 
-    func fetchProject(named name: String, shortcut: String?, groupName: String?) throws -> SwiftDataLaunchProject? {
-        let projects = try context.loadProjects()
-
-        return projects.first { project in
-            let nameMatches = project.name.matches(name)
-            let shortcutMatches = {
-                guard let shortcut, let projectShortcut = project.shortcut else { return false }
-                return shortcut.matches(projectShortcut)
-            }()
-
-            let groupMatches: Bool
-            if let groupName {
-                groupMatches = groupName.matches(project.group?.name)
-            } else {
-                groupMatches = true
-            }
-
-            return groupMatches && (nameMatches || shortcutMatches)
-        }
+    func fetchProject(named name: String) throws -> SwiftDataLaunchProject? {
+        return try context.loadProjects().first(where: { $0.name.matches(name) })
     }
 }

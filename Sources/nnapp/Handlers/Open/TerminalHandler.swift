@@ -5,21 +5,20 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import Foundation
-import NnShellKit
-
 /// Manages terminal operations including iTerm integration and session management.
 struct TerminalHandler {
-    private let shell: any Shell
+    private let shell: any LaunchShell
     private let loader: any ScriptLoader
+    private let environment: any TerminalEnvironmentProviding
     
     /// Initializes a new terminal manager.
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - context: Data context for loading launch scripts.
-    init(shell: any Shell, loader: any ScriptLoader) {
+    init(shell: any LaunchShell, loader: any ScriptLoader, environment: any TerminalEnvironmentProviding = ProcessInfoEnvironmentProvider()) {
         self.shell = shell
         self.loader = loader
+        self.environment = environment
     }
 }
 
@@ -59,7 +58,7 @@ private extension TerminalHandler {
     /// Runs the given shell script in a new iTerm tab, if iTerm is available.
     /// - Parameter script: A shell command string to execute.
     func runScriptInNewTerminalWindow(script: String) {
-        if let termProgram = ProcessInfo.processInfo.environment["TERM_PROGRAM"], termProgram == "iTerm.app" {
+        if environment.termProgram() == "iTerm.app" {
             let appleScript = """
                 tell application "iTerm"
                     activate
@@ -102,4 +101,8 @@ private extension TerminalHandler {
 // MARK: - Dependencies
 protocol ScriptLoader {
     func loadLaunchScript() -> String?
+}
+
+protocol TerminalEnvironmentProviding {
+    func termProgram() -> String?
 }

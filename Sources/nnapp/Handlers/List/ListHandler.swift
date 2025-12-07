@@ -6,11 +6,10 @@
 //
 
 import CodeLaunchKit
-import SwiftPickerKit
 
 /// Coordinates list and display operations for CodeLaunch hierarchy.
 struct ListHandler {
-    private let picker: any CommandLinePicker
+    private let picker: any LaunchPicker
     private let loader: any LaunchListLoader
     private let console: any ConsoleOutput
 
@@ -19,7 +18,7 @@ struct ListHandler {
     ///   - picker: Utility for prompting user input and selections.
     ///   - context: Data context for loading categories, groups, and projects.
     ///   - console: Console output adapter for displaying information.
-    init(picker: any CommandLinePicker, loader: any LaunchListLoader, console: any ConsoleOutput) {
+    init(picker: any LaunchPicker, loader: any LaunchListLoader, console: any ConsoleOutput) {
         self.picker = picker
         self.loader = loader
         self.console = console
@@ -29,7 +28,6 @@ struct ListHandler {
 
 // MARK: - Hierarchy Navigation
 extension ListHandler {
-    /// Displays an interactive tree navigation of the entire CodeLaunch hierarchy.
     func browseHierarchy() throws {
         let categories = try loader.loadCategories()
         
@@ -41,8 +39,7 @@ extension ListHandler {
         }
         
         let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: false) })
-        let root = TreeNavigationRoot(displayName: "CodeLaunch", children: rootNodes)
-        let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: root, newScreen: true, showPromptText: false)
+        let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
         
         if let selectedNode = selection {
             displayNodeDetails(selectedNode)
@@ -53,8 +50,6 @@ extension ListHandler {
 
 // MARK: - Category Operations
 extension ListHandler {
-    /// Selects and displays details for a specific category.
-    /// - Parameter name: Optional category name. If nil, prompts user to select.
     func selectAndDisplayCategory(name: String?) throws {
         let categories = try loader.loadCategories()
         let selectedCategory: LaunchCategory
@@ -69,9 +64,7 @@ extension ListHandler {
         displayCategoryDetails(selectedCategory)
         console.printLine("")
     }
-
-    /// Displays detailed information about a category.
-    /// - Parameter category: The category to display.
+    
     func displayCategoryDetails(_ category: LaunchCategory) {
         console.printHeader(category.name)
         console.printLine("path: \(category.path)")
@@ -95,8 +88,6 @@ extension ListHandler {
 
 // MARK: - Group Operations
 extension ListHandler {
-    /// Selects and displays details for a specific group.
-    /// - Parameter name: Optional group name or shortcut. If nil, prompts user to select.
     func selectAndDisplayGroup(name: String?) throws {
         let groups = try loader.loadGroups()
         let selectedGroup: LaunchGroup
@@ -112,8 +103,6 @@ extension ListHandler {
         console.printLine("")
     }
 
-    /// Displays detailed information about a group.
-    /// - Parameter group: The group to display.
     func displayGroupDetails(_ group: LaunchGroup) {
         console.printHeader(group.name)
         console.printLine("category: \(group.categoryName ?? "NOT ASSIGNED")")
@@ -132,8 +121,6 @@ extension ListHandler {
 
 // MARK: - Project Operations
 extension ListHandler {
-    /// Selects and displays details for a specific project.
-    /// - Parameter name: Optional project name or shortcut. If nil, prompts user to select.
     func selectAndDisplayProject(name: String?) throws {
         let projects = try loader.loadProjects()
         let selectedProject: LaunchProject
@@ -149,8 +136,6 @@ extension ListHandler {
         console.printLine("")
     }
 
-    /// Displays detailed information about a project.
-    /// - Parameter project: The project to display.
     func displayProjectDetails(_ project: LaunchProject) {
         console.printHeader(project.name)
         console.printLine("group: \(project.groupName ?? "NOT ASSIGNED")")
@@ -168,7 +153,6 @@ extension ListHandler {
 
 // MARK: - Link Operations
 extension ListHandler {
-    /// Displays all saved project link names.
     func displayProjectLinks() {
         let existingNames = loader.loadProjectLinkNames()
 

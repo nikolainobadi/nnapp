@@ -5,16 +5,8 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import Files
 import CodeLaunchKit
 import SwiftPickerKit
-
-// MARK: - Folder
-extension Folder: @retroactive DisplayablePickerItem {
-    public var displayName: String {
-        return name
-    }
-}
 
 // MARK: - LaunchCategory
 extension LaunchCategory: DisplayablePickerItem {
@@ -49,7 +41,7 @@ extension ProjectLink: DisplayablePickerItem {
 
 
 // MARK: - LaunchProjectFolder
-extension LaunchProjectFolder: DisplayablePickerItem {
+extension ProjectFolder: DisplayablePickerItem {
     var displayName: String {
         return name
     }
@@ -82,6 +74,14 @@ extension AssignGroupType: DisplayablePickerItem {
         case .import:
             return "Import existing folder to create new Group"
         }
+    }
+}
+
+
+// MARK: - DirectoryContainer
+extension DirectoryContainer: DisplayablePickerItem {
+    var displayName: String {
+        return directory.name
     }
 }
 
