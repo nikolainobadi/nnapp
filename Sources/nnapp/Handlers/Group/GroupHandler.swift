@@ -108,79 +108,69 @@ extension GroupHandler: ProjectGroupSelector {
 extension GroupHandler {
     func setMainProject(group: String?) throws {
         let groups = try loadAllGroups()
-        let selectedGroup: LaunchGroup
-        
-        if let group {
-            if let foundGroup = groups.first(where: { $0.name.matches(group) || group.matches($0.shortcut) }) {
-                selectedGroup = foundGroup
-            } else {
-                throw CodeLaunchError.missingGroup
-            }
-        } else {
-            selectedGroup = try picker.requiredSingleSelection("Select a group to set the main project for", items: groups, showSelectedItemText: false)
-        }
-        
-        let currentMainProject = mainProject(in: selectedGroup)
-        
-        if let currentMainProject {
-            print("Current main project: \(currentMainProject.name.bold)")
-            guard picker.getPermission("Would you like to change the main project?") else {
-                print("No changes made.")
-                return
-            }
-        } else {
-            print("No main project is currently set for group '\(selectedGroup.name.bold)'")
-        }
-        
-        // Get non-main projects
-        let nonMainProjects = selectedGroup.projects.filter { project in
-            guard let mainProject = currentMainProject else {
-                return true
-            }
-            
-            return project.name != mainProject.name
-        }
-            .sorted(by: { $0.name < $1.name })
-        
-        // Check if any non-main projects exist
-        guard !nonMainProjects.isEmpty else {
-            let message = currentMainProject != nil
-                ? "No other projects exist in this group to switch to."
-                : "No projects exist in this group. Add a project first using 'nnapp add project'."
-            print(message)
+        let selectedGroup = try resolveGroup(named: group, in: groups)
+        guard let selection = try chooseNewMainProject(in: selectedGroup) else {
             return
         }
-        
-        // Let user select new main project
-        let newMainProject = try picker.requiredSingleSelection(
-            "Select the new main project for '\(selectedGroup.name)'",
-            items: nonMainProjects
+
+        let shortcutToUse = try determineShortcut(for: selectedGroup, newMain: selection.newMain)
+
+        try persistMainProjectChange(
+            group: selectedGroup,
+            currentMain: selection.currentMain,
+            newMain: selection.newMain,
+            shortcut: shortcutToUse
         )
         
-        let shortcutToUse = try determineShortcut(for: selectedGroup, newMain: newMainProject)
-
-        if let currentMainProject, shouldClearPreviousShortcut(group: selectedGroup, shortcutToUse: shortcutToUse) {
-            var clearedProject = currentMainProject
-            clearedProject.shortcut = nil
-            try store.updateProject(clearedProject)
-        }
-        
-        var updatedGroup = selectedGroup
-        var updatedMain = newMainProject
-        
-        updatedGroup.shortcut = shortcutToUse
-        updatedMain.shortcut = shortcutToUse
-        
-        try store.updateProject(updatedMain)
-        try store.updateGroup(updatedGroup)
-        
-        print("Successfully set '\(updatedMain.name.bold)' as the main project for group '\(updatedGroup.name.bold)'")
+        print("Successfully set '\(selection.newMain.name.bold)' as the main project for group '\(selectedGroup.name.bold)'")
     }
 }
 
 
 // MARK: - Private Methods
 private extension GroupHandler {
+    func resolveGroup(named name: String?, in groups: [LaunchGroup]) throws -> LaunchGroup {
+        if let name {
+            if let foundGroup = groups.first(where: { $0.name.matches(name) || name.matches($0.shortcut) }) {
+                return foundGroup
+            }
+            
+            throw CodeLaunchError.missingGroup
+        }
+
+        return try picker.requiredSingleSelection("Select a group to set the main project for", items: groups, showSelectedItemText: false)
+    }
+    
+    func chooseNewMainProject(in group: LaunchGroup) throws -> (currentMain: LaunchProject?, newMain: LaunchProject)? {
+        let currentMain = mainProject(in: group)
+        
+        if let currentMain {
+            print("Current main project: \(currentMain.name.bold)")
+            guard picker.getPermission("Would you like to change the main project?") else {
+                print("No changes made.")
+                return nil
+            }
+        } else {
+            print("No main project is currently set for group '\(group.name.bold)'")
+        }
+        
+        let candidates = nonMainProjects(in: group, excluding: currentMain)
+        guard !candidates.isEmpty else {
+            let message = currentMain != nil
+                ? "No other projects exist in this group to switch to."
+                : "No projects exist in this group. Add a project first using 'nnapp add project'."
+            print(message)
+            return nil
+        }
+        
+        let newMain = try picker.requiredSingleSelection(
+            "Select the new main project for '\(group.name)'",
+            items: candidates
+        )
+        
+        return (currentMain, newMain)
+    }
+    
     func mainProject(in group: LaunchGroup) -> LaunchProject? {
         guard let groupShortcut = group.shortcut else {
             return nil
@@ -193,6 +183,15 @@ private extension GroupHandler {
             
             return groupShortcut.matches(projectShortcut)
         })
+    }
+    
+    func nonMainProjects(in group: LaunchGroup, excluding currentMain: LaunchProject?) -> [LaunchProject] {
+        return group.projects
+            .filter { project in
+                guard let currentMain else { return true }
+                return project.name != currentMain.name
+            }
+            .sorted(by: { $0.name < $1.name })
     }
     
     func determineShortcut(for group: LaunchGroup, newMain: LaunchProject) throws -> String {
@@ -213,6 +212,23 @@ private extension GroupHandler {
         }
         
         return currentGroupShortcut.matches(shortcutToUse)
+    }
+    
+    func persistMainProjectChange(group: LaunchGroup, currentMain: LaunchProject?, newMain: LaunchProject, shortcut: String) throws {
+        if let currentMain, shouldClearPreviousShortcut(group: group, shortcutToUse: shortcut) {
+            var clearedProject = currentMain
+            clearedProject.shortcut = nil
+            try store.updateProject(clearedProject)
+        }
+        
+        var updatedGroup = group
+        var updatedMain = newMain
+        
+        updatedGroup.shortcut = shortcut
+        updatedMain.shortcut = shortcut
+        
+        try store.updateProject(updatedMain)
+        try store.updateGroup(updatedGroup)
     }
     
     func selectCategory(name: String?) throws -> LaunchCategory {
