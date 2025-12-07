@@ -17,14 +17,15 @@ public final class CodeLaunchContext {
     private let launchScriptKey = "launchScriptKey"
     private let projectLinkNameListKey = "projectLinkNameListKey"
 
-    init(schema: Schema, testConfig: ModelConfiguration? = nil, userDefaultsTestSuiteName: String? = nil, defaults: UserDefaults? = nil) throws {
+    init(schema: Schema, testConfig: ModelConfiguration? = nil, userDefaultsTestSuiteName: String? = nil) throws {
         let identifier = "com.nobadi.codelaunch"
         let oldAppGroupId = "R8SJ24LQF3.\(identifier)"
         let appGroupId = "group.\(identifier)"
         
-        if let testConfig, let defaults {
-            self.defaults = defaults
-            self.context = try .init(.init(for: schema, configurations: testConfig))
+        if let testConfig, let userDefaultsTestSuiteName {
+            defaults = .init(suiteName: userDefaultsTestSuiteName)!
+            defaults.removePersistentDomain(forName: userDefaultsTestSuiteName)
+            context = try .init(.init(for: schema, configurations: testConfig))
         } else {
             try migrateAppGroupSwiftDataStoreIfNeeded(from: oldAppGroupId, to: appGroupId)
             let (container, defaults) = try makeAppGroupModelContainer(schema: schema, appGroupId: appGroupId)
@@ -32,26 +33,14 @@ public final class CodeLaunchContext {
             self.defaults = defaults
             self.context = .init(container)
         }
-        
-//        if let testConfig, let userDefaultsTestSuiteName {
-//            defaults = .init(suiteName: userDefaultsTestSuiteName)!
-//            defaults.removePersistentDomain(forName: userDefaultsTestSuiteName)
-//            context = try .init(.init(for: schema, configurations: testConfig))
-//        } else {
-//            let (container, defaults) = try makeAppGroupModelContainer(schema: schema, appGroupId: appGroupId)
-//            
-//            self.defaults = defaults
-//            self.context = .init(container)
-//        }
     }
 }
 
 
 // MARK: - Init
 public extension CodeLaunchContext {
-    // TODO: - update this to correct public init parameters
-    convenience init(config: ModelConfiguration? = nil, defaults: UserDefaults? = nil) throws {
-        try self.init(schema: .init(versionedSchema: FirstSchema.self), testConfig: config, userDefaultsTestSuiteName: nil, defaults: defaults)
+    convenience init(config: ModelConfiguration? = nil, userDefaultsTestSuiteName: String? = nil) throws {
+        try self.init(schema: .init(versionedSchema: FirstSchema.self), testConfig: config, userDefaultsTestSuiteName: userDefaultsTestSuiteName)
     }
 }
 
