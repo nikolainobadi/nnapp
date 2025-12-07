@@ -57,31 +57,12 @@ extension MockContextFactory: ContextFactory {
             return context
         }
 
-        let defaults = makeDefaults()
-        let config = ModelConfiguration(
-            "TestModel-\(uniqueId)",
-            isStoredInMemoryOnly: true
-        )
-        let context = try CodeLaunchContext(config: config, defaults: defaults)
+        let testSuiteName = "testSuiteDefaults-\(uniqueId)"
+        let config = ModelConfiguration("TestModel-\(uniqueId)", isStoredInMemoryOnly: true)
+        let context = try CodeLaunchContext(config: config, userDefaultsTestSuiteName: testSuiteName)
 
         self.context = context
 
         return context
     }
 }
-
-
-// MARK: - Private
-private extension MockContextFactory {
-    func makeDefaults() -> UserDefaults {
-        let testSuiteName = "testSuiteDefaults-\(uniqueId)"
-        let userDefaults = UserDefaults(suiteName: testSuiteName)!
-        userDefaults.removePersistentDomain(forName: testSuiteName)
-
-        return userDefaults
-    }
-}
-
-
-// MARK: - Mocks
-
