@@ -5,6 +5,7 @@
 - Folder browsing lives in `Sources/nnapp/Picker` (`FolderBrowser`, `DefaultFolderBrowser`) and is injected into handlers via factories.
 - Tests sit in `Tests/nnappTests/UnitTests`, organized by command or handler. Shared test helpers (mock pickers, context factories, temp folder helpers) are under `Tests/nnappTests/Shared`.
 - Resources (e.g., `Resources/Info.plist`) stay minimal; prefer code-first configuration where possible.
+- Main project logic lives in `GroupHandler.setMainProject`; shortcut sync rules are exercised via unit tests in `GroupHandlerTests`.
 
 ## Build, Test, and Development Commands
 - `swift build` — compile the package; use to verify new code paths. Avoid running automatically in CI unless requested.
@@ -17,6 +18,7 @@
 - Use `// MARK:` to separate concerns within files; prefer extensions for domain-specific helpers.
 - Types and protocols use `UpperCamelCase`; functions and properties use `lowerCamelCase`. Keep enums and models lightweight and composable.
 - New Swift files should retain the existing header format and author name (Nikolai Nobadi).
+- Shared shortcut updates use the `MainProjectShortcutStore` protocol (implemented by both group/project stores) so handlers can update group/project shortcuts without extra coupling.
 
 ## Testing Guidelines
 - Use XCTest with the existing naming pattern (`*Tests.swift`). Mirror production folders when adding new suites (e.g., `CommandTests/CreateTests`).
