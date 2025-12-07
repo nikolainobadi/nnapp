@@ -353,6 +353,8 @@ private extension GroupHandlerTests {
         private(set) var groups: [LaunchGroup]
         private(set) var savedGroups: [LaunchGroup] = []
         private(set) var deletedGroups: [LaunchGroup] = []
+        private(set) var updatedGroups: [LaunchGroup] = []
+        private(set) var updatedProjects: [LaunchProject] = []
 
         let category: LaunchCategory
 
@@ -370,8 +372,16 @@ private extension GroupHandlerTests {
             groups.append(group)
         }
 
+        func updateGroup(_ group: LaunchGroup) throws {
+            updatedGroups.append(group)
+        }
+
         func deleteGroup(_ group: LaunchGroup) throws {
             deletedGroups.append(group)
+        }
+
+        func updateProject(_ project: LaunchProject) throws {
+            updatedProjects.append(project)
         }
     }
 

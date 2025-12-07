@@ -22,6 +22,12 @@ public protocol ProjectLinkNameLoading {
     func loadProjectLinkNames() -> [String]
 }
 
+// MARK: - Shared Updating
+public protocol MainProjectShortcutStore {
+    func updateGroup(_ group: LaunchGroup) throws
+    func updateProject(_ project: LaunchProject) throws
+}
+
 
 // MARK: - Category
 public protocol CategoryStore: CategoryLoading {
@@ -36,7 +42,7 @@ public protocol LaunchGroupCategorySelector {
     func selectCategory(named name: String?) throws -> LaunchCategory
 }
 
-public protocol LaunchGroupStore: GroupLoading {
+public protocol LaunchGroupStore: GroupLoading, MainProjectShortcutStore {
     func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws
     func deleteGroup(_ group: LaunchGroup) throws
 }
@@ -50,11 +56,9 @@ public protocol ProjectGroupSelector {
 
 public protocol ProjectInfoLoader: GroupLoading, ProjectLoading, ProjectLinkNameLoading { }
 
-public protocol ProjectStore: ProjectInfoLoader {
-    func updateGroup(_ group: LaunchGroup) throws
+public protocol ProjectStore: ProjectInfoLoader, MainProjectShortcutStore {
     func deleteGroup(_ group: LaunchGroup) throws
     func deleteProject(_ project: LaunchProject) throws
-    func updateProject(_ project: LaunchProject) throws
     func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws
 }
 

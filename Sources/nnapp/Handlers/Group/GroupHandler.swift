@@ -120,13 +120,7 @@ extension GroupHandler {
             selectedGroup = try picker.requiredSingleSelection("Select a group to set the main project for", items: groups, showSelectedItemText: false)
         }
         
-        let currentMainProject = selectedGroup.projects.first { project in
-            guard let groupShortcut = selectedGroup.shortcut, let projectShortcut = project.shortcut else {
-                return false
-            }
-            
-            return groupShortcut.matches(projectShortcut)
-        }
+        let currentMainProject = mainProject(in: selectedGroup)
         
         if let currentMainProject {
             print("Current main project: \(currentMainProject.name.bold)")
@@ -163,42 +157,64 @@ extension GroupHandler {
             items: nonMainProjects
         )
         
-        // Determine shortcut to use
-        let shortcutToUse: String
-        if let groupShortcut = selectedGroup.shortcut {
-            // Group has shortcut, use it
-            shortcutToUse = groupShortcut
-        } else if let projectShortcut = newMainProject.shortcut {
-            // Group has no shortcut but new project does, use project's shortcut
-            shortcutToUse = projectShortcut
-        } else {
-            // Neither has shortcut, prompt user
-            shortcutToUse = try picker.getRequiredInput("Enter a shortcut for the main project and group:")
-        }
+        let shortcutToUse = try determineShortcut(for: selectedGroup, newMain: newMainProject)
 
-        print(shortcutToUse)
-        // TODO: -
-        // Clear current main project's shortcut if it exists
-//        if let currentMain = currentMainProject {
-//            currentMain.shortcut = nil
-//            try context.saveProject(currentMain, in: selectedGroup)
-//        }
-//
-//        // Set new main project's shortcut and update group
-//        newMainProject.shortcut = shortcutToUse
-//        selectedGroup.shortcut = shortcutToUse
-//        
-//        // Save changes
-//        try context.saveProject(newMainProject, in: selectedGroup)
-//        try context.saveGroup(selectedGroup, in: selectedGroup.category!)
-//        
-//        print("Successfully set '\(newMainProject.name.bold)' as the main project for group '\(selectedGroup.name.bold)'")
+        if let currentMainProject, shouldClearPreviousShortcut(group: selectedGroup, shortcutToUse: shortcutToUse) {
+            var clearedProject = currentMainProject
+            clearedProject.shortcut = nil
+            try store.updateProject(clearedProject)
+        }
+        
+        var updatedGroup = selectedGroup
+        var updatedMain = newMainProject
+        
+        updatedGroup.shortcut = shortcutToUse
+        updatedMain.shortcut = shortcutToUse
+        
+        try store.updateProject(updatedMain)
+        try store.updateGroup(updatedGroup)
+        
+        print("Successfully set '\(updatedMain.name.bold)' as the main project for group '\(updatedGroup.name.bold)'")
     }
 }
 
 
 // MARK: - Private Methods
 private extension GroupHandler {
+    func mainProject(in group: LaunchGroup) -> LaunchProject? {
+        guard let groupShortcut = group.shortcut else {
+            return nil
+        }
+        
+        return group.projects.first(where: { project in
+            guard let projectShortcut = project.shortcut else {
+                return false
+            }
+            
+            return groupShortcut.matches(projectShortcut)
+        })
+    }
+    
+    func determineShortcut(for group: LaunchGroup, newMain: LaunchProject) throws -> String {
+        if let groupShortcut = group.shortcut {
+            return groupShortcut
+        }
+        
+        if let projectShortcut = newMain.shortcut {
+            return projectShortcut
+        }
+        
+        return try picker.getRequiredInput("Enter a shortcut for the main project and group:")
+    }
+    
+    func shouldClearPreviousShortcut(group: LaunchGroup, shortcutToUse: String) -> Bool {
+        guard let currentGroupShortcut = group.shortcut else {
+            return false
+        }
+        
+        return currentGroupShortcut.matches(shortcutToUse)
+    }
+    
     func selectCategory(name: String?) throws -> LaunchCategory {
         return try categorySelector.selectCategory(named: name)
     }
