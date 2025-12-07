@@ -306,6 +306,84 @@ extension GroupHandlerTests {
 }
 
 
+// MARK: - Set Main Project
+extension GroupHandlerTests {
+    @Test("Clears previous main shortcut when reusing group shortcut")
+    func clearsPreviousMainShortcutWhenReusingGroupShortcut() throws {
+        let currentMain = makeProject(name: "Main", shortcut: "grp")
+        let newMain = makeProject(name: "Alt", shortcut: "alt")
+        let group = makeGroup(name: "Group", shortcut: "grp", projects: [currentMain, newMain])
+        let (sut, store, _, _) = makeSUT(
+            groups: [group],
+            permissionResults: [true],
+            selectionOutcomes: [.index(0)]
+        )
+
+        try sut.setMainProject(group: group.name)
+
+        #expect(store.updatedProjects.count == 2)
+        #expect(store.updatedProjects.first?.name == currentMain.name)
+        #expect(store.updatedProjects.first?.shortcut == nil)
+        #expect(store.updatedProjects.last?.name == newMain.name)
+        #expect(store.updatedProjects.last?.shortcut == group.shortcut)
+        #expect(store.updatedGroups.first?.shortcut == group.shortcut)
+    }
+
+    @Test("Uses project shortcut when group shortcut is missing without clearing others")
+    func usesProjectShortcutWhenGroupShortcutMissing() throws {
+        let current = makeProject(name: "Current", shortcut: "old")
+        let newMain = makeProject(name: "New", shortcut: "new")
+        let group = makeGroup(name: "Group", shortcut: nil, projects: [current, newMain])
+        let (sut, store, _, _) = makeSUT(
+            groups: [group],
+            selectionOutcomes: [.index(1)]
+        )
+
+        try sut.setMainProject(group: group.name)
+
+        #expect(store.updatedProjects.count == 1)
+        #expect(store.updatedProjects.first?.name == newMain.name)
+        #expect(store.updatedProjects.first?.shortcut == newMain.shortcut)
+        #expect(store.updatedGroups.first?.shortcut == newMain.shortcut)
+    }
+
+    @Test("Prompts for shortcut when none exist")
+    func promptsForShortcutWhenNoneExist() throws {
+        let first = makeProject(name: "First", shortcut: nil)
+        let second = makeProject(name: "Second", shortcut: nil)
+        let group = makeGroup(name: "Group", shortcut: nil, projects: [first, second])
+        let expectedShortcut = "custom"
+        let (sut, store, _, _) = makeSUT(
+            groups: [group],
+            inputResults: [expectedShortcut],
+            selectionOutcomes: [.index(0)]
+        )
+
+        try sut.setMainProject(group: group.name)
+
+        #expect(store.updatedProjects.first?.shortcut == expectedShortcut)
+        #expect(store.updatedGroups.first?.shortcut == expectedShortcut)
+    }
+
+    @Test("Does nothing when user declines changing existing main project")
+    func doesNothingWhenUserDeclinesChangingExistingMainProject() throws {
+        let currentMain = makeProject(name: "Main", shortcut: "grp")
+        let other = makeProject(name: "Other", shortcut: "alt")
+        let group = makeGroup(name: "Group", shortcut: "grp", projects: [currentMain, other])
+        let (sut, store, _, _) = makeSUT(
+            groups: [group],
+            permissionResults: [false],
+            selectionOutcomes: [.index(0)]
+        )
+
+        try sut.setMainProject(group: group.name)
+
+        #expect(store.updatedProjects.isEmpty)
+        #expect(store.updatedGroups.isEmpty)
+    }
+}
+
+
 // MARK: - SUT
 private extension GroupHandlerTests {
     func makeSUT(
@@ -315,19 +393,21 @@ private extension GroupHandlerTests {
         permissionResults: [Bool] = [true],
         assignGroupTypeIndex: Int = 0,
         selectionIndex: Int = 0,
+        selectionOutcomes: [MockSingleSelectionOutcome]? = nil,
         directoryToLoad: MockDirectory? = MockDirectory(path: "/tmp"),
         selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp")
     ) -> (sut: GroupHandler, store: MockGroupStore, browser: MockDirectoryBrowser, fileSystem: MockFileSystem) {
         let store = MockGroupStore(groups: groups, category: category)
+        let singleSelections = selectionOutcomes ?? [
+            .index(assignGroupTypeIndex),
+            .index(selectionIndex)
+        ]
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
             permissionResult: .init(type: .ordered(permissionResults)),
             selectionResult: .init(
                 defaultSingle: .index(selectionIndex),
-                singleType: .ordered([
-                    .index(assignGroupTypeIndex),
-                    .index(selectionIndex)
-                ])
+                singleType: .ordered(singleSelections)
             )
         )
         let browser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
