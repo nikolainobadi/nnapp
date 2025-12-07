@@ -1,5 +1,5 @@
 {
-  "originHash" : "5a978d283ff9d265c13793411c0241ef298b00bbe83c92aa717262beb3cb39b4",
+  "originHash" : "c2af8c33c77f0ccf958458d1acc0f15895578634841b2916eeca221d68b13fce",
   "pins" : [
     {
       "identity" : "ansiterminalmodified",
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nikolainobadi/NnSwiftDataKit",
       "state" : {
-        "branch" : "main",
-        "revision" : "d9f9b45016f081baa5c0bda1e2fbebad5ddd4f00"
+        "branch" : "container-migration",
+        "revision" : "8193c169cf5262f6214f86634431545192a2773e"
       }
     },
     {

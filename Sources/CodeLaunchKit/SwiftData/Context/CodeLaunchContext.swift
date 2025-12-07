@@ -19,15 +19,14 @@ public final class CodeLaunchContext {
 
     init(schema: Schema, testConfig: ModelConfiguration? = nil, userDefaultsTestSuiteName: String? = nil, defaults: UserDefaults? = nil) throws {
         let identifier = "com.nobadi.codelaunch"
-        let identifierWithTeamNumber = "R8SJ24LQF3.\(identifier)"
-//        let correctAppGroupId = "group.\(identifier)"
-        let appGroupId = identifierWithTeamNumber
+        let oldAppGroupId = "R8SJ24LQF3.\(identifier)"
+        let appGroupId = "group.\(identifier)"
         
-        // TODO: -
         if let testConfig, let defaults {
             self.defaults = defaults
             self.context = try .init(.init(for: schema, configurations: testConfig))
         } else {
+            try migrateAppGroupSwiftDataStoreIfNeeded(from: oldAppGroupId, to: appGroupId)
             let (container, defaults) = try makeAppGroupModelContainer(schema: schema, appGroupId: appGroupId)
             
             self.defaults = defaults
