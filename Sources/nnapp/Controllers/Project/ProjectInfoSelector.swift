@@ -11,11 +11,18 @@ struct ProjectInfoSelector {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let infoLoader: any ProjectInfoLoader
+    private let projectService: any ProjectService
 
-    init(shell: any LaunchShell, picker: any LaunchPicker, infoLoader: any ProjectInfoLoader) {
+    init(
+        shell: any LaunchShell,
+        picker: any LaunchPicker,
+        infoLoader: any ProjectInfoLoader,
+        projectService: any ProjectService
+    ) {
         self.shell = shell
         self.picker = picker
         self.infoLoader = infoLoader
+        self.projectService = projectService
     }
 }
 
@@ -46,21 +53,14 @@ private extension ProjectInfoSelector {
     func validateName(_ name: String) throws {
         let projects = try infoLoader.loadProjects()
 
-        if projects.contains(where: { $0.name.matches(name) }) {
-            throw CodeLaunchError.projectNameTaken
-        }
+        _ = try projectService.validateName(name, projects: projects)
     }
 
     func validateShortcut(_ shortcut: String?) throws {
-        if let shortcut {
-            let groups = try infoLoader.loadGroups()
-            let projects = groups.flatMap({ $0.projects })
-            let allShortcuts = groups.compactMap({ $0.shortcut }) + projects.compactMap({ $0.shortcut })
+        let groups = try infoLoader.loadGroups()
+        let projects = groups.flatMap({ $0.projects })
 
-            if allShortcuts.contains(where: { $0.matches(shortcut) }) {
-                throw CodeLaunchError.shortcutTaken
-            }
-        }
+        _ = try projectService.validateShortcut(shortcut, groups: groups, projects: projects)
     }
     
     func getShortcut(shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> String? {
@@ -89,8 +89,8 @@ private extension ProjectInfoSelector {
 
     /// Launches a prompt flow for adding additional custom links (e.g. Firebase, website).
     func getOtherLinks() -> [ProjectLink] {
-        let linkOptions = infoLoader.loadProjectLinkNames()
-        let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions)
+        let linkOptions = projectService.loadProjectLinkNames()
+        let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions, projectService: projectService)
         
         return handler.getOtherLinks()
     }

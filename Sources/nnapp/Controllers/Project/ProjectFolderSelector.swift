@@ -10,6 +10,7 @@ import CodeLaunchKit
 struct ProjectFolderSelector {
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
+    private let projectService: any ProjectService
     private let folderBrowser: any DirectoryBrowser
 
     /// Initializes a new folder selector using the provided user input picker.
@@ -21,10 +22,12 @@ struct ProjectFolderSelector {
     init(
         picker: any LaunchPicker,
         fileSystem: any FileSystem,
+        projectService: any ProjectService,
         folderBrowser: any DirectoryBrowser
     ) {
         self.picker = picker
         self.fileSystem = fileSystem
+        self.projectService = projectService
         self.folderBrowser = folderBrowser
     }
 }
@@ -40,7 +43,7 @@ extension ProjectFolderSelector {
     /// - Returns: A validated `ProjectFolder` containing the resolved folder and type.
     func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool = false) throws -> ProjectFolder {
         if let path, let directory = try? fileSystem.directory(at: path) {
-            let projectType = try getProjectType(folder: directory)
+            let projectType = try projectService.projectType(for: directory)
             
             return .init(folder: directory, type: projectType)
         }
@@ -71,7 +74,7 @@ extension ProjectFolderSelector {
 
         let browsePrompt = "Browse to select a folder to use for your Project"
         let folder = try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: groupPath)
-        let projectType = try getProjectType(folder: folder)
+        let projectType = try projectService.projectType(for: folder)
 
         return .init(folder: folder, type: projectType)
     }
@@ -80,42 +83,15 @@ extension ProjectFolderSelector {
 
 // MARK: - Private Methods
 private extension ProjectFolderSelector {
-    func getProjectType(folder: any Directory) throws -> ProjectType {
-        if folder.containsFile(named: "Package.swift") {
-            return .package
-        }
-
-        if folder.subdirectories.contains(where: { $0.extension == "xcodeproj" }) {
-            return .project
-        }
-
-        // TODO: - will need to also check for a workspace, then ask the user to choose which to use
-        throw CodeLaunchError.noProjectInFolder
-    }
-
     func getAvailableSubfolders(group: LaunchGroup, folder: any Directory) -> [ProjectFolder] {
-        return folder.subdirectories.compactMap { subFolder in
-            guard
-                !group.projects.map({ $0.name.lowercased() }).contains(subFolder.name.lowercased()),
-                let projectType = try? getProjectType(folder: subFolder)
-            else {
-                return nil
-            }
-
-            return .init(folder: subFolder, type: projectType)
-        }
+        let candidates = projectService.availableProjectFolders(group: group, categoryFolder: folder)
+        return candidates.map { ProjectFolder(folder: $0.folder, type: $0.type) }
     }
     
     func getDesktopProjectFolders() throws -> [ProjectFolder] {
         let desktopFolder = try fileSystem.desktopDirectory()
-        
-        return desktopFolder.subdirectories.compactMap { subFolder in
-            // Only include folders that contain valid Xcode projects or Swift packages
-            guard let projectType = try? getProjectType(folder: subFolder) else {
-                return nil
-            }
-            
-            return .init(folder: subFolder, type: projectType)
-        }
+
+        let candidates = projectService.desktopProjectFolders(desktop: desktopFolder)
+        return candidates.map { ProjectFolder(folder: $0.folder, type: $0.type) }
     }
 }

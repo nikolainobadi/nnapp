@@ -78,13 +78,23 @@ private extension ProjectHandler {
     }
     
     func selectProjectFolder(path: String?, group: LaunchGroup, fromDesktop: Bool) throws -> ProjectFolder {
-        let folderSelector = ProjectFolderSelector(picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser)
+        let folderSelector = ProjectFolderSelector(
+            picker: picker,
+            fileSystem: fileSystem,
+            projectService: projectService,
+            folderBrowser: folderBrowser
+        )
         
         return try folderSelector.selectProjectFolder(path: path, group: group, fromDesktop: fromDesktop)
     }
     
     func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
-        let infoSelector = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: infoLoader)
+        let infoSelector = ProjectInfoSelector(
+            shell: shell,
+            picker: picker,
+            infoLoader: infoLoader,
+            projectService: projectService
+        )
         
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }

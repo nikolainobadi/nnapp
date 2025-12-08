@@ -11,14 +11,16 @@ import CodeLaunchKit
 struct ProjectLinkHandler {
     private let picker: any LaunchPicker
     private let linkOptions: [String]
+    private let projectService: any ProjectService
     
     /// Initializes the handler used to collect additional project links.
     /// - Parameters:
     ///   - picker: Utility used for user prompts and permissions.
     ///   - linkOptions: Pre-existing link names to present as quick selections.
-    init(picker: any LaunchPicker, linkOptions: [String]) {
+    init(picker: any LaunchPicker, linkOptions: [String], projectService: any ProjectService) {
         self.picker = picker
         self.linkOptions = linkOptions
+        self.projectService = projectService
     }
 }
 
@@ -34,11 +36,8 @@ extension ProjectLinkHandler {
         
         let url = picker.getInput("Enter the url for your \(name) link.")
         
-        guard !name.isEmpty, !url.isEmpty else {
-            return []
-        }
-        
-        return [.init(name: name, urlString: url)] + getOtherLinks()
+        let link = projectService.makeLink(name: name, urlString: url)
+        return projectService.append(link, to: []) + getOtherLinks()
     }
 }
 
