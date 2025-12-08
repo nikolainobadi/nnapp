@@ -6,5 +6,5 @@
 //
 
 enum AssignGroupType: CaseIterable {
-    case `import`, create, select
+    case select, create, `import`
 }

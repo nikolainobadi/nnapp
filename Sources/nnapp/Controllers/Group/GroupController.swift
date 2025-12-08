@@ -56,7 +56,7 @@ extension GroupController {
         let confirmation = """
         name: \(name.cyan)
         category: \(category.name.cyan)
-        targetLocation: \(categoryFolder.path.appendingPathComponent(name).yellow)
+        categoryLocation: \(categoryFolder.path.yellow)
         """
         
         try picker.confirmDetails(confirmText: "Create New Group", details: confirmation)
