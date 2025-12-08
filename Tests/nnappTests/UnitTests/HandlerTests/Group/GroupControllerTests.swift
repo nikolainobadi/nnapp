@@ -50,7 +50,10 @@ struct GroupControllerTests {
         let browsedFolder = MockDirectory(path: "/tmp/elsewhere")
         let (sut, store, browser, _) = makeSUT(
             category: category,
-            permissionResults: [false],
+            permissionResults: [
+                false, // Would you like to select a subfolder?
+                true // confirm group import
+            ],
             directoryToLoad: categoryFolder,
             selectedDirectory: browsedFolder
         )
@@ -211,6 +214,7 @@ extension GroupControllerTests {
         let groupFolder = MockDirectory(path: "/tmp/imported")
         let (sut, store, _, _) = makeSUT(
             category: category,
+            permissionResults: [true, true],
             assignGroupTypeIndex: 0,
             directoryToLoad: groupFolder,
             selectedDirectory: groupFolder

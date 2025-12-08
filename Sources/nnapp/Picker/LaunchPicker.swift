@@ -25,11 +25,10 @@ protocol LaunchPicker {
 
 extension LaunchPicker {
     func confirmDetails(confirmText: String, details: String) throws {
-        let confirm = "Create New Category"
-        let options = [confirm, "Cancel"]
+        let options = [confirmText, "Cancel"]
         let selection = try requiredSingleSelection("Does everything look correct?", items: options, layout: .twoColumnStatic(detailText: details))
         
-        guard selection == confirm else {
+        guard selection == confirmText else {
             throw SwiftPickerError.selectionCancelled
         }
     }

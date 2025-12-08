@@ -37,6 +37,12 @@ extension GroupController {
         let category = try selectCategory(name: categoryName)
         let selection = try selectGroupFolder(path: path, category: category)
         let name = try groupService.validateName(selection.folder.name, groups: category.groups)
+        let confirmation = """
+        Import \(name.yellow) into category \(category.name.yellow)?
+        location: \(selection.folder.path.yellow)
+        """
+        
+        try picker.requiredPermission(confirmation)
         
         return try groupService.saveGroup(.new(name: name), in: category, groupFolder: selection.folder, categoryFolder: selection.categoryFolder)
     }
@@ -47,6 +53,13 @@ extension GroupController {
         let proposedName = try name ?? picker.getRequiredInput("Enter the name of your new group.")
         let name = try groupService.validateName(proposedName, groups: category.groups)
         let categoryFolder = try fileSystem.directory(at: category.path)
+        let confirmation = """
+        name: \(name.cyan)
+        category: \(category.name.cyan)
+        targetLocation: \(categoryFolder.path.appendingPathComponent(name).yellow)
+        """
+        
+        try picker.confirmDetails(confirmText: "Create New Group", details: confirmation)
     
         return try groupService.saveGroup(.new(name: name), in: category, groupFolder: nil, categoryFolder: categoryFolder)
     }
