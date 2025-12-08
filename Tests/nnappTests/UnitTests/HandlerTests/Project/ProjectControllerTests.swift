@@ -1,5 +1,5 @@
 //
-//  ProjectHandlerTests.swift
+//  ProjectControllerTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/5/25.
@@ -13,7 +13,7 @@ import SwiftPickerKit
 import SwiftPickerTesting
 @testable import nnapp
 
-struct ProjectHandlerTests {
+struct ProjectControllerTests {
     @Test("Starting values empty")
     func startingValuesEmpty() {
         let (_, delegate, _) = makeSUT()
@@ -29,7 +29,7 @@ struct ProjectHandlerTests {
 
 
 // MARK: - Add
-extension ProjectHandlerTests {
+extension ProjectControllerTests {
     @Test("Saves project and moves folder into selected group when added")
     func savesProjectAndMovesFolderIntoSelectedGroupWhenAdded() throws {
         let shortcut = "np"
@@ -181,7 +181,7 @@ extension ProjectHandlerTests {
 
 
 // MARK: - Remove
-extension ProjectHandlerTests {
+extension ProjectControllerTests {
     @Test("Deletes group when removing its only project")
     func deletesGroupWhenRemovingItsOnlyProject() throws {
         let project = makeProject(name: "Solo", shortcut: "solo")
@@ -356,7 +356,7 @@ extension ProjectHandlerTests {
 
 
 // MARK: - SUT
-private extension ProjectHandlerTests {
+private extension ProjectControllerTests {
     func makeSUT(
         groupToSelect: LaunchGroup? = nil,
         groupsToLoad: [LaunchGroup] = [],
@@ -373,7 +373,7 @@ private extension ProjectHandlerTests {
         moveTrackingDirectory: MockDirectory? = nil,
         customDirectoryMap: [String: any Directory]? = nil,
         throwError: Bool = false
-    ) -> (sut: ProjectHandler, delegate: MockDelegate, fileSystem: MockFileSystem) {
+    ) -> (sut: ProjectController, delegate: MockDelegate, fileSystem: MockFileSystem) {
         let selectionOutcomes = selectionIndices.map { MockSingleSelectionOutcome.index($0) }
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
@@ -404,7 +404,7 @@ private extension ProjectHandlerTests {
             allowOrphanedProject: projectGroupToGet == nil && !throwError
         )
         let projectService = ProjectManager(store: delegate, fileSystem: fileSystem)
-        let sut = ProjectHandler(
+        let sut = ProjectController(
             shell: shell,
             infoLoader: delegate,
             projectService: projectService,
@@ -420,7 +420,7 @@ private extension ProjectHandlerTests {
 
 
 // MARK: - Test Helpers
-private extension ProjectHandlerTests {
+private extension ProjectControllerTests {
     func makeMoveTrackingDirectory(path: String, subdirectories: [any Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, autoCreateSubdirectories: Bool = false, ext: String? = nil) -> MockDirectory {
         return MockDirectory(path: path, subdirectories: subdirectories, containedFiles: containedFiles, shouldThrowOnSubdirectory: shouldThrowOnSubdirectory, autoCreateSubdirectories: autoCreateSubdirectories, ext: ext)
     }
@@ -428,7 +428,7 @@ private extension ProjectHandlerTests {
 
 
 // MARK: - Mocks
-private extension ProjectHandlerTests {
+private extension ProjectControllerTests {
     final class MockDelegate: ProjectStore, ProjectGroupSelector {
         private let throwError: Bool
         private let groupToSelect: LaunchGroup?

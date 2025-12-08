@@ -70,7 +70,7 @@ extension Nnapp.Remove {
         var shortcut: String?
 
         func run() throws {
-            try Nnapp.makeProjectHandler().removeProject(name: name, shortcut: shortcut)
+            try Nnapp.makeProjectController().removeProject(name: name, shortcut: shortcut)
         }
     }
 }

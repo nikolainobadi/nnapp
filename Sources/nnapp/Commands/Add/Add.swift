@@ -83,7 +83,7 @@ extension Nnapp.Add {
         var fromDesktop: Bool = false
 
         func run() throws {
-            try Nnapp.makeProjectHandler().addProject(
+            try Nnapp.makeProjectController().addProject(
                 path: path,
                 shortcut: shortcut,
                 groupName: group,
