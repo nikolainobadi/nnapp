@@ -173,7 +173,7 @@ private extension ListController {
         console.printLine("")
 
         switch node.type {
-        case .category(let category,):
+        case .category(let category):
             displayCategoryDetails(category)
         case .group(let group):
             displayGroupDetails(group)
