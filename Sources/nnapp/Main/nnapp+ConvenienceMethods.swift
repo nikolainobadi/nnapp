@@ -68,10 +68,12 @@ extension Nnapp {
         let groupSelector = try makeGroupController(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
         let fileSystem = contextFactory.makeFileSystem()
+        let projectService = ProjectManager(store: repository, fileSystem: fileSystem)
 
         return .init(
             shell: shell,
-            store: repository,
+            infoLoader: repository,
+            projectService: projectService,
             picker: picker,
             fileSystem: fileSystem,
             folderBrowser: folderBrowser,

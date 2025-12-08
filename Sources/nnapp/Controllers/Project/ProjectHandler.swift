@@ -11,24 +11,27 @@ struct ProjectHandler {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let fileSystem: any FileSystem
-    private let store: any ProjectStore
     private let folderBrowser: any DirectoryBrowser
     private let groupSelector: any ProjectGroupSelector
+    private let infoLoader: any ProjectInfoLoader
+    private let projectService: any ProjectService
     
     init(
         shell: any LaunchShell,
-        store: any ProjectStore,
+        infoLoader: any ProjectInfoLoader,
+        projectService: any ProjectService,
         picker: any LaunchPicker,
         fileSystem: any FileSystem,
         folderBrowser: any DirectoryBrowser,
         groupSelector: any ProjectGroupSelector
     ) {
         self.shell = shell
-        self.store = store
         self.picker = picker
         self.fileSystem = fileSystem
         self.folderBrowser = folderBrowser
         self.groupSelector = groupSelector
+        self.infoLoader = infoLoader
+        self.projectService = projectService
     }
 }
 
@@ -81,13 +84,13 @@ private extension ProjectHandler {
     }
     
     func selectProjectInfo(folder: Directory, shortcut: String?, group: LaunchGroup, isMainProject: Bool) throws -> ProjectInfo {
-        let infoSelector = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: store)
+        let infoSelector = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: infoLoader)
         
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }
     
     func getProjectToDelete(name: String?, shortcut: String?) throws -> LaunchProject {
-        let projects = try store.loadProjects()
+        let projects = try projectService.loadProjects()
         let prompt = "Select the Project you would like to remove."
         // TODO: - update when evict is enabled
 //        let prompt = "Select the Project you would like to remove. (Note: this will unregister the project from quick-launch. If you want to remove the project and keep it available for quick launch, use \("evict".bold)"
@@ -111,55 +114,35 @@ private extension ProjectHandler {
         guard let parentPath else {
             throw CodeLaunchError.missingGroup
         }
-        
-        let parentFolder = try fileSystem.directory(at: parentPath)
-        
-        if let existingSubfolder = try? parentFolder.subdirectory(named: folder.name) {
-            if existingSubfolder.path != folder.path  {
-                throw CodeLaunchError.folderNameTaken
-            }
-            
-            print("Folder is already in correct location")
-            return
-        }
-        
-        try folder.move(to: parentFolder)
+
+        try projectService.moveProjectFolderIfNecessary(folder, parentPath: parentPath)
     }
     
     func saveProject(_ project: LaunchProject, in group: LaunchGroup, isMainProject: Bool) throws {
-        var updatedGroup = group
-        
-        if isMainProject || group.shortcut == nil {
-            updatedGroup.shortcut = project.shortcut
-        }
-        
-        try store.saveProject(project, in: updatedGroup)
+        try projectService.saveProject(project, in: group, isMainProject: isMainProject)
     }
     
     func deleteProject(_ project: LaunchProject) throws {
         if let group = try groupSelector.getProjectGroup(project: project) {
             if group.projects.count == 1 {
-                try store.deleteGroup(group)
+                try projectService.deleteProject(project, group: group, newMain: nil, useGroupShortcutForNewMain: false)
             } else {
                 if let groupShortcut = group.shortcut, groupShortcut == project.shortcut {
-                    var newMain = try selectNewMainProject(for: group, projectToDelete: project)
-
-                    try store.deleteProject(project)
-
-                    if let newMainShortcut = newMain.shortcut, try shouldUpdateGroupShortcut(group: group, project: newMain) {
-                        var updatedGroup = group
-                        updatedGroup.shortcut = newMainShortcut
-                        try store.updateGroup(updatedGroup)
-                    } else {
-                        newMain.shortcut = groupShortcut
-                        try store.updateProject(newMain)
-                    }
+                    let newMain = try selectNewMainProject(for: group, projectToDelete: project)
+                    let useGroupShortcut = try shouldUpdateGroupShortcut(group: group, project: newMain)
+                    
+                    try projectService.deleteProject(
+                        project,
+                        group: group,
+                        newMain: newMain,
+                        useGroupShortcutForNewMain: useGroupShortcut
+                    )
                 } else {
-                    try store.deleteProject(project)
+                    try projectService.deleteProject(project, group: group, newMain: nil, useGroupShortcutForNewMain: false)
                 }
             }
         } else {
-            try store.deleteProject(project)
+            try projectService.deleteProject(project, group: nil, newMain: nil, useGroupShortcutForNewMain: false)
         }
     }
     
