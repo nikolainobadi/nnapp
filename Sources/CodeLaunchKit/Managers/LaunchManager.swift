@@ -65,7 +65,7 @@ public extension LaunchManager {
             throw CodeLaunchError.missingProject
         }
 
-        try delegate.openIDE(project, launchType: launchType)
+        try openIDE(project, launchType: launchType, option: terminalOption)
         delegate.openTerminal(folderPath: folderPath, option: terminalOption)
 
         if let status = delegate.checkBranchStatus(for: project) {
@@ -83,5 +83,17 @@ public extension LaunchManager {
 
     func openProjectLink(for project: LaunchProject) throws {
         try delegate.openProjectLink(project.links)
+    }
+}
+
+
+// MARK: - Private Methods
+private extension LaunchManager {
+    func openIDE(_ project: LaunchProject, launchType: LaunchType, option: TerminalOption?) throws {
+        if let option, option == .onlyTerminal {
+            return
+        }
+        
+        try delegate.openIDE(project, launchType: launchType)
     }
 }

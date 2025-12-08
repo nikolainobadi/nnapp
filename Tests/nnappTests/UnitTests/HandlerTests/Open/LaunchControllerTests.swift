@@ -58,8 +58,8 @@ struct LaunchControllerTests {
 
 // MARK: - IDE Operations
 extension LaunchControllerTests {
-    @Test("Opens IDE and terminal then skips notification when branch status nil")
-    func opensIDEAndTerminalThenSkipsNotificationWhenBranchStatusNil() throws {
+    @Test("Skips IDE when terminal-only and skips notification when branch status nil")
+    func skipsIDEWhenTerminalOnlyAndSkipsNotificationWhenBranchStatusNil() throws {
         let project = makeProject(name: "App", shortcut: "app", remote: makeProjectLink(), group: makeProjectGroup(path: "/tmp/group"))
         let (sut, service) = makeSUT(branchStatus: nil)
 
@@ -67,8 +67,7 @@ extension LaunchControllerTests {
         
         let folderPath = try #require(project.folderPath)
 
-        #expect(service.openedProjectData?.project.name == project.name)
-        #expect(service.openedProjectData?.type == .xcode)
+        #expect(service.openedProjectData == nil)
         #expect(service.terminalData?.path == folderPath)
         #expect(service.terminalData?.option == .onlyTerminal)
         #expect(service.notifyData == nil)
