@@ -40,10 +40,11 @@ extension Nnapp {
     static func makeCategoryController(picker: (any LaunchPicker)? = nil) throws -> CategoryController {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
-        let folderBrowser = makeFolderBrowser(picker: picker)
         let manager = CategoryManager(store: repository)
+        let fileSystem = contextFactory.makeFileSystem()
+        let folderBrowser = makeFolderBrowser(picker: picker)
         
-        return .init(manager: manager, picker: picker, folderBrowser: folderBrowser)
+        return .init(manager: manager, picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser)
     }
     
     static func makeGroupController(picker: (any LaunchPicker)? = nil) throws -> GroupController {

@@ -10,11 +10,13 @@ import CodeLaunchKit
 struct CategoryController {
     private let picker: any LaunchPicker
     private let manager: any CategoryService
+    private let fileSystem: any FileSystem
     private let folderBrowser: any DirectoryBrowser
     
-    init(manager: any CategoryService, picker: any LaunchPicker, folderBrowser: any DirectoryBrowser) {
+    init(manager: any CategoryService, picker: any LaunchPicker, fileSystem: any FileSystem, folderBrowser: any DirectoryBrowser) {
         self.picker = picker
         self.manager = manager
+        self.fileSystem = fileSystem
         self.folderBrowser = folderBrowser
     }
 }
@@ -32,7 +34,7 @@ extension CategoryController {
     @discardableResult
     func createNewCategory(named name: String?, parentPath: String?) throws -> LaunchCategory {
         let proposedName = try name ?? picker.getRequiredInput("Enter the name of your new category.")
-        let parentFolder = try selectParentFolder(path: parentPath, categoryName: proposedName)
+        let parentFolder = try selectFolder(path: parentPath, browsePrompt: "Select the folder where \(proposedName.yellow) should be created")
         
         return try manager.createCategory(named: proposedName, in: parentFolder)
     }
@@ -93,16 +95,15 @@ extension CategoryController: LaunchGroupCategorySelector {
 // MARK: - Private Methods
 private extension CategoryController {
     func selectFolder(path: String?, browsePrompt: String) throws -> Directory {
+        if let path {
+            return try fileSystem.directory(at: path)
+        }
+        
         return try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: path)
     }
     
     func selectAssignCategoryType() throws -> AssignCategoryType {
         return try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases, showSelectedItemText: false)
-    }
-    
-    func selectParentFolder(path: String?, categoryName: String) throws -> Directory {
-        let folder = try selectFolder(path: path, browsePrompt: "Select the folder where \(categoryName.yellow) should be created")
-        return folder
     }
     
     func makeCategoryDetail(for category: LaunchCategory) -> String {

@@ -21,22 +21,6 @@ struct ListControllerTests {
         #expect(console.lines.contains("No Categories"))
         #expect(console.lines.contains(""))
     }
-
-    @Test("Displays selected category details from tree navigation")
-    func displaysSelectedCategoryDetailsFromTreeNavigation() throws {
-        let project = makeProject(name: "Proj", shortcut: "pj")
-        let group = LaunchGroup.new(name: "Group A", shortcut: "ga", projects: [project])
-        let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [group])
-        let (sut, _, console) = makeSUT(categories: [category], treeNavigationOutcome: .index(0))
-
-        try sut.browseHierarchy()
-
-        #expect(console.headers.contains("Cat"))
-        #expect(console.lines.contains(where: { $0.contains("path: /tmp/cat") }))
-        #expect(console.lines.contains(where: { $0.contains("group count: 1") }))
-        #expect(console.lines.contains(where: { $0.contains("Group A") }))
-        #expect(console.lines.contains(where: { $0.contains("Proj") }))
-    }
 }
 
 

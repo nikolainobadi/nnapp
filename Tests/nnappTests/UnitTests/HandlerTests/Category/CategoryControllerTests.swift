@@ -14,14 +14,17 @@ struct CategoryControllerTests {
     @Test("Imports category using provided path")
     func importsCategoryUsingProvidedPath() throws {
         let directory = MockDirectory(path: "/tmp/cat")
-        let (sut, store, browser) = makeSUT(selectedDirectory: directory)
+        let fileSystem = MockFileSystem(directoryMap: [directory.path: directory])
+        let (sut, store, browser) = makeSUT(selectedDirectory: nil, fileSystem: fileSystem)
 
         let category = try sut.importCategory(path: directory.path)
 
         #expect(category.name == directory.name)
         #expect(category.path == directory.path)
         #expect(store.savedCategories.first?.name == directory.name)
-        #expect(browser.startPath == directory.path)
+        #expect(fileSystem.capturedPaths == [directory.path])
+        #expect(browser.prompt == nil)
+        #expect(browser.startPath == nil)
     }
 
     @Test("Imports category by browsing when path is nil")
@@ -40,18 +43,21 @@ struct CategoryControllerTests {
     @Test("Import trims whitespace from category name")
     func importTrimsWhitespaceFromCategoryName() throws {
         let directory = MockDirectory(path: "/tmp/  SpacedName  ")
-        let sut = makeSUT(selectedDirectory: directory).sut
+        let fileSystem = MockFileSystem(directoryMap: [directory.path: directory])
+        let sut = makeSUT(selectedDirectory: nil, fileSystem: fileSystem).sut
 
         let category = try sut.importCategory(path: directory.path)
 
         #expect(category.name == "  SpacedName  ".trimmingCharacters(in: .whitespacesAndNewlines))
+        #expect(fileSystem.capturedPaths == [directory.path])
     }
 
     @Test("Import throws when name already exists")
     func importThrowsWhenNameAlreadyExists() {
         let existing = makeCategory()
         let directory = MockDirectory(path: existing.path)
-        let (sut, _, _) = makeSUT(categories: [existing], selectedDirectory: directory)
+        let fileSystem = MockFileSystem(directoryMap: [directory.path: directory])
+        let (sut, _, _) = makeSUT(categories: [existing], selectedDirectory: nil, fileSystem: fileSystem)
 
         #expect(throws: CodeLaunchError.categoryNameTaken) {
             try sut.importCategory(path: directory.path)
@@ -92,15 +98,18 @@ extension CategoryControllerTests {
     @Test("Creates category using provided parent path without browsing")
     func createsCategoryUsingProvidedParentPathWithoutBrowsing() throws {
         let parent = MockDirectory(path: "/tmp/provided")
+        let fileSystem = MockFileSystem(directoryMap: [parent.path: parent])
         let (sut, store, browser) = makeSUT(
             inputResults: ["NewCat"],
-            selectedDirectory: parent
+            selectedDirectory: nil,
+            fileSystem: fileSystem
         )
 
         let category = try sut.createNewCategory(named: nil, parentPath: parent.path)
 
         #expect(category.path == parent.path.appendingPathComponent("NewCat"))
-        #expect(browser.startPath == parent.path)
+        #expect(fileSystem.capturedPaths == [parent.path])
+        #expect(browser.startPath == nil)
         #expect(store.savedCategories.first?.path == category.path)
     }
 
@@ -356,7 +365,8 @@ private extension CategoryControllerTests {
         inputResults: [String] = [],
         assignCategoryTypeIndex: Int = 0,
         selectionIndex: Int = 0,
-        selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp")
+        selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp"),
+        fileSystem: MockFileSystem? = nil
     ) -> (sut: CategoryController, store: MockCategoryStore, browser: MockDirectoryBrowser) {
         let store = MockCategoryStore(categories: categories)
         let manager = CategoryManager(store: store)
@@ -371,8 +381,9 @@ private extension CategoryControllerTests {
                 ])
             )
         )
+        let fileSystem = fileSystem ?? MockFileSystem(directoryToLoad: selectedDirectory)
         let browser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let sut = CategoryController(manager: manager, picker: picker, folderBrowser: browser)
+        let sut = CategoryController(manager: manager, picker: picker, fileSystem: fileSystem, folderBrowser: browser)
 
         return (sut, store, browser)
     }
