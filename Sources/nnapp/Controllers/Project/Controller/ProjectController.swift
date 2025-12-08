@@ -101,6 +101,7 @@ private extension ProjectController {
     
     func getProjectToDelete(name: String?, shortcut: String?) throws -> LaunchProject {
         let projects = try projectService.loadProjects()
+        let groups = try projectService.loadGroups()
         let prompt = "Select the Project you would like to remove."
         // TODO: - update when evict is enabled
 //        let prompt = "Select the Project you would like to remove. (Note: this will unregister the project from quick-launch. If you want to remove the project and keep it available for quick launch, use \("evict".bold)"
@@ -117,7 +118,32 @@ private extension ProjectController {
             }
         }
         
-        return try picker.requiredSingleSelection(prompt, items: projects, showSelectedItemText: false)
+        let orphanedProjects = projects.filter { project in
+            !groups.contains(where: { group in
+                group.projects.contains(where: { $0.name.matches(project.name) })
+            })
+        }
+
+        var nodes: [LaunchTreeNode] = LaunchTreeNode.groupNodes(
+            groups: groups,
+            canSelect: false,
+            canSelectProjects: true
+        )
+
+        if !orphanedProjects.isEmpty {
+            nodes += LaunchTreeNode.projectNodes(projects: orphanedProjects, canSelect: true, shouldInclude: true)
+        }
+
+        guard let selection = picker.treeNavigation(prompt, root: .init(displayName: "Code Launch Projects", children: nodes)) else {
+            throw CodeLaunchError.missingProject
+        }
+
+        switch selection.type {
+        case .project(let project):
+            return project
+        default:
+            throw CodeLaunchError.missingProject
+        }
     }
     
     func moveFolderIfNecessary(_ folder: Directory, parentPath: String?) throws {

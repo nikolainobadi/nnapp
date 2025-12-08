@@ -296,10 +296,11 @@ extension ProjectControllerTests {
         let project2 = makeProject(name: "Second", shortcut: "s")
         let group = makeGroup(name: "Group", shortcut: "grp", projects: [project1, project2])
         let (sut, delegate, _) = makeSUT(
+            groupsToLoad: [group],
             projectsToLoad: [project1, project2],
             projectGroupToGet: group,
             permissionResults: [true],
-            selectionIndices: [1]
+            treeNavigationOutcome: .child(parentIndex: 0, childIndex: 1)
         )
 
         try sut.removeProject(name: "NonExistent", shortcut: nil)
@@ -313,10 +314,11 @@ extension ProjectControllerTests {
         let project2 = makeProject(name: "Second", shortcut: "s")
         let group = makeGroup(name: "Group", shortcut: "grp", projects: [project1, project2])
         let (sut, delegate, _) = makeSUT(
+            groupsToLoad: [group],
             projectsToLoad: [project1, project2],
             projectGroupToGet: group,
             permissionResults: [true],
-            selectionIndices: [0]
+            treeNavigationOutcome: .child(parentIndex: 0, childIndex: 0)
         )
 
         try sut.removeProject(name: nil, shortcut: nil)
@@ -372,13 +374,18 @@ private extension ProjectControllerTests {
         shellResults: [String] = [],
         moveTrackingDirectory: MockDirectory? = nil,
         customDirectoryMap: [String: any Directory]? = nil,
-        throwError: Bool = false
+        throwError: Bool = false,
+        treeNavigationOutcome: MockTreeSelectionOutcome = .none
     ) -> (sut: ProjectController, delegate: MockDelegate, fileSystem: MockFileSystem) {
         let selectionOutcomes = selectionIndices.map { MockSingleSelectionOutcome.index($0) }
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
             permissionResult: .init(defaultValue: true, type: .ordered(permissionResults)),
-            selectionResult: .init(defaultSingle: .index(selectionIndices.first ?? 0), singleType: .ordered(selectionOutcomes))
+            selectionResult: .init(defaultSingle: .index(selectionIndices.first ?? 0), singleType: .ordered(selectionOutcomes)),
+            treeNavigationResult: .init(
+                defaultOutcome: treeNavigationOutcome,
+                type: .ordered([treeNavigationOutcome])
+            )
         )
         let shell = MockLaunchShell(results: shellResults)
         let folder = moveTrackingDirectory ?? projectFolderPath.map { makeMoveTrackingDirectory(path: $0, containedFiles: projectFolderFiles) }
