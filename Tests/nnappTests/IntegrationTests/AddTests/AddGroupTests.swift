@@ -114,11 +114,12 @@ extension AddGroupTests {
 
 // MARK: - Factory
 private extension AddGroupTests {
-    func makeFactory(includeGroup: Bool = false, selectedFolder: Folder) throws -> MockContextFactory {
+    func makeFactory(includeGroup: Bool = false, selectedFolder: Folder, grantPermission: Bool = true) throws -> MockContextFactory {
         let existingCategoryFolder = try tempFolder.subfolder(named: existingCategoryName)
         let folderBrowser = MockDirectoryBrowser()
         folderBrowser.selectedDirectory = FilesDirectoryAdapter(folder: selectedFolder)
-        let factory = MockContextFactory(folderBrowser: folderBrowser)
+        let picker = MockSwiftPicker(permissionResult: .init(defaultValue: grantPermission))
+        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
         let context = try factory.makeContext()
         let category = makeSwiftDataCategory(name: existingCategoryName, path: existingCategoryFolder.path)
         try context.saveCategory(category)

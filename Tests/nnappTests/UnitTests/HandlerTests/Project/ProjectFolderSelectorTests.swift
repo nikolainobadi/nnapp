@@ -10,11 +10,7 @@ import CodeLaunchKit
 import SwiftPickerTesting
 @testable import nnapp
 
-struct ProjectFolderSelectorTests { }
-
-
-// MARK: - Path Selection
-extension ProjectFolderSelectorTests {
+struct ProjectFolderSelectorTests { 
     @Test("Returns project folder when valid path provided for package")
     func returnsProjectFolderWhenValidPathProvidedForPackage() throws {
         let projectDir = MockDirectory(path: "/tmp/MyPackage", containedFiles: ["Package.swift"])
@@ -229,8 +225,20 @@ private extension ProjectFolderSelectorTests {
         )
         let browser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
         let fileSystem = MockFileSystem(directoryToLoad: directoryToLoad, desktop: desktop)
-        let sut = ProjectFolderSelector(picker: picker, fileSystem: fileSystem, folderBrowser: browser)
+        let projectService = ProjectManager(store: MockProjectStore(), fileSystem: fileSystem)
+        let sut = ProjectFolderSelector(picker: picker, fileSystem: fileSystem, projectService: projectService, folderBrowser: browser)
 
         return (sut, browser, fileSystem)
     }
+}
+
+private final class MockProjectStore: ProjectStore {
+    func loadProjects() throws -> [LaunchProject] { return [] }
+    func loadGroups() throws -> [LaunchGroup] { return [] }
+    func loadProjectLinkNames() -> [String] { return [] }
+    func deleteGroup(_ group: LaunchGroup) throws { }
+    func deleteProject(_ project: LaunchProject) throws { }
+    func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws { }
+    func updateGroup(_ group: LaunchGroup) throws { }
+    func updateProject(_ project: LaunchProject) throws { }
 }

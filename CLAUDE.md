@@ -81,8 +81,8 @@ swift run nnapp --help
 - **`CodeLaunchContext`**: Primary persistence layer managing SwiftData models and UserDefaults storage
 - **Command Pattern**: Each CLI command (`Add`, `Create`, `Remove`, `List`, `Open`, `Finder`, `Script`, `SetMainProject`) implements `ParsableCommand`
 - **Handler Classes**: Domain-specific logic orchestrators:
-  - `CategoryHandler`: Create, import, remove categories
-  - `GroupHandler`: Create, import, remove groups; set main projects
+- `CategoryController`: Create, import, remove categories
+- `GroupHandler`: Create, import, remove groups; set main projects
   - `ProjectHandler`: Add, remove, evict projects
   - `OpenProjectHandler`: Manage IDE/terminal/URL launches
   - `FinderHandler`: Open folders in Finder
@@ -124,7 +124,7 @@ Sources/nnapp/
 │   ├── SetMainProject/               # set main project for group
 │   └── Evict/ (disabled)             # evict project folders
 ├── Handlers/                         # Business logic orchestrators
-│   ├── Category/                     # CategoryHandler
+│   ├── Category/                     # CategoryController
 │   ├── Group/                        # GroupHandler, main project logic
 │   ├── Project/                      # ProjectHandler, BranchInfo
 │   ├── Open/                         # OpenProjectHandler, IDELauncher, TerminalManager

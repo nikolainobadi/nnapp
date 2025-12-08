@@ -35,35 +35,14 @@ extension DefaultDirectoryBrowser: DirectoryBrowser {
     ///   - prompt: Prompt shown at the top of the tree navigation.
     ///   - startPath: Optional path to use as the root of the browser. Defaults to the user's home directory.
     /// - Returns: The selected `Directory`.
-    func browseForDirectory(prompt: String, startPath: String? = nil) throws -> Directory {
-        let rootURL = try resolveRootURL(startPath: startPath)
-        let rootNode = FileSystemNode(url: rootURL)
-        let root = TreeNavigationRoot(displayName: rootURL.lastPathComponent, children: [rootNode])
-        
-        guard let selection = picker.treeNavigation(prompt, root: root, newScreen: true, showPromptText: false) else {
+    func browseForDirectory(prompt: String) throws -> Directory {
+        let rootNode = FileSystemNode(url: homeDirectoryURL)
+        let root = TreeNavigationRoot(displayName: homeDirectoryURL.lastPathComponent, children: rootNode.loadChildren())
+
+        guard let selection = picker.treeNavigation(prompt, root: root) else {
             throw CodeLaunchError.invalidInput
         }
         
         return try fileSystem.directory(at: selection.url.path)
-    }
-}
-
-
-// MARK: - Convenience
-public extension DirectoryBrowser {
-    func browseForFolder(prompt: String, startPath: String? = nil) throws -> Directory {
-        return try browseForDirectory(prompt: prompt, startPath: startPath)
-    }
-}
-
-
-// MARK: - Private Methods
-private extension DefaultDirectoryBrowser {
-    func resolveRootURL(startPath: String?) throws -> URL {
-        if let startPath {
-            return .init(fileURLWithPath: startPath).standardizedFileURL
-        }
-        
-        return homeDirectoryURL
     }
 }

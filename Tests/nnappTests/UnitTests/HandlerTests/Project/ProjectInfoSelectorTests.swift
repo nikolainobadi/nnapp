@@ -109,8 +109,9 @@ private extension ProjectInfoSelectorTests {
             selectionResult: .init(defaultSingle: .index(selectionIndex))
         )
         let infoLoader = StubProjectInfoLoader(projects: projects, groups: groups, linkNames: linkNames)
+        let projectService = ProjectManager(store: infoLoader, fileSystem: MockFileSystem())
         let shell = MockLaunchShell(results: gitHubURLResults)
-        let sut = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: infoLoader)
+        let sut = ProjectInfoSelector(shell: shell, picker: picker, infoLoader: infoLoader, projectService: projectService)
 
         return (sut, shell)
     }
@@ -119,7 +120,7 @@ private extension ProjectInfoSelectorTests {
 
 // MARK: - Mocks
 private extension ProjectInfoSelectorTests {
-    final class StubProjectInfoLoader: ProjectInfoLoader {
+    final class StubProjectInfoLoader: ProjectInfoLoader, ProjectStore {
         private let projects: [LaunchProject]
         private let groups: [LaunchGroup]
         private let linkNames: [String]
@@ -141,5 +142,11 @@ private extension ProjectInfoSelectorTests {
         func loadProjectLinkNames() -> [String] {
             return linkNames
         }
+
+        func deleteGroup(_ group: LaunchGroup) throws { }
+        func deleteProject(_ project: LaunchProject) throws { }
+        func saveProject(_ project: LaunchProject, in group: LaunchGroup) throws { }
+        func updateGroup(_ group: LaunchGroup) throws { }
+        func updateProject(_ project: LaunchProject) throws { }
     }
 }

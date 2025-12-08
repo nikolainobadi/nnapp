@@ -5,8 +5,10 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
+import CodeLaunchKit
+
 extension Nnapp {
-    static func makeListHandler() throws -> ListHandler {
+    static func makeListController() throws -> ListController {
         let picker = makePicker()
         let repository = try makeRepository()
         let console = contextFactory.makeConsoleOutput()
@@ -14,7 +16,7 @@ extension Nnapp {
         return .init(picker: picker, loader: repository, console: console)
     }
 
-    static func makeFinderHandler() throws -> FinderHandler {
+    static func makeFinderController() throws -> FinderController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
@@ -23,55 +25,71 @@ extension Nnapp {
         return .init(shell: shell, picker: picker, loader: repository, console: console)
     }
 
-    static func makeOpenManager() throws -> OpenProjectHandler {
+    static func makeLaunchController() throws -> LaunchController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
         let fileSystem = contextFactory.makeFileSystem()
-        let delegate = DefaultOpenProjectDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem)
+        let environment = ProcessInfoEnvironmentProvider()
+        let delegate = DefaultLaunchDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem, environment: environment)
+        let launchService = LaunchManager(loader: repository, delegate: delegate)
         
-        return .init(picker: picker, loader: repository, delegate: delegate)
+        return .init(picker: picker, launchService: launchService)
     }
     
-    static func makeCategoryHandler(picker: (any LaunchPicker)? = nil) throws -> CategoryHandler {
+    static func makeCategoryController(picker: (any LaunchPicker)? = nil) throws -> CategoryController {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
-        let folderBrowser = makeFolderBrowser(picker: picker)
-        
-        return .init(store: repository, picker: picker, folderBrowser: folderBrowser)
-    }
-    
-    static func makeGroupHandler(picker: (any LaunchPicker)? = nil) throws -> GroupHandler {
-        let picker = picker ?? makePicker()
-        let repository = try makeRepository()
-        let categorySelector = try makeCategoryHandler(picker: picker)
-        let folderBrowser = makeFolderBrowser(picker: picker)
+        let manager = CategoryManager(store: repository)
         let fileSystem = contextFactory.makeFileSystem()
+        let folderBrowser = makeFolderBrowser(picker: picker)
+        
+        return .init(manager: manager, picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser)
+    }
+    
+    static func makeGroupController(picker: (any LaunchPicker)? = nil) throws -> GroupController {
+        let picker = picker ?? makePicker()
+        let repository = try makeRepository()
+        let fileSystem = contextFactory.makeFileSystem()
+        let folderBrowser = makeFolderBrowser(picker: picker)
+        let categorySelector = try makeCategoryController(picker: picker)
+        let groupService = GroupManager(store: repository, fileSystem: fileSystem)
         
         return .init(
-            store: repository,
             picker: picker,
+            fileSystem: fileSystem,
+            groupService: groupService,
             folderBrowser: folderBrowser,
-            categorySelector: categorySelector,
-            fileSystem: fileSystem
+            categorySelector: categorySelector
         )
     }
     
-    static func makeProjectHandler() throws -> ProjectHandler {
+    static func makeProjectController() throws -> ProjectController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
-        let groupSelector = try makeGroupHandler(picker: picker)
+        let groupSelector = try makeGroupController(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
         let fileSystem = contextFactory.makeFileSystem()
+        let projectService = ProjectManager(store: repository, fileSystem: fileSystem)
 
         return .init(
             shell: shell,
-            store: repository,
+            infoLoader: repository,
+            projectService: projectService,
             picker: picker,
             fileSystem: fileSystem,
             folderBrowser: folderBrowser,
             groupSelector: groupSelector
         )
+    }
+}
+
+
+// TODO: -
+import Foundation
+struct ProcessInfoEnvironmentProvider: TerminalEnvironmentProviding {
+    func termProgram() -> String? {
+        return ProcessInfo.processInfo.environment["TERM_PROGRAM"]
     }
 }

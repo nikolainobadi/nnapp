@@ -274,21 +274,10 @@ nnapp --help
 
 ## Architecture Notes
 
-The project follows a clean, protocol-driven structure:
-
-- `CodeLaunchContext`: Core model and persistence handler
-- `Handlers`: Orchestrate logic per domain (category, group, project, open, finder, script)
-- `FolderBrowser`: Shared tree-navigation browser used for interactive folder selection
-- `IDELauncher`: Manages Xcode/VSCode launching with automatic Git cloning
-- `TerminalManager`: iTerm integration and custom script execution
-- `BranchSyncChecker`: Monitors Git branch status against remotes
-- `BranchStatusNotifier`: Desktop notifications for branch sync alerts
-- `Shell`: Abstracted shell interaction via `NnShellKit`
-- `SwiftPickerKit`: Handles interactive prompts, selections, and tree navigation
-- `SwiftData`: Structured, lightweight local storage with `@Model` decorators
-- `NnGitKit`: Git operations and repository management
-
-Each entity (`Category`, `Group`, `Project`) is managed via a declarative `@Model` and persists automatically using SwiftData.
+- Shared logic lives in `CodeLaunchKit` (models, protocols, managers/services like `CategoryManager`, `GroupManager`, `ProjectManager`, `LaunchManager`, branch helpers), while CLI wiring and picker UX live in `nnapp` controllers.
+- Branch tooling (`BranchSyncChecker`, `BranchStatusNotifier`) is shared for reuse across platforms.
+- Interactive flows use `SwiftPickerKit`; shell/Git interactions are abstracted via `NnShellKit` and `NnGitKit`.
+- Persistence uses `SwiftData` for categories, groups, and projects; tree navigation via a shared folder browser.
 
 ---
 

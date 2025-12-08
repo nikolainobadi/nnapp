@@ -42,7 +42,7 @@ public protocol LaunchGroupCategorySelector {
     func selectCategory(named name: String?) throws -> LaunchCategory
 }
 
-public protocol LaunchGroupStore: GroupLoading, MainProjectShortcutStore {
+public protocol LaunchGroupStore: GroupLoading, CategoryLoading, MainProjectShortcutStore {
     func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws
     func deleteGroup(_ group: LaunchGroup) throws
 }

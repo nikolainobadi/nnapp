@@ -7,6 +7,7 @@
 
 import Testing
 import Foundation
+import CodeLaunchKit
 import NnShellTesting
 @testable import nnapp
 

@@ -6,13 +6,5 @@
 //
 
 public protocol DirectoryBrowser {
-    func browseForDirectory(prompt: String, startPath: String?) throws -> Directory
-}
-
-
-// MARK: - Convenience Method
-public extension DirectoryBrowser {
-    func browseForDirectory(prompt: String, startPath: String? = nil) throws -> Directory {
-        return try browseForDirectory(prompt: prompt, startPath: startPath)
-    }
+    func browseForDirectory(prompt: String) throws -> Directory
 }

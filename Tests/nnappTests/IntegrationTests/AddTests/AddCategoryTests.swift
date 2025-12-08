@@ -18,9 +18,7 @@ final class AddCategoryTests: MainActorBaseAddTests {
         let existingName = "existingCategory"
         let otherFolder = try tempFolder.createSubfolder(named: "OtherFolder")
         let categoryFolderToImport = try otherFolder.createSubfolder(named: existingName)
-        let selectedDirectory = FilesDirectoryAdapter(folder: categoryFolderToImport)
-        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let factory = MockContextFactory(folderBrowser: folderBrowser)
+        let factory = makeContextFactory(categoryFolderToImport: categoryFolderToImport)
         let context = try factory.makeContext()
         let existingCategory = makeSwiftDataCategory(name: existingName, path: tempFolder.path.appendingPathComponent(existingName))
 
@@ -35,10 +33,7 @@ final class AddCategoryTests: MainActorBaseAddTests {
     func savesNewCategory(useArg: Bool) throws {
         let categoryFolderToImport = try tempFolder.createSubfolder(named: "newCategory")
         let path = categoryFolderToImport.path
-        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(useArg ? [] : [path])))
-        let folderBrowser = MockDirectoryBrowser()
-        folderBrowser.selectedDirectory = FilesDirectoryAdapter(folder: categoryFolderToImport)
-        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
+        let factory = makeContextFactory(categoryFolderToImport: categoryFolderToImport, inputResults: useArg ? [] : [path])
         let context = try factory.makeContext()
 
         try runCommand(factory, argType: .category(path: useArg ? path : nil))
@@ -49,6 +44,18 @@ final class AddCategoryTests: MainActorBaseAddTests {
         #expect(categories.count == 1)
         #expect(savedCategory.name.matches(categoryFolderToImport.name))
         #expect(savedCategory.path.matches(categoryFolderToImport.path))
+    }
+}
+
+
+// MARK: - Factory
+private extension AddCategoryTests {
+    func makeContextFactory(categoryFolderToImport: Folder, inputResults: [String] = [], grantPermission: Bool = true) -> MockContextFactory {
+        let selectedDirectory = FilesDirectoryAdapter(folder: categoryFolderToImport)
+        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
+        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(inputResults)), permissionResult: .init(defaultValue: grantPermission))
+        
+        return .init(picker: picker, folderBrowser: folderBrowser)
     }
 }
 

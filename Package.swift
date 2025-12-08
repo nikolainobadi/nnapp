@@ -19,23 +19,23 @@ let package = Package(
         .package(url: "https://github.com/nikolainobadi/NnShellKit.git", from: "2.2.0"),
         .package(url: "https://github.com/nikolainobadi/NnSwiftDataKit", from: "0.8.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
-        .package(url: "https://github.com/nikolainobadi/SwiftPickerKit.git", from: "0.7.0")
+        .package(url: "https://github.com/nikolainobadi/SwiftPickerKit.git", from: "0.8.0")
     ],
     targets: [
         .target(
             name: "CodeLaunchKit",
             dependencies: [
                 "Files",
-                "NnSwiftDataKit"
+                "NnSwiftDataKit",
+                .product(name: "GitShellKit", package: "NnGitKit"),
+                .product(name: "NnShellKit", package: "NnShellKit"),
+                .product(name: "GitCommandGen", package: "NnGitKit")
             ]
         ),
         .executableTarget(
             name: "nnapp",
             dependencies: [
                 "CodeLaunchKit",
-                "NnSwiftDataKit",
-                .product(name: "GitShellKit", package: "NnGitKit"),
-                .product(name: "NnShellKit", package: "NnShellKit"),
                 .product(name: "SwiftPickerKit", package: "SwiftPickerKit"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
