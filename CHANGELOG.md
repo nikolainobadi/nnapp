@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-12-08
+
+### Changed
+- Major internal refactoring: extracted CodeLaunchKit framework for better separation of concerns
+- Migrated from SwiftShell to NnShellKit (v2.2.0+)
+- Migrated from SwiftPicker to SwiftPickerKit (v0.8.0+)
+- Improved group selection UI when adding new projects
+- Improved selection experience when removing groups
+- Enhanced folder browsing to always start at home directory
+- Added user confirmation prompts before creating or importing categories
+
+### Fixed
+- Folder browsing now correctly supports direct folder selection when path is provided during category create/import operations
+
+### Removed
+- Temporarily disabled `script` subcommand (will be re-enabled in a future release)
+
 ## [0.6.1] - 2025-10-04
 
 ### Changed
