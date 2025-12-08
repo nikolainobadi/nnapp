@@ -1,5 +1,5 @@
 //
-//  ProjectLinkHandler.swift
+//  ProjectLinkSelector.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/28/25.
@@ -8,7 +8,7 @@
 import CodeLaunchKit
 
 /// Handles interactive prompting for custom project links beyond the primary remote.
-struct ProjectLinkHandler {
+struct ProjectLinkSelector {
     private let picker: any LaunchPicker
     private let linkOptions: [String]
     private let projectService: any ProjectService
@@ -26,7 +26,7 @@ struct ProjectLinkHandler {
 
 
 // MARK: - Action
-extension ProjectLinkHandler {
+extension ProjectLinkSelector {
     /// Recursively prompts the user to add custom links and returns all captured entries.
     /// - Returns: An array of `ProjectLink` objects created from user input.
     func getOtherLinks() -> [ProjectLink] {
@@ -43,7 +43,7 @@ extension ProjectLinkHandler {
 
 
 // MARK: - Private Methods
-private extension ProjectLinkHandler {
+private extension ProjectLinkSelector {
     /// Retrieves a link name using either pre-configured options or freeform input.
     /// - Returns: The selected or entered name, or `nil` if the user cancels.
     func getName() -> String? {

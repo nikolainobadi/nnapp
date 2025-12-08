@@ -1,5 +1,5 @@
 //
-//  ProjectLinkHandlerTests.swift
+//  ProjectLinkSelectorTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 4/2/25.
@@ -10,7 +10,7 @@ import CodeLaunchKit
 import SwiftPickerTesting
 @testable import nnapp
 
-struct ProjectLinkHandlerTests {
+struct ProjectLinkSelectorTests {
     @Test("Returns empty when user declines custom link prompt")
     func returnsEmptyWhenUserDeclinesCustomLinkPrompt() {
         let sut = makeSUT(permissionResults: [false])
@@ -66,15 +66,15 @@ struct ProjectLinkHandlerTests {
 
 
 // MARK: - SUT
-private extension ProjectLinkHandlerTests {
-    func makeSUT(linkOptions: [String] = [], inputResults: [String] = [], permissionResults: [Bool] = [], selectionIndex: Int = 0) -> ProjectLinkHandler {
+private extension ProjectLinkSelectorTests {
+    func makeSUT(linkOptions: [String] = [], inputResults: [String] = [], permissionResults: [Bool] = [], selectionIndex: Int = 0) -> ProjectLinkSelector {
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
             permissionResult: .init(defaultValue: true, type: .ordered(permissionResults)),
             selectionResult: .init(defaultSingle: .index(selectionIndex))
         )
         let projectService = ProjectManager(store: MockProjectStore(), fileSystem: MockFileSystem())
-        return ProjectLinkHandler(picker: picker, linkOptions: linkOptions, projectService: projectService)
+        return ProjectLinkSelector(picker: picker, linkOptions: linkOptions, projectService: projectService)
     }
 }
 

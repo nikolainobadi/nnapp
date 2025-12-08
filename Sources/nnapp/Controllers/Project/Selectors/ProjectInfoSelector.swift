@@ -90,7 +90,7 @@ private extension ProjectInfoSelector {
     /// Launches a prompt flow for adding additional custom links (e.g. Firebase, website).
     func getOtherLinks() -> [ProjectLink] {
         let linkOptions = projectService.loadProjectLinkNames()
-        let handler = ProjectLinkHandler(picker: picker, linkOptions: linkOptions, projectService: projectService)
+        let handler = ProjectLinkSelector(picker: picker, linkOptions: linkOptions, projectService: projectService)
         
         return handler.getOtherLinks()
     }
