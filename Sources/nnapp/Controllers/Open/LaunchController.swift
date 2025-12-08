@@ -1,5 +1,5 @@
 //
-//  OpenProjectHandler.swift
+//  LaunchController.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 3/26/25.
@@ -7,13 +7,13 @@
 
 import CodeLaunchKit
 
-struct OpenProjectHandler {
+struct LaunchController {
     private let picker: any LaunchPicker
     private let loader: any Loader
-    private let delegate: any OpenProjectDelegate
+    private let delegate: any LaunchDelegate
 
     typealias Loader = ScriptLoader & LaunchHierarchyLoader
-    init(picker: any LaunchPicker, loader: any Loader, delegate: any OpenProjectDelegate) {
+    init(picker: any LaunchPicker, loader: any Loader, delegate: any LaunchDelegate) {
         self.picker = picker
         self.loader = loader
         self.delegate = delegate
@@ -22,7 +22,7 @@ struct OpenProjectHandler {
 
 
 // MARK: - Project Selection
-extension OpenProjectHandler {
+extension LaunchController {
     /// Resolves a `LaunchProject` using either a shortcut or interactive selection.
     /// - Parameters:
     ///   - shortcut: Optional shortcut to identify the project or group.
@@ -52,7 +52,7 @@ extension OpenProjectHandler {
 
 
 // MARK: - IDE Operations
-extension OpenProjectHandler {
+extension LaunchController {
     /// Opens the project in Xcode or VSCode, optionally launching terminal in the project directory.
     /// - Parameters:
     ///   - project: The project to open.
@@ -74,7 +74,7 @@ extension OpenProjectHandler {
 
 
 // MARK: - URL Operations
-extension OpenProjectHandler {
+extension LaunchController {
     /// Opens the remote repository URL in the browser.
     /// - Parameter project: The project whose remote URL to open.
     func openRemoteURL(for project: LaunchProject) throws {
@@ -86,15 +86,4 @@ extension OpenProjectHandler {
     func openProjectLink(for project: LaunchProject) throws {
         try delegate.openProjectLink(project.links)
     }
-}
-
-
-// MARK: - Dependencies
-protocol OpenProjectDelegate {
-    func openIDE(_ project: LaunchProject, launchType: LaunchType) throws
-    func openTerminal(folderPath: String, option: TerminalOption?)
-    func checkBranchStatus(for project: LaunchProject) -> LaunchBranchStatus?
-    func notifyBranchStatus(_ status: LaunchBranchStatus, for project: LaunchProject)
-    func openRemoteURL(for remote: ProjectLink?) throws
-    func openProjectLink(_ links: [ProjectLink]) throws
 }

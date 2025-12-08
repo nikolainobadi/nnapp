@@ -26,16 +26,15 @@ let package = Package(
             name: "CodeLaunchKit",
             dependencies: [
                 "Files",
-                "NnSwiftDataKit"
+                "NnSwiftDataKit",
+                .product(name: "GitShellKit", package: "NnGitKit"),
+                .product(name: "NnShellKit", package: "NnShellKit"),
             ]
         ),
         .executableTarget(
             name: "nnapp",
             dependencies: [
                 "CodeLaunchKit",
-                "NnSwiftDataKit",
-                .product(name: "GitShellKit", package: "NnGitKit"),
-                .product(name: "NnShellKit", package: "NnShellKit"),
                 .product(name: "SwiftPickerKit", package: "SwiftPickerKit"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],

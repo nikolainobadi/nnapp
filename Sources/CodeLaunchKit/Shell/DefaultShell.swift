@@ -8,26 +8,28 @@
 import NnShellKit
 import GitShellKit
 
-struct DefaultShell {
+public struct DefaultShell {
     private let shell: NnShell = .init()
+    
+    public init() { }
 }
 
 extension DefaultShell: GitShell {
-    func runWithOutput(_ command: String) throws -> String {
+    public func runWithOutput(_ command: String) throws -> String {
         return try shell.bash(command)
     }
 }
 
 extension DefaultShell: LaunchGitShell {
-    func bash(_ command: String) throws -> String {
+    public func bash(_ command: String) throws -> String {
         return try shell.bash(command)
     }
     
-    func runAndPrint(bash command: String) throws {
+    public func runAndPrint(bash command: String) throws {
         try shell.runAndPrint(bash: command)
     }
     
-    func run(_ program: String, args: [String]) throws -> String {
+    public func run(_ program: String, args: [String]) throws -> String {
         return try shell.run(program, args: args)
     }
 }

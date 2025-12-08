@@ -1,5 +1,5 @@
 //
-//  OpenProjectHandlerTests.swift
+//  LaunchControllerTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/05/25.
@@ -11,7 +11,7 @@ import CodeLaunchKit
 import SwiftPickerTesting
 @testable import nnapp
 
-struct OpenProjectHandlerTests {
+struct LaunchControllerTests {
     @Test("Selects project from group shortcut with picker selection")
     func selectsProjectFromGroupShortcutWithPickerSelection() throws {
         let groupProjects = [
@@ -57,7 +57,7 @@ struct OpenProjectHandlerTests {
 
 
 // MARK: - IDE Operations
-extension OpenProjectHandlerTests {
+extension LaunchControllerTests {
     @Test("Opens IDE and terminal then skips notification when branch status nil")
     func opensIDEAndTerminalThenSkipsNotificationWhenBranchStatusNil() throws {
         let project = makeProject(name: "App", shortcut: "app", remote: makeProjectLink(), group: makeProjectGroup(path: "/tmp/group"))
@@ -102,7 +102,7 @@ extension OpenProjectHandlerTests {
 
 
 // MARK: - URL Operations
-extension OpenProjectHandlerTests {
+extension LaunchControllerTests {
     @Test("Opens remote URL through service")
     func opensRemoteURLThroughService() throws {
         let remote = makeProjectLink()
@@ -128,18 +128,18 @@ extension OpenProjectHandlerTests {
 
 
 // MARK: - SUT
-private extension OpenProjectHandlerTests {
+private extension LaunchControllerTests {
     func makeSUT(
         projects: [LaunchProject] = [],
         groups: [LaunchGroup] = [],
         selectionIndex: Int = 0,
         branchStatus: LaunchBranchStatus? = nil,
         throwError: Bool = false
-    ) -> (sut: OpenProjectHandler, delegate: MockOpenProjectDelegate) {
+    ) -> (sut: LaunchController, delegate: MockOpenProjectDelegate) {
         let picker = MockSwiftPicker(selectionResult: .init(defaultSingle: .index(selectionIndex)))
         let loader = StubLoader(projects: projects, groups: groups)
         let delegate = MockOpenProjectDelegate(throwError: throwError, branchStatus: branchStatus)
-        let sut = OpenProjectHandler(picker: picker, loader: loader, delegate: delegate)
+        let sut = LaunchController(picker: picker, loader: loader, delegate: delegate)
 
         return (sut, delegate)
     }
@@ -147,8 +147,8 @@ private extension OpenProjectHandlerTests {
 
 
 // MARK: - Mocks
-private extension OpenProjectHandlerTests {
-    final class StubLoader: OpenProjectHandler.Loader {
+private extension LaunchControllerTests {
+    final class StubLoader: LaunchController.Loader {
         private let groups: [LaunchGroup]
         private let projects: [LaunchProject]
         
@@ -178,7 +178,7 @@ private extension OpenProjectHandlerTests {
         }
     }
     
-    final class MockOpenProjectDelegate: OpenProjectDelegate {
+    final class MockOpenProjectDelegate: LaunchDelegate {
         private let throwError: Bool
         private let branchStatus: LaunchBranchStatus?
 

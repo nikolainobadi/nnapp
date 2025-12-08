@@ -25,12 +25,13 @@ extension Nnapp {
         return .init(shell: shell, picker: picker, loader: repository, console: console)
     }
 
-    static func makeOpenManager() throws -> OpenProjectHandler {
+    static func makeOpenManager() throws -> LaunchController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
         let fileSystem = contextFactory.makeFileSystem()
-        let delegate = DefaultOpenProjectDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem)
+        let environment = ProcessInfoEnvironmentProvider()
+        let delegate = DefaultOpenProjectDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem, environment: environment)
         
         return .init(picker: picker, loader: repository, delegate: delegate)
     }
@@ -79,5 +80,14 @@ extension Nnapp {
             folderBrowser: folderBrowser,
             groupSelector: groupSelector
         )
+    }
+}
+
+
+// TODO: -
+import Foundation
+struct ProcessInfoEnvironmentProvider: TerminalEnvironmentProviding {
+    func termProgram() -> String? {
+        return ProcessInfo.processInfo.environment["TERM_PROGRAM"]
     }
 }

@@ -7,7 +7,7 @@
 
 import GitShellKit
 
-protocol LaunchGitShell: LaunchShell {
+public protocol LaunchGitShell: LaunchShell {
     func remoteExists(path: String?) throws -> Bool
     func localGitExists(at path: String?) throws -> Bool
     func runGitCommandWithOutput(_ command: GitShellCommand, path: String?) throws -> String

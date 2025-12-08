@@ -17,11 +17,12 @@ struct DefaultOpenProjectDelegate {
     init(
         shell: any LaunchGitShell,
         picker: any LaunchPicker,
-        loader: any OpenProjectHandler.Loader,
-        fileSystem: any FileSystem
+        loader: any LaunchController.Loader,
+        fileSystem: any FileSystem,
+        environment: any TerminalEnvironmentProviding
     ) {
         self.ideLauncher = .init(shell: shell, picker: picker, fileSystem: fileSystem)
-        self.terminalManager = .init(shell: shell, loader: loader)
+        self.terminalManager = .init(shell: shell, loader: loader, environment: environment)
         self.urlLauncher = .init(shell: shell, picker: picker)
         self.branchSyncChecker = .init(shell: shell, fileSystem: fileSystem)
         self.branchStatusNotifier = .init(shell: shell)
@@ -29,8 +30,8 @@ struct DefaultOpenProjectDelegate {
 }
 
 
-// MARK: - OpenProjectDelegate
-extension DefaultOpenProjectDelegate: OpenProjectDelegate {
+// MARK: - LaunchDelegate
+extension DefaultOpenProjectDelegate: LaunchDelegate {
     func openIDE(_ project: LaunchProject, launchType: LaunchType) throws {
         try ideLauncher.openInIDE(project, launchType: launchType)
     }

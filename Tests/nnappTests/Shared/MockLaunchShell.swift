@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 12/5/25.
 //
 
+import CodeLaunchKit
 import GitCommandGen
 import NnShellTesting
 @testable import nnapp

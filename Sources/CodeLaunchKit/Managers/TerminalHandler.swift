@@ -6,7 +6,7 @@
 //
 
 /// Manages terminal operations including iTerm integration and session management.
-struct TerminalHandler {
+public struct TerminalHandler {
     private let shell: any LaunchShell
     private let loader: any ScriptLoader
     private let environment: any TerminalEnvironmentProviding
@@ -15,7 +15,7 @@ struct TerminalHandler {
     /// - Parameters:
     ///   - shell: Shell protocol for executing system commands.
     ///   - context: Data context for loading launch scripts.
-    init(shell: any LaunchShell, loader: any ScriptLoader, environment: any TerminalEnvironmentProviding = ProcessInfoEnvironmentProvider()) {
+    public init(shell: any LaunchShell, loader: any ScriptLoader, environment: any TerminalEnvironmentProviding) {
         self.shell = shell
         self.loader = loader
         self.environment = environment
@@ -24,7 +24,7 @@ struct TerminalHandler {
 
 
 // MARK: - Actions
-extension TerminalHandler {
+public extension TerminalHandler {
     /// Opens the project folder in a new terminal window, if not already open.
     /// - Parameters:
     ///   - folderPath: The project folder path to open.
@@ -99,10 +99,10 @@ private extension TerminalHandler {
 
 
 // MARK: - Dependencies
-protocol ScriptLoader {
+public protocol ScriptLoader {
     func loadLaunchScript() -> String?
 }
 
-protocol TerminalEnvironmentProviding {
+public protocol TerminalEnvironmentProviding {
     func termProgram() -> String?
 }

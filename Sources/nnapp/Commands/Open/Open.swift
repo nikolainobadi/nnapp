@@ -45,13 +45,13 @@ extension Nnapp {
 
 // MARK: - Extension Dependencies
 extension LaunchType: EnumerableFlag {
-    static func name(for value: LaunchType) -> NameSpecification {
+    public static func name(for value: LaunchType) -> NameSpecification {
         return .customShort(value.argChar)
     }
 }
 
 extension TerminalOption: EnumerableFlag {
-    static func name(for value: TerminalOption) -> NameSpecification {
+    public static func name(for value: TerminalOption) -> NameSpecification {
         switch value {
         case .noTerminal:
             return [.customShort("n"), .customLong("no-terminal")]
