@@ -5,6 +5,8 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
+import CodeLaunchKit
+
 extension Nnapp {
     static func makeListHandler() throws -> ListHandler {
         let picker = makePicker()
@@ -37,8 +39,9 @@ extension Nnapp {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
         let folderBrowser = makeFolderBrowser(picker: picker)
+        let manager = CategoryManager(store: repository)
         
-        return .init(store: repository, picker: picker, folderBrowser: folderBrowser)
+        return .init(manager: manager, picker: picker, folderBrowser: folderBrowser)
     }
     
     static func makeGroupHandler(picker: (any LaunchPicker)? = nil) throws -> GroupHandler {

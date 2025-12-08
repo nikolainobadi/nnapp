@@ -8,12 +8,12 @@
 import CodeLaunchKit
 
 struct CategoryHandler {
-    private let store: any CategoryStore
+    private let manager: CategoryManager
     private let picker: any LaunchPicker
     private let folderBrowser: any DirectoryBrowser
     
-    init(store: any CategoryStore, picker: any LaunchPicker, folderBrowser: any DirectoryBrowser) {
-        self.store = store
+    init(manager: CategoryManager, picker: any LaunchPicker, folderBrowser: any DirectoryBrowser) {
+        self.manager = manager
         self.picker = picker
         self.folderBrowser = folderBrowser
     }
@@ -24,22 +24,17 @@ struct CategoryHandler {
 extension CategoryHandler {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
-        let categories = try loadAllCategories()
         let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
-        let name = try validateName(folder.name, categories: categories)
         
-        return try saveCategory(.new(name: name, path: folder.path))
+        return try manager.importCategory(from: folder)
     }
     
     @discardableResult
     func createNewCategory(named name: String?, parentPath: String?) throws -> LaunchCategory {
-        let categories = try loadAllCategories()
         let proposedName = try name ?? picker.getRequiredInput("Enter the name of your new category.")
-        let name = try validateName(proposedName, categories: categories)
-        let parentFolder = try selectParentFolder(path: parentPath, categoryName: name)
-        let categoryFolder = try createSubfolder(named: name, in: parentFolder)
+        let parentFolder = try selectParentFolder(path: parentPath, categoryName: proposedName)
         
-        return try saveCategory(.new(name: name, path: categoryFolder.path))
+        return try manager.createCategory(named: proposedName, in: parentFolder)
     }
 }
 
@@ -47,7 +42,7 @@ extension CategoryHandler {
 // MARK: - Remove
 extension CategoryHandler {
     func removeCategory(named name: String?) throws {
-        let categories = try loadAllCategories()
+        let categories = try manager.loadCategories()
         let categoryToDelete: LaunchCategory
         
         if let name, let category = categories.first(where: { $0.name.lowercased() == name.lowercased() }) {
@@ -61,7 +56,7 @@ extension CategoryHandler {
         }
         
         try picker.requiredPermission("Are you sure want to remove \(categoryToDelete.name.yellow)?")
-        try store.deleteCategory(categoryToDelete)
+        try manager.deleteCategory(categoryToDelete)
     }
 }
 
@@ -69,17 +64,11 @@ extension CategoryHandler {
 // MARK: - LaunchGroupCategorySelector
 extension CategoryHandler: LaunchGroupCategorySelector {
     func getCategory(group: LaunchGroup) -> LaunchCategory? {
-        guard let categories = try? loadAllCategories() else {
-            return nil
-        }
-        
-        return categories.first(where: { category in
-            category.groups.contains(where: { $0.name.matches(group.name) })
-        })
+        return manager.getCategory(for: group)
     }
     
     func selectCategory(named name: String?) throws -> LaunchCategory {
-        let categories = try loadAllCategories()
+        let categories = try manager.loadCategories()
         
         if let name {
             if let category = categories.first(where: { $0.name.matches(name) }) {
@@ -103,10 +92,6 @@ extension CategoryHandler: LaunchGroupCategorySelector {
 
 // MARK: - Private Methods
 private extension CategoryHandler {
-    func loadAllCategories() throws -> [LaunchCategory] {
-        return try store.loadCategories()
-    }
-    
     func selectFolder(path: String?, browsePrompt: String) throws -> Directory {
         return try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: path)
     }
@@ -115,35 +100,9 @@ private extension CategoryHandler {
         return try picker.requiredSingleSelection("How would you like to assign a Category to your Group?", items: AssignCategoryType.allCases, showSelectedItemText: false)
     }
     
-    func validateName(_ name: String, categories: [LaunchCategory]) throws -> String {
-        if categories.contains(where: { $0.name.matches(name) }) {
-            throw CodeLaunchError.categoryNameTaken
-        }
-        
-        return name.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-    
     func selectParentFolder(path: String?, categoryName: String) throws -> Directory {
         let folder = try selectFolder(path: path, browsePrompt: "Select the folder where \(categoryName.yellow) should be created")
-        
-        try validateParentFolder(folder, categoryName: categoryName)
-        
         return folder
-    }
-    
-    func validateParentFolder(_ folder: Directory, categoryName: String) throws {
-        if folder.subdirectories.contains(where: { $0.name.matches(categoryName) }) {
-            throw CodeLaunchError.categoryPathTaken
-        }
-    }
-    
-    func createSubfolder(named name: String, in parentFolder: Directory) throws -> Directory {
-        return try parentFolder.createSubdirectory(named: name)
-    }
-    
-    func saveCategory(_ category: LaunchCategory) throws -> LaunchCategory {
-        try store.saveCategory(category)
-        return category
     }
     
     func makeCategoryDetail(for category: LaunchCategory) -> String {

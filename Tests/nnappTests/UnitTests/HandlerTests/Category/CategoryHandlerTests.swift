@@ -359,6 +359,7 @@ private extension CategoryHandlerTests {
         selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp")
     ) -> (sut: CategoryHandler, store: MockCategoryStore, browser: MockDirectoryBrowser) {
         let store = MockCategoryStore(categories: categories)
+        let manager = CategoryManager(store: store)
         let picker = MockSwiftPicker(
             inputResult: .init(type: .ordered(inputResults)),
             permissionResult: .init(defaultValue: true, type: .ordered([true])),
@@ -371,7 +372,7 @@ private extension CategoryHandlerTests {
             )
         )
         let browser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let sut = CategoryHandler(store: store, picker: picker, folderBrowser: browser)
+        let sut = CategoryHandler(manager: manager, picker: picker, folderBrowser: browser)
 
         return (sut, store, browser)
     }
