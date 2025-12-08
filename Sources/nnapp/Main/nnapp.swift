@@ -22,7 +22,7 @@ struct Nnapp: ParsableCommand {
             List.self,
             Open.self,
             Finder.self,
-            Script.self,
+//            Script.self, // TODO: - will enable soon
             SetMainProject.self
         ]
     )
