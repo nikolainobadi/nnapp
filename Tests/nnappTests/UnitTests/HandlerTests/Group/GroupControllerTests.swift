@@ -140,31 +140,38 @@ extension GroupControllerTests {
 extension GroupControllerTests {
     @Test("Removes group by name without prompting")
     func removesGroupByNameWithoutPrompting() throws {
-        let group = makeGroup(name: "ToDelete")
+        let groupName = "ToDelete"
+        let group = makeGroup(name: groupName)
         let category = makeCategory(name: "TestCat", groups: [group])
-        let (sut, store, _, _) = makeSUT(groups: [group], category: category)
+        let (sut, store, _, _) = makeSUT(groups: [group], category: category, categoriesToLoad: [category])
 
-        try sut.removeGroup(named: "ToDelete")
+        try sut.removeGroup(named: groupName)
 
         #expect(store.deletedGroups.first?.name == group.name)
     }
 
     @Test("Removes group using case-insensitive name matching")
     func removesGroupUsingCaseInsensitiveNameMatching() throws {
-        let group = makeGroup(name: "MixedCase")
+        let groupName = "MixedCase"
+        let group = makeGroup(name: groupName)
         let category = makeCategory(name: "TestCat", groups: [group])
-        let (sut, store, _, _) = makeSUT(groups: [group], category: category)
+        let (sut, store, _, _) = makeSUT(groups: [group], category: category, categoriesToLoad: [category])
 
         try sut.removeGroup(named: "mixedcase")
 
-        #expect(store.deletedGroups.first?.name == "MixedCase")
+        #expect(store.deletedGroups.first?.name == groupName)
     }
 
     @Test("Prompts to select group when name missing")
     func promptsToSelectGroupWhenNameMissing() throws {
         let groups = [makeGroup(name: "First"), makeGroup(name: "Second")]
         let category = makeCategory(name: "TestCat", groups: groups)
-        let (sut, store, _, _) = makeSUT(groups: groups, category: category, assignGroupTypeIndex: 1, selectionIndex: 0)
+        let (sut, store, _, _) = makeSUT(
+            groups: groups,
+            category: category,
+            categoriesToLoad: [category],
+            treeNavigationOutcome: .child(parentIndex: 0, childIndex: 1)
+        )
 
         try sut.removeGroup(named: nil)
 
@@ -175,7 +182,12 @@ extension GroupControllerTests {
     func promptsToSelectGroupWhenNameNotFound() throws {
         let groups = [makeGroup(name: "First"), makeGroup(name: "Second")]
         let category = makeCategory(name: "TestCat", groups: groups)
-        let (sut, store, _, _) = makeSUT(groups: groups, category: category, selectionIndex: 0)
+        let (sut, store, _, _) = makeSUT(
+            groups: groups,
+            category: category,
+            categoriesToLoad: [category],
+            treeNavigationOutcome: .child(parentIndex: 0, childIndex: 0)
+        )
 
         try sut.removeGroup(named: "NonExistent")
 
@@ -400,7 +412,8 @@ private extension GroupControllerTests {
         selectionIndex: Int = 0,
         selectionOutcomes: [MockSingleSelectionOutcome]? = nil,
         directoryToLoad: MockDirectory? = MockDirectory(path: "/tmp"),
-        selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp")
+        selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp"),
+        treeNavigationOutcome: MockTreeSelectionOutcome = .none
     ) -> (sut: GroupController, store: MockGroupStore, browser: MockDirectoryBrowser, fileSystem: MockFileSystem) {
         let store = MockGroupStore(groups: groups, category: category, categoriesToLoad: categoriesToLoad)
         let singleSelections = selectionOutcomes ?? [
@@ -413,7 +426,8 @@ private extension GroupControllerTests {
             selectionResult: .init(
                 defaultSingle: .index(selectionIndex),
                 singleType: .ordered(singleSelections)
-            )
+            ),
+            treeNavigationResult: .init(defaultOutcome: treeNavigationOutcome, type: .ordered([treeNavigationOutcome]))
         )
         let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
         let categorySelector = MockCategorySelector(category: category)

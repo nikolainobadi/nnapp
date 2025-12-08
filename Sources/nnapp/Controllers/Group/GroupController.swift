@@ -69,17 +69,26 @@ extension GroupController {
 // MARK: - Remove
 extension GroupController {
     func removeGroup(named name: String?) throws {
-        let groups = try groupService.loadGroups()
+        let categories = try groupService.loadCategories()
+        let groups = categories.flatMap({ $0.groups })
         let groupToDelete: LaunchGroup
         
         if let name, let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
             groupToDelete = group
         } else {
-            groupToDelete = try picker.requiredSingleSelection(
-                "Select a group to delete",
-                items: groups,
-                layout: .twoColumnDynamic { makeGroupDetail(for: $0) }
-            )
+            let nodes = LaunchTreeNode.categoryNodes(categories: categories, canSelect: false, includeProjects: false)
+            let prompt = "Select a group from a category to remove."
+            
+            guard let selection = picker.treeNavigation(prompt, root: .init(displayName: "Code Launch Groups", children: nodes)) else {
+                throw CodeLaunchError.missingGroup
+            }
+            
+            switch selection.type {
+            case .group(let group):
+                groupToDelete = group
+            default:
+                throw CodeLaunchError.missingGroup
+            }
         }
         
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")

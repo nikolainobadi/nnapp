@@ -19,7 +19,7 @@ let package = Package(
         .package(url: "https://github.com/nikolainobadi/NnShellKit.git", from: "2.2.0"),
         .package(url: "https://github.com/nikolainobadi/NnSwiftDataKit", from: "0.8.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
-        .package(url: "https://github.com/nikolainobadi/SwiftPickerKit.git", from: "0.7.0")
+        .package(url: "https://github.com/nikolainobadi/SwiftPickerKit.git", branch: "allow-child-selection-mock-tree-navigation")
     ],
     targets: [
         .target(
