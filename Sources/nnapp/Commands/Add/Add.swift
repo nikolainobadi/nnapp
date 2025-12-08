@@ -34,7 +34,7 @@ extension Nnapp.Add {
         var path: String?
 
         func run() throws {
-            try Nnapp.makeCategoryHandler().importCategory(path: path)
+            try Nnapp.makeCategoryController().importCategory(path: path)
         }
     }
 }

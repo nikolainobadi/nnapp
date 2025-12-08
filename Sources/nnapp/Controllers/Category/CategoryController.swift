@@ -1,5 +1,5 @@
 //
-//  CategoryHandler.swift
+//  CategoryController.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/4/25.
@@ -7,12 +7,12 @@
 
 import CodeLaunchKit
 
-struct CategoryHandler {
-    private let manager: CategoryManager
+struct CategoryController {
     private let picker: any LaunchPicker
+    private let manager: any CategoryService
     private let folderBrowser: any DirectoryBrowser
     
-    init(manager: CategoryManager, picker: any LaunchPicker, folderBrowser: any DirectoryBrowser) {
+    init(manager: any CategoryService, picker: any LaunchPicker, folderBrowser: any DirectoryBrowser) {
         self.manager = manager
         self.picker = picker
         self.folderBrowser = folderBrowser
@@ -21,7 +21,7 @@ struct CategoryHandler {
 
 
 // MARK: - Add
-extension CategoryHandler {
+extension CategoryController {
     @discardableResult
     func importCategory(path: String?) throws -> LaunchCategory {
         let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
@@ -40,7 +40,7 @@ extension CategoryHandler {
 
 
 // MARK: - Remove
-extension CategoryHandler {
+extension CategoryController {
     func removeCategory(named name: String?) throws {
         let categories = try manager.loadCategories()
         let categoryToDelete: LaunchCategory
@@ -62,9 +62,9 @@ extension CategoryHandler {
 
 
 // MARK: - LaunchGroupCategorySelector
-extension CategoryHandler: LaunchGroupCategorySelector {
+extension CategoryController: LaunchGroupCategorySelector {
     func getCategory(group: LaunchGroup) -> LaunchCategory? {
-        return manager.getCategory(for: group)
+        return manager.category(for: group)
     }
     
     func selectCategory(named name: String?) throws -> LaunchCategory {
@@ -91,7 +91,7 @@ extension CategoryHandler: LaunchGroupCategorySelector {
 
 
 // MARK: - Private Methods
-private extension CategoryHandler {
+private extension CategoryController {
     func selectFolder(path: String?, browsePrompt: String) throws -> Directory {
         return try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: path)
     }

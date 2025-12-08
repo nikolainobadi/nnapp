@@ -35,7 +35,7 @@ extension Nnapp {
         return .init(picker: picker, loader: repository, delegate: delegate)
     }
     
-    static func makeCategoryHandler(picker: (any LaunchPicker)? = nil) throws -> CategoryHandler {
+    static func makeCategoryController(picker: (any LaunchPicker)? = nil) throws -> CategoryController {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
         let folderBrowser = makeFolderBrowser(picker: picker)
@@ -47,7 +47,7 @@ extension Nnapp {
     static func makeGroupHandler(picker: (any LaunchPicker)? = nil) throws -> GroupHandler {
         let picker = picker ?? makePicker()
         let repository = try makeRepository()
-        let categorySelector = try makeCategoryHandler(picker: picker)
+        let categorySelector = try makeCategoryController(picker: picker)
         let folderBrowser = makeFolderBrowser(picker: picker)
         let fileSystem = contextFactory.makeFileSystem()
         

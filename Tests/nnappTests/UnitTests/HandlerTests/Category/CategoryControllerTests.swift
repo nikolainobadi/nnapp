@@ -1,5 +1,5 @@
 //
-//  CategoryHandlerTests.swift
+//  CategoryControllerTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/05/25.
@@ -10,7 +10,7 @@ import CodeLaunchKit
 import SwiftPickerTesting
 @testable import nnapp
 
-struct CategoryHandlerTests {
+struct CategoryControllerTests {
     @Test("Imports category using provided path")
     func importsCategoryUsingProvidedPath() throws {
         let directory = MockDirectory(path: "/tmp/cat")
@@ -61,7 +61,7 @@ struct CategoryHandlerTests {
 
 
 // MARK: - Create
-extension CategoryHandlerTests {
+extension CategoryControllerTests {
     @Test("Creates new category with prompted name and parent folder")
     func createsNewCategoryWithPromptedNameAndParentFolder() throws {
         let parent = MockDirectory(path: "/tmp")
@@ -140,7 +140,7 @@ extension CategoryHandlerTests {
 
 
 // MARK: - Remove
-extension CategoryHandlerTests {
+extension CategoryControllerTests {
     @Test("Removes category by name without prompting")
     func removesCategoryByNameWithoutPrompting() throws {
         let category = makeCategory(name: "ToDelete")
@@ -190,7 +190,7 @@ extension CategoryHandlerTests {
 
 
 // MARK: - Get Category
-extension CategoryHandlerTests {
+extension CategoryControllerTests {
     @Test("Returns category containing the group")
     func returnsCategoryContainingTheGroup() {
         let group = makeGroup(name: "TestGroup")
@@ -237,7 +237,7 @@ extension CategoryHandlerTests {
 
 
 // MARK: - Select Category
-extension CategoryHandlerTests {
+extension CategoryControllerTests {
     @Test("Returns matching category by name without prompting")
     func returnsMatchingCategoryByNameWithoutPrompting() throws {
         let category = makeCategory(name: "Match")
@@ -350,14 +350,14 @@ extension CategoryHandlerTests {
 
 
 // MARK: - SUT
-private extension CategoryHandlerTests {
+private extension CategoryControllerTests {
     func makeSUT(
         categories: [LaunchCategory] = [],
         inputResults: [String] = [],
         assignCategoryTypeIndex: Int = 0,
         selectionIndex: Int = 0,
         selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp")
-    ) -> (sut: CategoryHandler, store: MockCategoryStore, browser: MockDirectoryBrowser) {
+    ) -> (sut: CategoryController, store: MockCategoryStore, browser: MockDirectoryBrowser) {
         let store = MockCategoryStore(categories: categories)
         let manager = CategoryManager(store: store)
         let picker = MockSwiftPicker(
@@ -372,7 +372,7 @@ private extension CategoryHandlerTests {
             )
         )
         let browser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let sut = CategoryHandler(manager: manager, picker: picker, folderBrowser: browser)
+        let sut = CategoryController(manager: manager, picker: picker, folderBrowser: browser)
 
         return (sut, store, browser)
     }
@@ -380,7 +380,7 @@ private extension CategoryHandlerTests {
 
 
 // MARK: - Mocks
-private extension CategoryHandlerTests {
+private extension CategoryControllerTests {
     final class MockCategoryStore: CategoryStore {
         private(set) var categories: [LaunchCategory]
         private(set) var savedCategories: [LaunchCategory] = []

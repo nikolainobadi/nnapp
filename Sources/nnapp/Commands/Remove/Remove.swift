@@ -33,7 +33,7 @@ extension Nnapp.Remove {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeCategoryHandler().removeCategory(named: name)
+            try Nnapp.makeCategoryController().removeCategory(named: name)
         }
     }
 }

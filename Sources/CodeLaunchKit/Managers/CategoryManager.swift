@@ -5,7 +5,7 @@
 //  Created by Nikolai Nobadi on 12/5/25.
 //
 
-public struct CategoryManager {
+public struct CategoryManager: CategoryService {
     private let store: any CategoryStore
 
     public init(store: any CategoryStore) {
@@ -43,7 +43,7 @@ public extension CategoryManager {
         try store.deleteCategory(category)
     }
 
-    func getCategory(for group: LaunchGroup) -> LaunchCategory? {
+    func category(for group: LaunchGroup) -> LaunchCategory? {
         guard let categories = try? loadCategories() else {
             return nil
         }

@@ -34,7 +34,7 @@ extension Nnapp.Create {
         var parentPath: String?
 
         func run() throws {
-            try Nnapp.makeCategoryHandler().createNewCategory(named: name, parentPath: parentPath)
+            try Nnapp.makeCategoryController().createNewCategory(named: name, parentPath: parentPath)
         }
     }
 }
