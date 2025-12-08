@@ -37,8 +37,9 @@ extension ListController {
             return
         }
         
-        let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
-        _ = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
+        let nodes = LaunchTreeNode.categoryNodes(categories: categories)
+        
+        _ = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: .init(displayName: "CodeLaunch", children: nodes), showPromptText: false)
     }
 }
 
@@ -171,12 +172,12 @@ private extension ListController {
     func displayNodeDetails(_ node: LaunchTreeNode) {
         console.printLine("")
 
-        switch node {
-        case .category(let category, _):
+        switch node.type {
+        case .category(let category,):
             displayCategoryDetails(category)
-        case .group(let group, _):
+        case .group(let group):
             displayGroupDetails(group)
-        case .project(let project, _):
+        case .project(let project):
             displayProjectDetails(project)
         }
 

@@ -32,8 +32,8 @@ extension FinderController {
             return
         }
 
-        let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
-        let selection = picker.treeNavigation("Browse and select folder to open", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
+        let nodes = LaunchTreeNode.categoryNodes(categories: categories)
+        let selection = picker.treeNavigation("Browse and select folder to open", root: .init(displayName: "CodeLaunch", children: nodes), showPromptText: false)
 
         guard let selectedNode = selection else {
             console.printLine("No selection made.")
@@ -135,15 +135,15 @@ private extension FinderController {
     }
     
     func getPathFromNode(_ node: LaunchTreeNode) throws -> String {
-        switch node {
-        case .category(let category, _):
+        switch node.type {
+        case .category(let category):
             return category.path
-        case .group(let group, _):
+        case .group(let group):
             guard let path = group.path else {
                 throw CodeLaunchError.missingGroup
             }
             return path
-        case .project(let project, _):
+        case .project(let project):
             guard let path = project.folderPath else {
                 throw CodeLaunchError.missingProject
             }
