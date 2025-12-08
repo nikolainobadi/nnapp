@@ -50,7 +50,7 @@ extension Nnapp.Remove {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeGroupHandler().removeGroup(named: name)
+            try Nnapp.makeGroupController().removeGroup(named: name)
         }
     }
 }

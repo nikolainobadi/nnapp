@@ -5,7 +5,7 @@
 - Folder browsing lives in `Sources/nnapp/Picker` (`FolderBrowser`, `DefaultFolderBrowser`) and is injected into handlers via factories.
 - Tests sit in `Tests/nnappTests/UnitTests`, organized by command or handler. Shared test helpers (mock pickers, context factories, temp folder helpers) are under `Tests/nnappTests/Shared`.
 - Resources (e.g., `Resources/Info.plist`) stay minimal; prefer code-first configuration where possible.
-- Main project logic lives in `GroupHandler.setMainProject`; shortcut sync rules are exercised via unit tests in `GroupHandlerTests`.
+- Main project logic lives in `GroupController.setMainProject`; shortcut sync rules are exercised via unit tests in `GroupControllerTests`.
 
 ## Build, Test, and Development Commands
 - `swift build` — compile the package; use to verify new code paths. Avoid running automatically in CI unless requested.

@@ -54,7 +54,7 @@ extension Nnapp.Add {
         var category: String?
 
         func run() throws {
-            try Nnapp.makeGroupHandler().importGroup(path: path, categoryName: category)
+            try Nnapp.makeGroupController().importGroup(path: path, categoryName: category)
         }
     }
 }

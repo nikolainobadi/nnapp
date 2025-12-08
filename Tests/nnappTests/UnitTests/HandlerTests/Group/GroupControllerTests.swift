@@ -1,5 +1,5 @@
 //
-//  GroupHandlerTests.swift
+//  GroupControllerTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/05/25.
@@ -10,7 +10,7 @@ import CodeLaunchKit
 import SwiftPickerTesting
 @testable import nnapp
 
-struct GroupHandlerTests {
+struct GroupControllerTests {
     @Test("Imports group using provided path")
     func importsGroupUsingProvidedPath() throws {
         let category = makeCategory(name: "TestCat", path: "/tmp/cat")
@@ -78,7 +78,7 @@ struct GroupHandlerTests {
 
 
 // MARK: - Create
-extension GroupHandlerTests {
+extension GroupControllerTests {
     @Test("Creates new group with prompted name")
     func createsNewGroupWithPromptedName() throws {
         let category = makeCategory(name: "TestCat", path: "/tmp/cat")
@@ -134,7 +134,7 @@ extension GroupHandlerTests {
 
 
 // MARK: - Remove
-extension GroupHandlerTests {
+extension GroupControllerTests {
     @Test("Removes group by name without prompting")
     func removesGroupByNameWithoutPrompting() throws {
         let group = makeGroup(name: "ToDelete")
@@ -182,7 +182,7 @@ extension GroupHandlerTests {
 
 
 // MARK: - Select Group
-extension GroupHandlerTests {
+extension GroupControllerTests {
     @Test("Returns matching group by name without prompting")
     func returnsMatchingGroupByNameWithoutPrompting() throws {
         let group = makeGroup(name: "Match")
@@ -307,7 +307,7 @@ extension GroupHandlerTests {
 
 
 // MARK: - Set Main Project
-extension GroupHandlerTests {
+extension GroupControllerTests {
     @Test("Clears previous main shortcut when reusing group shortcut")
     func clearsPreviousMainShortcutWhenReusingGroupShortcut() throws {
         let currentMain = makeProject(name: "Main", shortcut: "grp")
@@ -385,7 +385,7 @@ extension GroupHandlerTests {
 
 
 // MARK: - SUT
-private extension GroupHandlerTests {
+private extension GroupControllerTests {
     func makeSUT(
         groups: [LaunchGroup] = [],
         category: LaunchCategory = makeCategory(),
@@ -396,7 +396,7 @@ private extension GroupHandlerTests {
         selectionOutcomes: [MockSingleSelectionOutcome]? = nil,
         directoryToLoad: MockDirectory? = MockDirectory(path: "/tmp"),
         selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp")
-    ) -> (sut: GroupHandler, store: MockGroupStore, browser: MockDirectoryBrowser, fileSystem: MockFileSystem) {
+    ) -> (sut: GroupController, store: MockGroupStore, browser: MockDirectoryBrowser, fileSystem: MockFileSystem) {
         let store = MockGroupStore(groups: groups, category: category)
         let singleSelections = selectionOutcomes ?? [
             .index(assignGroupTypeIndex),
@@ -410,25 +410,41 @@ private extension GroupHandlerTests {
                 singleType: .ordered(singleSelections)
             )
         )
-        let browser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
+        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
         let categorySelector = MockCategorySelector(category: category)
         let homeDirectory = MockDirectory(path: "/Users/test")
-        let fileSystem = MockFileSystem(homeDirectory: homeDirectory, directoryToLoad: directoryToLoad)
-        let sut = GroupHandler(
-            store: store,
+        let categoryDirectory: any Directory
+        if let directoryToLoad, directoryToLoad.path == category.path {
+            categoryDirectory = directoryToLoad
+        } else {
+            categoryDirectory = MockDirectory(path: category.path)
+        }
+
+        var directoryMap: [String: any Directory] = [
+            category.path: categoryDirectory
+        ]
+
+        if let directoryToLoad {
+            directoryMap[directoryToLoad.path] = directoryToLoad
+        }
+
+        let fileSystem = MockFileSystem(homeDirectory: homeDirectory, directoryToLoad: nil, directoryMap: directoryMap)
+        let groupService = GroupManager(store: store, fileSystem: fileSystem)
+        let sut = GroupController(
             picker: picker,
-            folderBrowser: browser,
-            categorySelector: categorySelector,
-            fileSystem: fileSystem
+            fileSystem: fileSystem,
+            groupService: groupService,
+            folderBrowser: folderBrowser,
+            categorySelector: categorySelector
         )
 
-        return (sut, store, browser, fileSystem)
+        return (sut, store, folderBrowser, fileSystem)
     }
 }
 
 
 // MARK: - Mocks
-private extension GroupHandlerTests {
+private extension GroupControllerTests {
     final class MockGroupStore: LaunchGroupStore {
         private(set) var groups: [LaunchGroup]
         private(set) var savedGroups: [LaunchGroup] = []

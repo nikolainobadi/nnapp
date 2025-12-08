@@ -1,5 +1,5 @@
 //
-//  GroupHandler.swift
+//  GroupController.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/4/25.
@@ -7,55 +7,56 @@
 
 import CodeLaunchKit
 
-struct GroupHandler {
-    private let store: any LaunchGroupStore
+struct GroupController {
     private let picker: any LaunchPicker
+    private let fileSystem: any FileSystem
+    private let groupService: any GroupService
     private let folderBrowser: any DirectoryBrowser
     private let categorySelector: any LaunchGroupCategorySelector
-    private let fileSystem: any FileSystem
     
     init(
-        store: any LaunchGroupStore,
         picker: any LaunchPicker,
+        fileSystem: any FileSystem,
+        groupService: any GroupService,
         folderBrowser: any DirectoryBrowser,
-        categorySelector: any LaunchGroupCategorySelector,
-        fileSystem: any FileSystem
+        categorySelector: any LaunchGroupCategorySelector
     ) {
-        self.store = store
         self.picker = picker
+        self.fileSystem = fileSystem
+        self.groupService = groupService
         self.folderBrowser = folderBrowser
         self.categorySelector = categorySelector
-        self.fileSystem = fileSystem
     }
 }
 
 
 // MARK: - Add
-extension GroupHandler {
+extension GroupController {
     @discardableResult
     func importGroup(path: String?, categoryName: String?) throws -> LaunchGroup {
         let category = try selectCategory(name: categoryName)
-        let groupFolder = try selectGroupFolder(path: path, category: category)
-        let name = try validateName(groupFolder.name, groups: category.groups)
+        let selection = try selectGroupFolder(path: path, category: category)
+        let name = try groupService.validateName(selection.folder.name, groups: category.groups)
         
-        return try saveGroup(.new(name: name), in: category)
+        return try groupService.saveGroup(.new(name: name), in: category, groupFolder: selection.folder, categoryFolder: selection.categoryFolder)
     }
     
     @discardableResult
     func createNewGroup(named name: String?, categoryName: String?) throws -> LaunchGroup {
         let category = try selectCategory(name: categoryName)
         let proposedName = try name ?? picker.getRequiredInput("Enter the name of your new group.")
-        let name = try validateName(proposedName, groups: category.groups)
+        let name = try groupService.validateName(proposedName, groups: category.groups)
+        let categoryFolder = try fileSystem.directory(at: category.path)
     
-        return try saveGroup(.new(name: name), in: category)
+        return try groupService.saveGroup(.new(name: name), in: category, groupFolder: nil, categoryFolder: categoryFolder)
     }
 }
 
 
 // MARK: - Remove
-extension GroupHandler {
+extension GroupController {
     func removeGroup(named name: String?) throws {
-        let groups = try loadAllGroups()
+        let groups = try groupService.loadGroups()
         let groupToDelete: LaunchGroup
         
         if let name, let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
@@ -69,21 +70,19 @@ extension GroupHandler {
         }
         
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
-        try store.deleteGroup(groupToDelete)
+        try groupService.deleteGroup(groupToDelete)
     }
 }
 
 
 // MARK: - LaunchProjectGroupSelector
-extension GroupHandler: ProjectGroupSelector {
+extension GroupController: ProjectGroupSelector {
     func getProjectGroup(project: LaunchProject) throws -> LaunchGroup? {
-        return try loadAllGroups().first(where: { group in
-            return group.projects.contains(where: { $0.name.matches(project.name) })
-        })
+        return try groupService.projectGroup(for: project)
     }
     
     func selectGroup(name: String?) throws -> LaunchGroup {
-        let groups = try loadAllGroups()
+        let groups = try groupService.loadGroups()
         
         if let name {
             if let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
@@ -105,9 +104,9 @@ extension GroupHandler: ProjectGroupSelector {
 
 
 // MARK: - SetMainProject
-extension GroupHandler {
+extension GroupController {
     func setMainProject(group: String?) throws {
-        let groups = try loadAllGroups()
+        let groups = try groupService.loadGroups()
         let selectedGroup = try resolveGroup(named: group, in: groups)
         guard let selection = try chooseNewMainProject(in: selectedGroup) else {
             return
@@ -128,7 +127,7 @@ extension GroupHandler {
 
 
 // MARK: - Private Methods
-private extension GroupHandler {
+private extension GroupController {
     func resolveGroup(named name: String?, in groups: [LaunchGroup]) throws -> LaunchGroup {
         if let name {
             if let foundGroup = groups.first(where: { $0.name.matches(name) || name.matches($0.shortcut) }) {
@@ -142,7 +141,7 @@ private extension GroupHandler {
     }
     
     func chooseNewMainProject(in group: LaunchGroup) throws -> (currentMain: LaunchProject?, newMain: LaunchProject)? {
-        let currentMain = mainProject(in: group)
+        let currentMain = groupService.mainProject(in: group)
         
         if let currentMain {
             print("Current main project: \(currentMain.name.bold)")
@@ -154,7 +153,7 @@ private extension GroupHandler {
             print("No main project is currently set for group '\(group.name.bold)'")
         }
         
-        let candidates = nonMainProjects(in: group, excluding: currentMain)
+        let candidates = groupService.nonMainProjects(in: group, excluding: currentMain)
         guard !candidates.isEmpty else {
             let message = currentMain != nil
                 ? "No other projects exist in this group to switch to."
@@ -207,28 +206,16 @@ private extension GroupHandler {
     }
     
     func shouldClearPreviousShortcut(group: LaunchGroup, shortcutToUse: String) -> Bool {
-        guard let currentGroupShortcut = group.shortcut else {
-            return false
-        }
-        
-        return currentGroupShortcut.matches(shortcutToUse)
+        return groupService.shouldClearPreviousShortcut(group: group, shortcutToUse: shortcutToUse)
     }
     
     func persistMainProjectChange(group: LaunchGroup, currentMain: LaunchProject?, newMain: LaunchProject, shortcut: String) throws {
-        if let currentMain, shouldClearPreviousShortcut(group: group, shortcutToUse: shortcut) {
-            var clearedProject = currentMain
-            clearedProject.shortcut = nil
-            try store.updateProject(clearedProject)
-        }
-        
-        var updatedGroup = group
-        var updatedMain = newMain
-        
-        updatedGroup.shortcut = shortcut
-        updatedMain.shortcut = shortcut
-        
-        try store.updateProject(updatedMain)
-        try store.updateGroup(updatedGroup)
+        try groupService.persistMainProjectChange(
+            group: group,
+            currentMain: currentMain,
+            newMain: newMain,
+            shortcut: shortcut
+        )
     }
     
     func selectCategory(name: String?) throws -> LaunchCategory {
@@ -239,72 +226,26 @@ private extension GroupHandler {
         return try picker.requiredSingleSelection("How would you like to assign a Group to your Project?", items: AssignGroupType.allCases, showSelectedItemText: false)
     }
     
-    func selectGroupFolder(path: String?, category: LaunchCategory) throws -> any Directory {
+    func selectGroupFolder(path: String?, category: LaunchCategory) throws -> (folder: Directory, categoryFolder: Directory) {
+        let categoryFolder = try fileSystem.directory(at: category.path)
+
         if let path {
-            return try fileSystem.directory(at: path)
+            return (try fileSystem.directory(at: path), categoryFolder)
         }
         
-        let categoryFolder = try fileSystem.directory(at: category.path)
         let availableFolders = categoryFolder.subdirectories.filter { folder in
             !category.groups.map({ $0.name.lowercased() }).contains(folder.name.lowercased())
         }
 
         if !availableFolders.isEmpty, picker.getPermission("Would you like to select a subfolder of \(categoryFolder.name)?") {
-            return try picker.requiredSingleSelection("Select a folder", items: availableFolders.map({ DirectoryContainer(directory: $0) }), showSelectedItemText: false).directory
+            let selected = try picker.requiredSingleSelection("Select a folder", items: availableFolders.map({ DirectoryContainer(directory: $0) }), showSelectedItemText: false).directory
+            return (selected, categoryFolder)
         }
 
-        return try folderBrowser.browseForDirectory(prompt: "Browse to select a folder to import as a Group")
+        let browsed = try folderBrowser.browseForDirectory(prompt: "Browse to select a folder to import as a Group")
+        return (browsed, categoryFolder)
     }
-    
-    func loadAllGroups() throws -> [LaunchGroup] {
-        return try store.loadGroups()
-    }
-    
-    func saveGroup(_ group: LaunchGroup, in category: LaunchCategory, groupFolder: Directory? = nil) throws -> LaunchGroup {
-        if let groupFolder {
-            try moveFolderIfNecessary(groupFolder, category: category)
-        } else {
-            try createNewGroupFolder(group: group, category: category)
-        }
-        
-        try store.saveGroup(group, in: category)
-        return group
-    }
-    
-    func validateName(_ name: String, groups: [LaunchGroup]) throws -> String {
-        if groups.contains(where: { $0.name.matches(name) }) {
-            throw CodeLaunchError.groupNameTaken
-        }
-        
-        return name
-    }
-    
-    func moveFolderIfNecessary(_ folder: Directory, category: LaunchCategory) throws {
-        let categoryFolder = try fileSystem.directory(at: category.path)
-        
-        if let existingFolder = try? categoryFolder.subdirectory(named: folder.name) {
-            if existingFolder.path != folder.path {
-                throw CodeLaunchError.groupFolderAlreadyExists
-            }
-            
-            print("folder is already in the correct location")
-            return
-        }
-        
-        try folder.move(to: categoryFolder)
-    }
-    
-    func createNewGroupFolder(group: LaunchGroup, category: LaunchCategory) throws {
-        let categoryFolder = try fileSystem.directory(at: category.path)
-        let subfolderNames = categoryFolder.subdirectories.map({ $0.name })
 
-        if subfolderNames.contains(where: { $0.matches(group.name) }) {
-            throw CodeLaunchError.groupFolderAlreadyExists
-        }
-
-        _ = try categoryFolder.createSubdirectory(named: group.name)
-    }
-    
     func makeGroupDetail(for group: LaunchGroup) -> String {
         let category = categorySelector.getCategory(group: group)
         let categoryName = category?.name ?? "Not assigned"

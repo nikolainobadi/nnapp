@@ -13,8 +13,8 @@ struct CategoryController {
     private let folderBrowser: any DirectoryBrowser
     
     init(manager: any CategoryService, picker: any LaunchPicker, folderBrowser: any DirectoryBrowser) {
-        self.manager = manager
         self.picker = picker
+        self.manager = manager
         self.folderBrowser = folderBrowser
     }
 }

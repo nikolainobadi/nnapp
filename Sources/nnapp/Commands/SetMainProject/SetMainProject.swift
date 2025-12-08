@@ -17,7 +17,7 @@ extension Nnapp {
         var group: String?
 
         func run() throws {
-            try Nnapp.makeGroupHandler().setMainProject(group: group)
+            try Nnapp.makeGroupController().setMainProject(group: group)
         }
     }
 }

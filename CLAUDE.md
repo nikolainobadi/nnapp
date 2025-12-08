@@ -82,7 +82,7 @@ swift run nnapp --help
 - **Command Pattern**: Each CLI command (`Add`, `Create`, `Remove`, `List`, `Open`, `Finder`, `Script`, `SetMainProject`) implements `ParsableCommand`
 - **Handler Classes**: Domain-specific logic orchestrators:
 - `CategoryController`: Create, import, remove categories
-  - `GroupHandler`: Create, import, remove groups; set main projects
+- `GroupHandler`: Create, import, remove groups; set main projects
   - `ProjectHandler`: Add, remove, evict projects
   - `OpenProjectHandler`: Manage IDE/terminal/URL launches
   - `FinderHandler`: Open folders in Finder
