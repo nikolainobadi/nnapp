@@ -8,7 +8,7 @@
 import CodeLaunchKit
 
 extension Nnapp {
-    static func makeListHandler() throws -> ListHandler {
+    static func makeListHandler() throws -> ListController {
         let picker = makePicker()
         let repository = try makeRepository()
         let console = contextFactory.makeConsoleOutput()

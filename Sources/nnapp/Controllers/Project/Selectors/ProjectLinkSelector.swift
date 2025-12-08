@@ -7,7 +7,6 @@
 
 import CodeLaunchKit
 
-/// Handles interactive prompting for custom project links beyond the primary remote.
 struct ProjectLinkSelector {
     private let picker: any LaunchPicker
     private let linkOptions: [String]

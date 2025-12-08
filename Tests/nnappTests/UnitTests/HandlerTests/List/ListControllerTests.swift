@@ -1,16 +1,16 @@
 //
-//  ListHandlerTests.swift
+//  ListControllerTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/05/25.
 //
 
+import Testing
 import CodeLaunchKit
 import SwiftPickerTesting
-import Testing
 @testable import nnapp
 
-struct ListHandlerTests {
+struct ListControllerTests {
     @Test("Displays root placeholder when no categories exist")
     func displaysRootPlaceholderWhenNoCategoriesExist() throws {
         let (sut, _, console) = makeSUT(categories: [])
@@ -41,7 +41,7 @@ struct ListHandlerTests {
 
 
 // MARK: - Category Operations
-extension ListHandlerTests {
+extension ListControllerTests {
     @Test("Selects category by name without prompting")
     func selectsCategoryByNameWithoutPrompting() throws {
         let category = LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: [])
@@ -69,7 +69,7 @@ extension ListHandlerTests {
 
 
 // MARK: - Group Operations
-extension ListHandlerTests {
+extension ListControllerTests {
     @Test("Selects group by name without prompting")
     func selectsGroupByNameWithoutPrompting() throws {
         let group = LaunchGroup.new(name: "Backend", shortcut: nil, projects: [])
@@ -97,7 +97,7 @@ extension ListHandlerTests {
 
 
 // MARK: - Project Operations
-extension ListHandlerTests {
+extension ListControllerTests {
     @Test("Selects project by name or shortcut without prompting")
     func selectsProjectByNameOrShortcutWithoutPrompting() throws {
         let project = makeProject(name: "CLI", shortcut: "cli", type: .package, remote: nil, links: [], group: nil)
@@ -126,7 +126,7 @@ extension ListHandlerTests {
 
 
 // MARK: - Link Operations
-extension ListHandlerTests {
+extension ListControllerTests {
     @Test("Displays placeholder when no project link names exist")
     func displaysPlaceholderWhenNoProjectLinkNamesExist() {
         let (sut, _, console) = makeSUT(linkNames: [])
@@ -151,7 +151,7 @@ extension ListHandlerTests {
 
 
 // MARK: - SUT
-private extension ListHandlerTests {
+private extension ListControllerTests {
     func makeSUT(
         categories: [LaunchCategory] = [],
         groups: [LaunchGroup] = [],
@@ -159,14 +159,14 @@ private extension ListHandlerTests {
         linkNames: [String] = [],
         selectionIndex: Int = 0,
         treeNavigationOutcome: MockTreeSelectionOutcome = .none
-    ) -> (sut: ListHandler, loader: StubListLoader, console: MockConsoleOutput) {
+    ) -> (sut: ListController, loader: StubListLoader, console: MockConsoleOutput) {
         let picker = MockSwiftPicker(
             selectionResult: .init(defaultSingle: .index(selectionIndex)),
             treeNavigationResult: .init(defaultOutcome: treeNavigationOutcome)
         )
         let console = MockConsoleOutput()
         let loader = StubListLoader(categories: categories, groups: groups, projects: projects, linkNames: linkNames)
-        let sut = ListHandler(picker: picker, loader: loader, console: console)
+        let sut = ListController(picker: picker, loader: loader, console: console)
 
         return (sut, loader, console)
     }

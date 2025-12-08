@@ -1,5 +1,5 @@
 //
-//  ListHandler.swift
+//  ListController.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/3/25.
@@ -7,8 +7,7 @@
 
 import CodeLaunchKit
 
-/// Coordinates list and display operations for CodeLaunch hierarchy.
-struct ListHandler {
+struct ListController {
     private let picker: any LaunchPicker
     private let loader: any LaunchListLoader
     private let console: any ConsoleOutput
@@ -27,7 +26,7 @@ struct ListHandler {
 
 
 // MARK: - Hierarchy Navigation
-extension ListHandler {
+extension ListController {
     func browseHierarchy() throws {
         let categories = try loader.loadCategories()
         
@@ -49,7 +48,7 @@ extension ListHandler {
 
 
 // MARK: - Category Operations
-extension ListHandler {
+extension ListController {
     func selectAndDisplayCategory(name: String?) throws {
         let categories = try loader.loadCategories()
         let selectedCategory: LaunchCategory
@@ -87,7 +86,7 @@ extension ListHandler {
 
 
 // MARK: - Group Operations
-extension ListHandler {
+extension ListController {
     func selectAndDisplayGroup(name: String?) throws {
         let groups = try loader.loadGroups()
         let selectedGroup: LaunchGroup
@@ -120,7 +119,7 @@ extension ListHandler {
 
 
 // MARK: - Project Operations
-extension ListHandler {
+extension ListController {
     func selectAndDisplayProject(name: String?) throws {
         let projects = try loader.loadProjects()
         let selectedProject: LaunchProject
@@ -152,7 +151,7 @@ extension ListHandler {
 
 
 // MARK: - Link Operations
-extension ListHandler {
+extension ListController {
     func displayProjectLinks() {
         let existingNames = loader.loadProjectLinkNames()
 
@@ -172,7 +171,7 @@ extension ListHandler {
 
 
 // MARK: - Private Methods
-private extension ListHandler {
+private extension ListController {
     func displayNodeDetails(_ node: LaunchTreeNode) {
         console.printLine("")
 
