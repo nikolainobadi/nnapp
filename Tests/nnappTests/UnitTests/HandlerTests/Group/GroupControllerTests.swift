@@ -202,7 +202,7 @@ extension GroupControllerTests {
     func returnsMatchingGroupByNameWithoutPrompting() throws {
         let group = makeGroup(name: "Match")
         let category = makeCategory(name: "TestCat", groups: [group])
-        let (sut, _, _, _) = makeSUT(groups: [group], category: category)
+        let (sut, _, _, _) = makeSUT(groups: [group], category: category, categoriesToLoad: [category])
 
         let selected = try sut.selectGroup(name: "match")
 
@@ -213,7 +213,7 @@ extension GroupControllerTests {
     func findsGroupUsingCaseInsensitiveMatching() throws {
         let group = makeGroup(name: "MixedCase")
         let category = makeCategory(name: "TestCat", groups: [group])
-        let (sut, _, _, _) = makeSUT(groups: [group], category: category)
+        let (sut, _, _, _) = makeSUT(groups: [group], category: category, categoriesToLoad: [category])
 
         let selected = try sut.selectGroup(name: "MIXEDCASE")
 
@@ -261,8 +261,10 @@ extension GroupControllerTests {
         let (sut, _, _, _) = makeSUT(
             groups: [existing],
             category: category,
+            categoriesToLoad: [category],
             assignGroupTypeIndex: 0,
-            selectionIndex: 0
+            selectionIndex: 0,
+            treeNavigationOutcome: .child(parentIndex: 0, childIndex: 0)
         )
 
         let selected = try sut.selectGroup(name: "NotFound")
@@ -311,8 +313,10 @@ extension GroupControllerTests {
         let (sut, _, _, _) = makeSUT(
             groups: [existing],
             category: category,
+            categoriesToLoad: [category],
             assignGroupTypeIndex: 0,
-            selectionIndex: 0
+            selectionIndex: 0,
+            treeNavigationOutcome: .child(parentIndex: 0, childIndex: 0)
         )
 
         let selected = try sut.selectGroup(name: nil)

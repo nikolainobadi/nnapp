@@ -76,19 +76,7 @@ extension GroupController {
         if let name, let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
             groupToDelete = group
         } else {
-            let nodes = LaunchTreeNode.categoryNodes(categories: categories, canSelect: false, includeProjects: false)
-            let prompt = "Select a group from a category to remove."
-            
-            guard let selection = picker.treeNavigation(prompt, root: .init(displayName: "Code Launch Groups", children: nodes)) else {
-                throw CodeLaunchError.missingGroup
-            }
-            
-            switch selection.type {
-            case .group(let group):
-                groupToDelete = group
-            default:
-                throw CodeLaunchError.missingGroup
-            }
+            groupToDelete = try chooseExistingGroup(prompt: "Select a group from a category to remove.", categories: categories)
         }
         
         try picker.requiredPermission("Are you sure want to remove \(groupToDelete.name.yellow)?")
@@ -104,7 +92,8 @@ extension GroupController: ProjectGroupSelector {
     }
     
     func selectGroup(name: String?) throws -> LaunchGroup {
-        let groups = try groupService.loadGroups()
+        let categories = try groupService.loadCategories()
+        let groups = categories.flatMap({ $0.groups })
         
         if let name {
             if let group = groups.first(where: { $0.name.lowercased() == name.lowercased() }) {
@@ -119,7 +108,7 @@ extension GroupController: ProjectGroupSelector {
         case .create:
             return try createNewGroup(named: name, categoryName: nil)
         case .select:
-            return try picker.requiredSingleSelection("Select a Group", items: groups, showSelectedItemText: false)
+            return try chooseExistingGroup(prompt: "Select a group", categories: categories)
         }
     }
 }
@@ -266,6 +255,21 @@ private extension GroupController {
 
         let browsed = try folderBrowser.browseForDirectory(prompt: "Browse to select a folder to import as a Group")
         return (browsed, categoryFolder)
+    }
+    
+    func chooseExistingGroup(prompt: String, categories: [LaunchCategory]) throws -> LaunchGroup {
+        let nodes = LaunchTreeNode.categoryNodes(categories: categories, canSelect: false, includeProjects: false)
+        
+        guard let selection = picker.treeNavigation(prompt, root: .init(displayName: "Code Launch Groups", children: nodes)) else {
+            throw CodeLaunchError.missingGroup
+        }
+        
+        switch selection.type {
+        case .group(let group):
+            return group
+        default:
+            throw CodeLaunchError.missingGroup
+        }
     }
 
     func makeGroupDetail(for group: LaunchGroup) -> String {
