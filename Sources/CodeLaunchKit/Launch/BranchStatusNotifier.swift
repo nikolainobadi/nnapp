@@ -5,19 +5,17 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import CodeLaunchKit
-
-struct BranchStatusNotifier {
+public struct BranchStatusNotifier {
     private let shell: any LaunchShell
 
-    init(shell: any LaunchShell) {
+    public init(shell: any LaunchShell) {
         self.shell = shell
     }
 }
 
 
 // MARK: - BranchStatusNotifier
-extension BranchStatusNotifier {
+public extension BranchStatusNotifier {
     func notify(status: LaunchBranchStatus, for project: LaunchProject) {
         let title = "Branch Status Alert"
         let message: String

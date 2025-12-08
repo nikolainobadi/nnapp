@@ -5,14 +5,13 @@
 //  Created by Nikolai Nobadi on 3/26/25.
 //
 
-import CodeLaunchKit
 import GitCommandGen
 
-struct BranchSyncChecker {
+public struct BranchSyncChecker {
     private let shell: any LaunchGitShell
     private let fileSystem: any FileSystem
 
-    init(shell: any LaunchGitShell, fileSystem: any FileSystem) {
+    public init(shell: any LaunchGitShell, fileSystem: any FileSystem) {
         self.shell = shell
         self.fileSystem = fileSystem
     }
@@ -20,7 +19,7 @@ struct BranchSyncChecker {
 
 
 // MARK: - BranchSyncChecker
-extension BranchSyncChecker {
+public extension BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
         // Skip if project doesn't have a remote
         guard project.remote != nil else {

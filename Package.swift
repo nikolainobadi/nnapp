@@ -29,6 +29,7 @@ let package = Package(
                 "NnSwiftDataKit",
                 .product(name: "GitShellKit", package: "NnGitKit"),
                 .product(name: "NnShellKit", package: "NnShellKit"),
+                .product(name: "GitCommandGen", package: "NnGitKit")
             ]
         ),
         .executableTarget(
