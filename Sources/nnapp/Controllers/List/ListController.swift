@@ -37,12 +37,8 @@ extension ListController {
             return
         }
         
-        let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: false) })
-        let selection = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
-        
-        if let selectedNode = selection {
-            displayNodeDetails(selectedNode)
-        }
+        let rootNodes = categories.map({ LaunchTreeNode.category($0, selectable: true) })
+        _ = picker.treeNavigation("Browse CodeLaunch Hierarchy", root: .init(displayName: "CodeLaunch", children: rootNodes), showPromptText: false)
     }
 }
 
