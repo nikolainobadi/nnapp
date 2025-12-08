@@ -15,6 +15,19 @@ This repository has multiple documentation files for different purposes:
 
 **nnapp** is a Swift command-line utility for managing and launching Xcode projects and Swift packages. It organizes development environments into hierarchical **Categories**, **Groups**, and **Projects** with SwiftData persistence and Git integration.
 
+## Architecture Evolution (v0.7.0)
+
+Version 0.7.0 introduced a major architectural refactoring:
+
+- **CodeLaunchKit Framework**: Core functionality extracted into a separate framework for better separation of concerns
+- **Repository Pattern**: SwiftData access now goes through a repository layer with domain/persistence model separation
+- **Service Layer**: Business logic moved to Manager classes (CategoryManager, GroupManager, ProjectManager, LaunchManager)
+- **Controller Rename**: Handler classes renamed to Controllers for consistency
+- **Modern Dependencies**: Migrated to NnShellKit (v2.2.0+) and SwiftPickerKit (v0.8.0+)
+- **Clean Architecture**: Clear boundaries between CLI, business logic, and persistence layers
+
+This refactoring improves testability, maintainability, and enables potential future GUI applications using the same CodeLaunchKit framework.
+
 ## Key Features & Concepts
 
 ### Hierarchical Organization
@@ -78,103 +91,202 @@ swift run nnapp --help
 
 ### Core Components
 
-- **`CodeLaunchContext`**: Primary persistence layer managing SwiftData models and UserDefaults storage
-- **Command Pattern**: Each CLI command (`Add`, `Create`, `Remove`, `List`, `Open`, `Finder`, `Script`, `SetMainProject`) implements `ParsableCommand`
-- **Handler Classes**: Domain-specific logic orchestrators:
-- `CategoryController`: Create, import, remove categories
-- `GroupHandler`: Create, import, remove groups; set main projects
-  - `ProjectHandler`: Add, remove, evict projects
-  - `OpenProjectHandler`: Manage IDE/terminal/URL launches
-  - `FinderHandler`: Open folders in Finder
-  - `ListHandler`: Display and browse entities
-  - `ProjectLinkHandler`: Manage link metadata
-- **Shell Abstraction**: `Shell` protocol with `DefaultShell` implementation using `NnShellKit`
+**CodeLaunchKit Framework** (v0.7.0+):
+- **Domain Models**: `LaunchCategory`, `LaunchGroup`, `LaunchProject`, `ProjectLink`, `ProjectType`
+- **Managers**: Service layer handling business logic
+  - `CategoryManager`: Category CRUD operations
+  - `GroupManager`: Group management and main project logic
+  - `ProjectManager`: Project operations and metadata
+  - `LaunchManager`: IDE and terminal launching coordination
+- **SwiftData Layer**:
+  - `CodeLaunchContext`: Primary persistence layer with UserDefaults storage
+  - `SwiftDataLaunchRepository`: Repository pattern for data access
+  - Mappers: Convert between domain models and SwiftData models
+- **Utilities**:
+  - `BranchSyncChecker`: Monitors Git branch status against remotes
+  - `BranchStatusNotifier`: Desktop notifications for branch sync alerts
+  - `TerminalHandler`: iTerm integration and script execution
+- **Protocols**: Service contracts (`CategoryService`, `GroupService`, `ProjectService`, `LaunchService`)
+
+**nnapp CLI**:
+- **Command Pattern**: Each CLI command (`Add`, `Create`, `Remove`, `List`, `Open`, `Finder`, `SetMainProject`) implements `ParsableCommand`
+- **Controllers**: Command handlers orchestrating manager calls
+  - `CategoryController`: Category operations
+  - `GroupController`: Group operations and main project management
+  - `ProjectController`: Project operations with selectors
+  - `LaunchController`: Project launching with IDE/terminal/URL handlers
+  - `FinderController`: Finder integration
+  - `ListController`: Display and browse entities
 - **Interactive Prompts**: `SwiftPickerKit` for CLI user input, selection, and tree navigation
-- **Folder Browser**: `FolderBrowser` protocol with `DefaultFolderBrowser` implementation for interactive folder selection
-- **IDE Launchers**: `IDELauncher` manages Xcode/VSCode launching with automatic Git cloning
-- **Terminal Management**: `TerminalManager` handles iTerm integration and custom script execution
-- **Git Integration**:
-  - `DefaultBranchSyncChecker`: Monitors Git branch status against remotes
-  - `DefaultBranchStatusNotifier`: Desktop notifications for branch sync alerts
-- **URL Launcher**: `URLLauncher` opens remote repos and custom project links
+- **Folder Browser**: `DirectoryBrowser` protocol for interactive folder selection
 
-### Data Models (SwiftData)
+### Data Models
 
+**Domain Models** (in CodeLaunchKit):
 - **`LaunchCategory`**: Top-level containers for groups
-- **`LaunchGroup`**: Collections of related projects within a category  
+- **`LaunchGroup`**: Collections of related projects within a category
 - **`LaunchProject`**: Individual projects with metadata (type, shortcuts, remote repos, links)
 - **`ProjectLink`**: URLs associated with projects (docs, repos, etc.)
 - **`ProjectType`**: Enum for `.project`, `.package`, `.workspace`
 
+**SwiftData Models** (internal, prefixed with `SwiftData`):
+- **`SwiftDataLaunchCategory`**: Persistence model for categories
+- **`SwiftDataLaunchGroup`**: Persistence model for groups
+- **`SwiftDataLaunchProject`**: Persistence model for projects
+- Mappers translate between domain and persistence models
+
 ### Project Structure
 
 ```
-Sources/nnapp/
-├── Main/
-│   ├── nnapp.swift                    # Entry point with @main
-│   └── ContextFactory                 # Protocol + DefaultContextFactory
-├── Commands/                          # ArgumentParser subcommands
-│   ├── Add/                          # add category|group|project|link
-│   ├── Create/                       # create category|group
-│   ├── Remove/                       # remove category|group|project|link
-│   ├── List/                         # list entities
-│   ├── Open/                         # open projects
-│   ├── Finder/                       # finder integration
-│   ├── Script/                       # script management
-│   ├── SetMainProject/               # set main project for group
-│   └── Evict/ (disabled)             # evict project folders
-├── Handlers/                         # Business logic orchestrators
-│   ├── Category/                     # CategoryController
-│   ├── Group/                        # GroupHandler, main project logic
-│   ├── Project/                      # ProjectHandler, BranchInfo
-│   ├── Open/                         # OpenProjectHandler, IDELauncher, TerminalManager
-│   │                                 # BranchSyncChecker, BranchStatusNotifier
-│   ├── Finder/                       # FinderHandler
-│   ├── List/                         # ListHandler
-│   └── Link/                         # ProjectLinkHandler
-├── Kit/                              # Data models & core types
-│   ├── CodeLaunchContext.swift       # SwiftData context & persistence
-│   ├── LaunchCategory.swift          # @Model
-│   ├── LaunchGroup.swift             # @Model
-│   ├── LaunchProject.swift           # @Model
-│   ├── ProjectLink.swift             # Struct (not @Model)
-│   ├── ProjectType.swift             # Enum (.project, .package, .workspace)
-│   └── Error types
-├── Picker/                           # Interactive folder browsing
-│   ├── FolderBrowser.swift           # Protocol
-│   ├── DefaultFolderBrowser.swift    # Implementation
-│   └── LaunchTreeNode.swift          # Tree structure for browsing
-├── Shell/                            # Shell & URL operations
-│   ├── Shell.swift                   # Protocol
-│   ├── DefaultShell.swift            # NnShellKit implementation
-│   └── URLLauncher.swift             # Open URLs/repos
-└── Resources/
-    └── Info.plist
+Sources/
+├── CodeLaunchKit/                    # Core framework (v0.7.0+)
+│   ├── Errors/
+│   │   └── CodeLaunchError.swift
+│   ├── Extensions/
+│   │   ├── String+AppendingPathComponent.swift
+│   │   └── String+Matches.swift
+│   ├── FileSystem/                   # File operations abstraction
+│   │   ├── DefaultFileSystem.swift
+│   │   ├── Directory.swift
+│   │   ├── DirectoryBrowser.swift
+│   │   ├── FileSystem.swift
+│   │   └── FilesDirectoryAdapter.swift
+│   ├── Managers/                     # Business logic services
+│   │   ├── CategoryManager.swift
+│   │   ├── GroupManager.swift
+│   │   ├── LaunchManager.swift
+│   │   └── ProjectManager.swift
+│   ├── Models/                       # Domain models
+│   │   ├── LaunchBranchStatus.swift
+│   │   ├── LaunchCategory.swift
+│   │   ├── LaunchGroup.swift
+│   │   ├── LaunchProject.swift
+│   │   ├── LaunchType.swift
+│   │   ├── ProjectLink.swift
+│   │   ├── ProjectType.swift
+│   │   └── TerminalOption.swift
+│   ├── Protocols/                    # Service contracts
+│   │   ├── CategoryService.swift
+│   │   ├── GroupService.swift
+│   │   ├── LaunchDataContracts.swift
+│   │   ├── LaunchDelegate.swift
+│   │   ├── LaunchService.swift
+│   │   └── ProjectService.swift
+│   ├── Shell/                        # Shell abstraction
+│   │   ├── DefaultShell.swift
+│   │   ├── LaunchGitShell.swift
+│   │   └── LaunchShell.swift
+│   ├── SwiftData/                    # Persistence layer
+│   │   ├── Context/
+│   │   │   └── CodeLaunchContext.swift
+│   │   ├── Mappers/                  # Domain ↔ SwiftData translation
+│   │   │   ├── LaunchCategoryMapper.swift
+│   │   │   ├── LaunchGroupMapper.swift
+│   │   │   └── LaunchProjectMapper.swift
+│   │   ├── Models/
+│   │   │   ├── SwiftDataLaunchCategory.swift
+│   │   │   ├── SwiftDataLaunchGroup.swift
+│   │   │   └── SwiftDataLaunchProject.swift
+│   │   ├── Repositories/
+│   │   │   └── SwiftDataLaunchRepository.swift
+│   │   └── Schema/
+│   │       └── FirstSchema.swift
+│   └── Utilities/
+│       ├── BranchStatusNotifier.swift
+│       ├── BranchSyncChecker.swift
+│       └── TerminalHandler.swift
+│
+└── nnapp/                            # CLI executable
+    ├── Main/
+    │   ├── nnapp.swift               # Entry point with @main
+    │   ├── DefaultContextFactory.swift
+    │   └── nnapp+ConvenienceMethods.swift
+    ├── Commands/                     # Flat command structure
+    │   ├── Add.swift
+    │   ├── Create.swift
+    │   ├── Remove.swift
+    │   ├── List.swift
+    │   ├── Open.swift
+    │   ├── Finder.swift
+    │   ├── SetMainProject.swift
+    │   ├── Script.swift (disabled)
+    │   └── Evict.swift (disabled)
+    ├── Controllers/                  # Command handlers
+    │   ├── Category/
+    │   │   ├── CategoryController.swift
+    │   │   └── AssignCategoryType.swift
+    │   ├── Group/
+    │   │   ├── GroupController.swift
+    │   │   ├── AssignGroupType.swift
+    │   │   └── DirectoryContainer.swift
+    │   ├── Project/
+    │   │   ├── Controller/
+    │   │   │   └── ProjectController.swift
+    │   │   ├── Model/
+    │   │   │   ├── BranchInfo.swift
+    │   │   │   ├── ProjectFolder.swift
+    │   │   │   └── ProjectInfo.swift
+    │   │   └── Selectors/
+    │   │       ├── ProjectFolderSelector.swift
+    │   │       ├── ProjectInfoSelector.swift
+    │   │       └── ProjectLinkSelector.swift
+    │   ├── Launch/
+    │   │   ├── LaunchController.swift
+    │   │   ├── DefaultLaunchDelegate.swift
+    │   │   ├── IDEHandler.swift
+    │   │   └── URLHandler.swift
+    │   ├── Finder/
+    │   │   └── FinderController.swift
+    │   └── List/
+    │       └── ListController.swift
+    ├── Picker/                       # Interactive browsing
+    │   ├── DefaultDirectoryBrowser.swift
+    │   ├── LaunchPicker.swift
+    │   ├── LaunchTreeNode.swift
+    │   ├── DisplayablePickerItemConformance.swift
+    │   └── SwiftPicker+LaunchPicker.swift
+    ├── Shared/
+    │   ├── CodeLaunchError.swift
+    │   └── ConsoleOutput.swift
+    └── Extensions/
+        └── SwiftDataLaunchRepository+Adapters.swift
 
 Tests/nnappTests/
-├── UnitTests/                        # Command-specific test suites
+├── IntegrationTests/                 # Integration test suites
 │   ├── AddTests/
 │   ├── CreateTests/
-│   ├── RemoveTests/
-│   ├── ListTests/
-│   ├── OpenTests/
 │   ├── FinderTests/
-│   └── SetMainProjectTests/
+│   ├── OpenTests/
+│   ├── RemoveTests/
+│   ├── ScriptTests/
+│   └── TestHelpers/
+├── UnitTests/
+│   └── HandlerTests/                 # Controller unit tests
+│       ├── Category/
+│       ├── Group/
+│       ├── Project/
+│       ├── Finder/
+│       ├── List/
+│       └── Open/
 └── Shared/                           # Test utilities
-    ├── MockPicker.swift
-    ├── MockFolderBrowser.swift
     ├── MockContextFactory.swift
-    └── Temp folder helpers
+    ├── MockDirectory.swift
+    ├── MockDirectoryBrowser.swift
+    ├── MockFileSystem.swift
+    ├── MockLaunchShell.swift
+    ├── MockConsoleOutput.swift
+    ├── MockSwiftPicker+LaunchPicker.swift
+    └── FactoryMethods.swift
 ```
 
 ### Key Dependencies
 
 - **ArgumentParser** (v1.5.0+): CLI command parsing and help generation
 - **SwiftData**: Model persistence with app group containers
-- **SwiftPickerKit** (branch: refactor-tree-navigation): Interactive CLI prompts, selections, and tree navigation
-- **NnShellKit** (v2.0.0+): Shell command execution and abstraction
-- **NnGitKit** (v0.6.0+): Git operations abstraction
-- **NnSwiftDataKit** (branch: main): Shared SwiftData configuration utilities
+- **SwiftPickerKit** (v0.8.0+): Interactive CLI prompts, selections, and tree navigation
+- **NnShellKit** (v2.2.0+): Shell command execution and abstraction
+- **NnGitKit** (v0.6.0+): Git operations abstraction (GitShellKit, GitCommandGen)
+- **NnSwiftDataKit** (v0.8.0+): Shared SwiftData configuration utilities
 - **Files** (v4.0.0+): Filesystem operations
 
 ## File Header Convention
@@ -196,7 +308,7 @@ Tests are located in `Tests/nnappTests/` with:
 
 ### Main Project Management
 
-The `setMainProject` functionality in `GroupHandler` manages which project serves as the "main" or default project for a group. Key behaviors:
+The `setMainProject` functionality in `GroupController` manages which project serves as the "main" or default project for a group. Key behaviors:
 
 - **Main Project Definition**: A project with the same shortcut as its parent group
 - **Shortcut Synchronization**: When switching main projects, shortcuts are transferred appropriately:
@@ -214,7 +326,7 @@ The Add Project command supports a `--from-desktop` flag that allows users to se
 - **Usage**: `nnapp add project --from-desktop --group GroupName`
 - **Filtering**: Only folders containing valid Xcode projects or Swift packages are shown
 - **Detection**: Swift packages are identified by presence of `Package.swift`
-- **Testing**: Desktop path can be injected for testing purposes via `ProjectHandler` constructor
+- **Testing**: Desktop path can be injected for testing purposes via `ProjectController` constructor
 
 ## Available Commands
 
@@ -225,18 +337,22 @@ The Add Project command supports a `--from-desktop` flag that allows users to se
 5. **open** - Launch projects in Xcode/VSCode, open remotes, or project links
 6. **set-main-project** - Change the main project for a group
 7. **finder** - Open folders in Finder
-8. **script** - Manage terminal launch scripts
-9. **evict** - (Implemented but disabled in v0.6.0) Delete project folder while keeping metadata
+8. **script** - (Temporarily disabled in v0.7.0) Manage terminal launch scripts
+9. **evict** - (Temporarily disabled) Delete project folder while keeping metadata
 
 For complete command reference, see [Documentation.md](./docs/Documentation.md).
 
 ## Version & Status
 
-- **Current Version**: v0.6.0
+- **Current Version**: v0.7.0
 - **Stability**: Functional and ready to use, but features and API may evolve before v1.0.0
 - **Breaking Changes**: Possible before reaching v1.0.0
 
+### Temporary Limitations
+- **Script command disabled**: Temporarily disabled in v0.7.0 during refactoring; will be re-enabled soon
+
 ### Future Enhancements
+- Re-enable `script` command with improved functionality
 - Enable `evict` command for managing disk space
 - Expand terminal support beyond iTerm to vanilla Terminal and others
 
