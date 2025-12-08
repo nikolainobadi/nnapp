@@ -21,6 +21,10 @@ public extension GroupManager {
     func loadGroups() throws -> [LaunchGroup] {
         return try store.loadGroups()
     }
+    
+    func loadCategories() throws -> [LaunchCategory] {
+        return try store.loadCategories()
+    }
 
     @discardableResult
     func saveGroup(_ group: LaunchGroup, in category: LaunchCategory, groupFolder: Directory?, categoryFolder: Directory?) throws -> LaunchGroup {

@@ -266,7 +266,7 @@ extension CategoryControllerTests {
         let directory = MockDirectory(path: "/tmp/imported")
         let (sut, store, _) = makeSUT(
             categories: [],
-            assignCategoryTypeIndex: 0,
+            assignCategoryTypeIndex: 2,
             selectedDirectory: directory
         )
 
@@ -296,7 +296,7 @@ extension CategoryControllerTests {
         let existing = makeCategory(name: "Existing")
         let (sut, _, _) = makeSUT(
             categories: [existing],
-            assignCategoryTypeIndex: 2,
+            assignCategoryTypeIndex: 0,
             selectionIndex: 0
         )
 
@@ -310,7 +310,7 @@ extension CategoryControllerTests {
         let directory = MockDirectory(path: "/tmp/imported")
         let (sut, store, _) = makeSUT(
             categories: [],
-            assignCategoryTypeIndex: 0,
+            assignCategoryTypeIndex: 2,
             selectedDirectory: directory
         )
 
@@ -341,7 +341,7 @@ extension CategoryControllerTests {
         let existing = makeCategory(name: "Existing")
         let (sut, _, _) = makeSUT(
             categories: [existing],
-            assignCategoryTypeIndex: 2,
+            assignCategoryTypeIndex: 0,
             selectionIndex: 0
         )
 

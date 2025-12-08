@@ -215,7 +215,7 @@ extension GroupControllerTests {
         let (sut, store, _, _) = makeSUT(
             category: category,
             permissionResults: [true, true],
-            assignGroupTypeIndex: 0,
+            assignGroupTypeIndex: 2,
             directoryToLoad: groupFolder,
             selectedDirectory: groupFolder
         )
@@ -249,7 +249,7 @@ extension GroupControllerTests {
         let (sut, _, _, _) = makeSUT(
             groups: [existing],
             category: category,
-            assignGroupTypeIndex: 2,
+            assignGroupTypeIndex: 0,
             selectionIndex: 0
         )
 
@@ -264,7 +264,7 @@ extension GroupControllerTests {
         let groupFolder = MockDirectory(path: "/tmp/imported")
         let (sut, store, _, _) = makeSUT(
             category: category,
-            assignGroupTypeIndex: 0,
+            assignGroupTypeIndex: 2,
             directoryToLoad: groupFolder,
             selectedDirectory: groupFolder
         )
@@ -299,7 +299,7 @@ extension GroupControllerTests {
         let (sut, _, _, _) = makeSUT(
             groups: [existing],
             category: category,
-            assignGroupTypeIndex: 2,
+            assignGroupTypeIndex: 0,
             selectionIndex: 0
         )
 
@@ -393,6 +393,7 @@ private extension GroupControllerTests {
     func makeSUT(
         groups: [LaunchGroup] = [],
         category: LaunchCategory = makeCategory(),
+        categoriesToLoad: [LaunchCategory] = [],
         inputResults: [String] = [],
         permissionResults: [Bool] = [true],
         assignGroupTypeIndex: Int = 0,
@@ -401,7 +402,7 @@ private extension GroupControllerTests {
         directoryToLoad: MockDirectory? = MockDirectory(path: "/tmp"),
         selectedDirectory: MockDirectory? = MockDirectory(path: "/tmp")
     ) -> (sut: GroupController, store: MockGroupStore, browser: MockDirectoryBrowser, fileSystem: MockFileSystem) {
-        let store = MockGroupStore(groups: groups, category: category)
+        let store = MockGroupStore(groups: groups, category: category, categoriesToLoad: categoriesToLoad)
         let singleSelections = selectionOutcomes ?? [
             .index(assignGroupTypeIndex),
             .index(selectionIndex)
@@ -450,6 +451,8 @@ private extension GroupControllerTests {
 // MARK: - Mocks
 private extension GroupControllerTests {
     final class MockGroupStore: LaunchGroupStore {
+        private let categoriesToLoad: [LaunchCategory]
+        
         private(set) var groups: [LaunchGroup]
         private(set) var savedGroups: [LaunchGroup] = []
         private(set) var deletedGroups: [LaunchGroup] = []
@@ -458,13 +461,18 @@ private extension GroupControllerTests {
 
         let category: LaunchCategory
 
-        init(groups: [LaunchGroup], category: LaunchCategory) {
+        init(groups: [LaunchGroup], category: LaunchCategory, categoriesToLoad: [LaunchCategory]) {
             self.groups = groups
             self.category = category
+            self.categoriesToLoad = categoriesToLoad
         }
 
         func loadGroups() throws -> [LaunchGroup] {
             return groups
+        }
+        
+        func loadCategories() throws -> [LaunchCategory] {
+            return categoriesToLoad
         }
 
         func saveGroup(_ group: LaunchGroup, in category: LaunchCategory) throws {
