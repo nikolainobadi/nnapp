@@ -29,6 +29,7 @@ extension CategoryController {
         let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
         
         // TODO: - maybe add the option to move the category folder to a different location
+        try picker.requiredPermission("Import \(folder.name) as a new category?")
         return try manager.importCategory(from: folder)
     }
     
@@ -38,9 +39,9 @@ extension CategoryController {
         let parentFolder = try selectFolder(path: parentPath, browsePrompt: "Select the folder where \(proposedName.yellow) should be created")
         let confirm = "Create New Category"
         let details = """
-        name: \(proposedName)
-        parentFolderName: \(parentFolder.name)
-        parentFolderLocation: \(parentFolder.path)
+        name: \(proposedName.cyan)
+        parentFolder: \(parentFolder.name.cyan)
+        parentLocation: \(parentFolder.path.yellow)
         """
         
         try picker.confirmDetails(confirmText: confirm, details: details)
