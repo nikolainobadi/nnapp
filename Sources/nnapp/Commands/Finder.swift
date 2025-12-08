@@ -19,7 +19,7 @@ extension Nnapp {
         )
 
         func run() throws {
-            try Nnapp.makeFinderHandler().browseAll()
+            try Nnapp.makeFinderController().browseAll()
         }
     }
 }
@@ -36,7 +36,7 @@ extension Nnapp.Finder {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeFinderHandler().openCategory(name: name)
+            try Nnapp.makeFinderController().openCategory(name: name)
         }
     }
 }
@@ -53,7 +53,7 @@ extension Nnapp.Finder {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeFinderHandler().openGroup(name: name)
+            try Nnapp.makeFinderController().openGroup(name: name)
         }
     }
 }
@@ -70,7 +70,7 @@ extension Nnapp.Finder {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeFinderHandler().openProject(name: name)
+            try Nnapp.makeFinderController().openProject(name: name)
         }
     }
 }

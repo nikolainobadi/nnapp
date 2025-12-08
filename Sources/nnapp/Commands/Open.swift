@@ -27,16 +27,16 @@ extension Nnapp {
         var terminalOption: TerminalOption?
 
         func run() throws {
-            let openManager = try Nnapp.makeOpenManager()
-            let project: LaunchProject = try openManager.selectProject(shortcut: shortcut, useGroupShortcut: useGroupShortcut)
+            let launchController = try Nnapp.makeLaunchController()
+            let project: LaunchProject = try launchController.selectProject(shortcut: shortcut, useGroupShortcut: useGroupShortcut)
 
             switch launchType {
             case .xcode, .vscode:
-                try openManager.openInIDE(project, launchType: launchType, terminalOption: terminalOption)
+                try launchController.openInIDE(project, launchType: launchType, terminalOption: terminalOption)
             case .remote:
-                try openManager.openRemoteURL(for: project)
+                try launchController.openRemoteURL(for: project)
             case .link:
-                try openManager.openProjectLink(for: project)
+                try launchController.openProjectLink(for: project)
             }
         }
     }

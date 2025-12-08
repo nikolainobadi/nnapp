@@ -8,7 +8,7 @@
 import CodeLaunchKit
 
 extension Nnapp {
-    static func makeListHandler() throws -> ListController {
+    static func makeListController() throws -> ListController {
         let picker = makePicker()
         let repository = try makeRepository()
         let console = contextFactory.makeConsoleOutput()
@@ -16,7 +16,7 @@ extension Nnapp {
         return .init(picker: picker, loader: repository, console: console)
     }
 
-    static func makeFinderHandler() throws -> FinderController {
+    static func makeFinderController() throws -> FinderController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
@@ -25,7 +25,7 @@ extension Nnapp {
         return .init(shell: shell, picker: picker, loader: repository, console: console)
     }
 
-    static func makeOpenManager() throws -> LaunchController {
+    static func makeLaunchController() throws -> LaunchController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()

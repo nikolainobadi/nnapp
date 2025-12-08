@@ -20,7 +20,7 @@ extension Nnapp {
         )
 
         func run() throws {
-            try Nnapp.makeListHandler().browseHierarchy()
+            try Nnapp.makeListController().browseHierarchy()
         }
     }
 }
@@ -37,7 +37,7 @@ extension Nnapp.List {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeListHandler().selectAndDisplayCategory(name: name)
+            try Nnapp.makeListController().selectAndDisplayCategory(name: name)
         }
     }
 }
@@ -54,7 +54,7 @@ extension Nnapp.List {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeListHandler().selectAndDisplayGroup(name: name)
+            try Nnapp.makeListController().selectAndDisplayGroup(name: name)
         }
     }
 }
@@ -71,7 +71,7 @@ extension Nnapp.List {
         var name: String?
 
         func run() throws {
-            try Nnapp.makeListHandler().selectAndDisplayProject(name: name)
+            try Nnapp.makeListController().selectAndDisplayProject(name: name)
         }
     }
 }
@@ -85,7 +85,7 @@ extension Nnapp.List {
         )
 
         func run() throws {
-            try Nnapp.makeListHandler().displayProjectLinks()
+            try Nnapp.makeListController().displayProjectLinks()
         }
     }
 }
