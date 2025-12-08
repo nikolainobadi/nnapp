@@ -19,12 +19,11 @@ struct CategoryControllerTests {
 
         let category = try sut.importCategory(path: directory.path)
 
+        #expect(browser.prompt == nil)
         #expect(category.name == directory.name)
         #expect(category.path == directory.path)
         #expect(store.savedCategories.first?.name == directory.name)
         #expect(fileSystem.capturedPaths == [directory.path])
-        #expect(browser.prompt == nil)
-        #expect(browser.startPath == nil)
     }
 
     @Test("Imports category by browsing when path is nil")
@@ -99,17 +98,12 @@ extension CategoryControllerTests {
     func createsCategoryUsingProvidedParentPathWithoutBrowsing() throws {
         let parent = MockDirectory(path: "/tmp/provided")
         let fileSystem = MockFileSystem(directoryMap: [parent.path: parent])
-        let (sut, store, browser) = makeSUT(
-            inputResults: ["NewCat"],
-            selectedDirectory: nil,
-            fileSystem: fileSystem
-        )
+        let (sut, store, _) = makeSUT(inputResults: ["NewCat"], selectedDirectory: nil, fileSystem: fileSystem)
 
         let category = try sut.createNewCategory(named: nil, parentPath: parent.path)
 
         #expect(category.path == parent.path.appendingPathComponent("NewCat"))
         #expect(fileSystem.capturedPaths == [parent.path])
-        #expect(browser.startPath == nil)
         #expect(store.savedCategories.first?.path == category.path)
     }
 

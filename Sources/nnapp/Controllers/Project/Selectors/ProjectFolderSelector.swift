@@ -73,7 +73,7 @@ extension ProjectFolderSelector {
         }
 
         let browsePrompt = "Browse to select a folder to use for your Project"
-        let folder = try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: groupPath)
+        let folder = try folderBrowser.browseForDirectory(prompt: browsePrompt)
         let projectType = try projectService.projectType(for: folder)
 
         return .init(folder: folder, type: projectType)

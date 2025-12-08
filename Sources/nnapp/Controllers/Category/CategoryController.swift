@@ -99,7 +99,7 @@ private extension CategoryController {
             return try fileSystem.directory(at: path)
         }
         
-        return try folderBrowser.browseForDirectory(prompt: browsePrompt, startPath: path)
+        return try folderBrowser.browseForDirectory(prompt: browsePrompt)
     }
     
     func selectAssignCategoryType() throws -> AssignCategoryType {
