@@ -139,7 +139,8 @@ private extension LaunchControllerTests {
         let picker = MockSwiftPicker(selectionResult: .init(defaultSingle: .index(selectionIndex)))
         let loader = StubLoader(projects: projects, groups: groups)
         let delegate = MockOpenProjectDelegate(throwError: throwError, branchStatus: branchStatus)
-        let sut = LaunchController(picker: picker, loader: loader, delegate: delegate)
+        let launchService = LaunchManager(loader: loader, delegate: delegate)
+        let sut = LaunchController(picker: picker, launchService: launchService, loader: loader, delegate: delegate)
 
         return (sut, delegate)
     }

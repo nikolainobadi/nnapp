@@ -9,12 +9,14 @@ import CodeLaunchKit
 
 struct LaunchController {
     private let picker: any LaunchPicker
+    private let launchService: any LaunchService
     private let loader: any Loader
     private let delegate: any LaunchDelegate
 
     typealias Loader = ScriptLoader & LaunchHierarchyLoader
-    init(picker: any LaunchPicker, loader: any Loader, delegate: any LaunchDelegate) {
+    init(picker: any LaunchPicker, launchService: any LaunchService, loader: any Loader, delegate: any LaunchDelegate) {
         self.picker = picker
+        self.launchService = launchService
         self.loader = loader
         self.delegate = delegate
     }
@@ -39,13 +41,7 @@ extension LaunchController {
             
             return try picker.requiredSingleSelection("Select a project", items: group.projects)
         } else {
-            let projects = try loader.loadProjects()
-            
-            guard let project = projects.first(where: { shortcut.matches($0.shortcut) }) else {
-                throw CodeLaunchError.missingProject
-            }
-            
-            return project
+            return try launchService.resolveProject(shortcut: shortcut, useGroupShortcut: false)
         }
     }
 }
@@ -59,16 +55,7 @@ extension LaunchController {
     ///   - launchType: Whether to open in Xcode or VSCode.
     ///   - terminalOption: Controls terminal launch behavior.
     func openInIDE(_ project: LaunchProject, launchType: LaunchType, terminalOption: TerminalOption?) throws {
-        guard let folderPath = project.folderPath else {
-            throw CodeLaunchError.missingProject
-        }
-
-        try delegate.openIDE(project, launchType: launchType)
-        delegate.openTerminal(folderPath: folderPath, option: terminalOption)
-
-        if let status = delegate.checkBranchStatus(for: project) {
-            delegate.notifyBranchStatus(status, for: project)
-        }
+        try launchService.openInIDE(project, launchType: launchType, terminalOption: terminalOption)
     }
 }
 
@@ -78,12 +65,12 @@ extension LaunchController {
     /// Opens the remote repository URL in the browser.
     /// - Parameter project: The project whose remote URL to open.
     func openRemoteURL(for project: LaunchProject) throws {
-        try delegate.openRemoteURL(for: project.remote)
+        try launchService.openRemoteURL(for: project)
     }
 
     /// Opens one of the project's custom links, prompting if multiple exist.
     /// - Parameter project: The project whose link to open.
     func openProjectLink(for project: LaunchProject) throws {
-        try delegate.openProjectLink(project.links)
+        try launchService.openProjectLink(for: project)
     }
 }
