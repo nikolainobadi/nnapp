@@ -140,7 +140,7 @@ private extension LaunchControllerTests {
         let loader = StubLoader(projects: projects, groups: groups)
         let delegate = MockOpenProjectDelegate(throwError: throwError, branchStatus: branchStatus)
         let launchService = LaunchManager(loader: loader, delegate: delegate)
-        let sut = LaunchController(picker: picker, launchService: launchService, loader: loader, delegate: delegate)
+        let sut = LaunchController(picker: picker, launchService: launchService)
 
         return (sut, delegate)
     }
@@ -149,7 +149,7 @@ private extension LaunchControllerTests {
 
 // MARK: - Mocks
 private extension LaunchControllerTests {
-    final class StubLoader: LaunchController.Loader {
+    final class StubLoader: LaunchManager.Loader {
         private let groups: [LaunchGroup]
         private let projects: [LaunchProject]
         

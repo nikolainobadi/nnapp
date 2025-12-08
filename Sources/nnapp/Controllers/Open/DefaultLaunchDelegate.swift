@@ -1,5 +1,5 @@
 //
-//  DefaultOpenProjectDelegate.swift
+//  DefaultLaunchDelegate.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/5/25.
@@ -7,7 +7,7 @@
 
 import CodeLaunchKit
 
-struct DefaultOpenProjectDelegate {
+struct DefaultLaunchDelegate {
     private let ideLauncher: IDEHandler
     private let terminalManager: TerminalHandler
     private let urlLauncher: URLHandler
@@ -17,7 +17,7 @@ struct DefaultOpenProjectDelegate {
     init(
         shell: any LaunchGitShell,
         picker: any LaunchPicker,
-        loader: any LaunchController.Loader,
+        loader: any LaunchManager.Loader,
         fileSystem: any FileSystem,
         environment: any TerminalEnvironmentProviding
     ) {
@@ -31,7 +31,7 @@ struct DefaultOpenProjectDelegate {
 
 
 // MARK: - LaunchDelegate
-extension DefaultOpenProjectDelegate: LaunchDelegate {
+extension DefaultLaunchDelegate: LaunchDelegate {
     func openIDE(_ project: LaunchProject, launchType: LaunchType) throws {
         try ideLauncher.openInIDE(project, launchType: launchType)
     }

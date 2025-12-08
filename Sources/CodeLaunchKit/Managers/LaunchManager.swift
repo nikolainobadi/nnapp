@@ -26,21 +26,16 @@ public extension LaunchManager {
         }
 
         if useGroupShortcut {
-            let groups = try loader.loadGroups()
-            guard let group = groups.first(where: { shortcut.matches($0.shortcut) }) else {
-                throw CodeLaunchError.missingGroup
-            }
-
-            guard let project = group.projects.first else {
+            let projects = try groupProjects(shortcut: shortcut)
+            guard let project = projects.first else {
                 throw CodeLaunchError.missingProject
             }
 
-            if group.projects.count == 1 {
-                return project
+            if projects.count > 1 {
+                throw CodeLaunchError.missingProject
             }
 
-            // Defer specific project selection to the caller (CLI) if multiple exist
-            throw CodeLaunchError.missingProject
+            return project
         } else {
             let projects = try loader.loadProjects()
 
@@ -50,6 +45,15 @@ public extension LaunchManager {
 
             return project
         }
+    }
+
+    func groupProjects(shortcut: String) throws -> [LaunchProject] {
+        let groups = try loader.loadGroups()
+        guard let group = groups.first(where: { shortcut.matches($0.shortcut) }) else {
+            throw CodeLaunchError.missingGroup
+        }
+
+        return group.projects
     }
 }
 

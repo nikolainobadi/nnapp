@@ -31,10 +31,10 @@ extension Nnapp {
         let repository = try makeRepository()
         let fileSystem = contextFactory.makeFileSystem()
         let environment = ProcessInfoEnvironmentProvider()
-        let delegate = DefaultOpenProjectDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem, environment: environment)
+        let delegate = DefaultLaunchDelegate(shell: shell, picker: picker, loader: repository, fileSystem: fileSystem, environment: environment)
         let launchService = LaunchManager(loader: repository, delegate: delegate)
         
-        return .init(picker: picker, launchService: launchService, loader: repository, delegate: delegate)
+        return .init(picker: picker, launchService: launchService)
     }
     
     static func makeCategoryController(picker: (any LaunchPicker)? = nil) throws -> CategoryController {

@@ -10,15 +10,10 @@ import CodeLaunchKit
 struct LaunchController {
     private let picker: any LaunchPicker
     private let launchService: any LaunchService
-    private let loader: any Loader
-    private let delegate: any LaunchDelegate
 
-    typealias Loader = ScriptLoader & LaunchHierarchyLoader
-    init(picker: any LaunchPicker, launchService: any LaunchService, loader: any Loader, delegate: any LaunchDelegate) {
+    init(picker: any LaunchPicker, launchService: any LaunchService) {
         self.picker = picker
         self.launchService = launchService
-        self.loader = loader
-        self.delegate = delegate
     }
 }
 
@@ -34,12 +29,8 @@ extension LaunchController {
         let shortcut = try shortcut ?? picker.getRequiredInput("Enter the shortcut of the app you would like to open")
         
         if useGroupShortcut {
-            let groups = try loader.loadGroups()
-            guard let group = groups.first(where: { shortcut.matches($0.shortcut) }) else {
-                throw CodeLaunchError.missingGroup
-            }
-            
-            return try picker.requiredSingleSelection("Select a project", items: group.projects)
+            let projects = try launchService.groupProjects(shortcut: shortcut)
+            return try picker.requiredSingleSelection("Select a project", items: projects)
         } else {
             return try launchService.resolveProject(shortcut: shortcut, useGroupShortcut: false)
         }
