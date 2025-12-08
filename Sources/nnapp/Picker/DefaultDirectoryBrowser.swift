@@ -39,7 +39,7 @@ extension DefaultDirectoryBrowser: DirectoryBrowser {
         let rootNode = FileSystemNode(url: homeDirectoryURL)
         let root = TreeNavigationRoot(displayName: homeDirectoryURL.lastPathComponent, children: rootNode.loadChildren())
 
-        guard let selection = picker.treeNavigation(prompt, root: root, newScreen: true, showPromptText: false) else {
+        guard let selection = picker.treeNavigation(prompt, root: root) else {
             throw CodeLaunchError.invalidInput
         }
         

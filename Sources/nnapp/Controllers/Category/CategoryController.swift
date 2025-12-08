@@ -28,6 +28,7 @@ extension CategoryController {
     func importCategory(path: String?) throws -> LaunchCategory {
         let folder = try selectFolder(path: path, browsePrompt: "Select a folder to import as a Category")
         
+        // TODO: - maybe add the option to move the category folder to a different location
         return try manager.importCategory(from: folder)
     }
     
@@ -35,6 +36,14 @@ extension CategoryController {
     func createNewCategory(named name: String?, parentPath: String?) throws -> LaunchCategory {
         let proposedName = try name ?? picker.getRequiredInput("Enter the name of your new category.")
         let parentFolder = try selectFolder(path: parentPath, browsePrompt: "Select the folder where \(proposedName.yellow) should be created")
+        let confirm = "Create New Category"
+        let details = """
+        name: \(proposedName)
+        parentFolderName: \(parentFolder.name)
+        parentFolderLocation: \(parentFolder.path)
+        """
+        
+        try picker.confirmDetails(confirmText: confirm, details: details)
         
         return try manager.createCategory(named: proposedName, in: parentFolder)
     }

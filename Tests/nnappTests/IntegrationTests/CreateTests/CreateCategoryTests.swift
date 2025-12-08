@@ -27,9 +27,7 @@ extension CreateCategoryTests {
     func throwsErrorWhenFolderAlreadyExists() throws {
         _ = try tempFolder.createSubfolder(named: categoryName)
         let parentPath = parentPath
-        let selectedDirectory = FilesDirectoryAdapter(folder: tempFolder)
-        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let factory = MockContextFactory(folderBrowser: folderBrowser)
+        let factory = makeContextFactory()
 
         #expect(throws: CodeLaunchError.categoryPathTaken) {
             try runCategoryCommand(factory: factory, parentPath: parentPath)
@@ -40,9 +38,7 @@ extension CreateCategoryTests {
     func throwsErrorWhenCategoryNameAlreadyExists() throws {
         let parentPath = parentPath
         let existingCategoryFolder = try tempFolder.createSubfolder(named: categoryName)
-        let selectedDirectory = FilesDirectoryAdapter(folder: tempFolder)
-        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let factory = MockContextFactory(folderBrowser: folderBrowser)
+        let factory = makeContextFactory()
         let context = try factory.makeContext()
         let category = makeSwiftDataCategory(name: categoryName, path: existingCategoryFolder.path)
 
@@ -55,10 +51,7 @@ extension CreateCategoryTests {
 
     @Test("Creates a new folder for the new category", arguments: MainActorBaseCreateTests.TestInfo.testOptions)
     func createCategoryFolder(info: MainActorBaseCreateTests.TestInfo) throws {
-        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info))))
-        let selectedDirectory = FilesDirectoryAdapter(folder: tempFolder)
-        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
+        let factory = makeContextFactory(inputResults: makeCategoryInputs(info: info))
 
         try runCategoryCommand(factory: factory, info: info, parentPath: parentPath)
 
@@ -69,10 +62,7 @@ extension CreateCategoryTests {
 
     @Test("Saves the new category", arguments: MainActorBaseCreateTests.TestInfo.testOptions)
     func savesNewCategory(info: MainActorBaseCreateTests.TestInfo) throws {
-        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(makeCategoryInputs(info: info))))
-        let selectedDirectory = FilesDirectoryAdapter(folder: tempFolder)
-        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
-        let factory = MockContextFactory(picker: picker, folderBrowser: folderBrowser)
+        let factory = makeContextFactory(inputResults: makeCategoryInputs(info: info))
 
         try runCategoryCommand(factory: factory, info: info, parentPath: parentPath)
 
@@ -98,6 +88,14 @@ private extension CreateCategoryTests {
         }
 
         return inputs
+    }
+    
+    func makeContextFactory(inputResults: [String] = [], grantPermission: Bool = true) -> MockContextFactory {
+        let selectedDirectory = FilesDirectoryAdapter(folder: tempFolder)
+        let folderBrowser = MockDirectoryBrowser(selectedDirectory: selectedDirectory)
+        let picker = MockSwiftPicker(inputResult: .init(type: .ordered(inputResults)), selectionResult: .init(defaultSingle: .index(grantPermission ? 0 : 1)))
+        
+        return .init(picker: picker, folderBrowser: folderBrowser)
     }
 }
 
