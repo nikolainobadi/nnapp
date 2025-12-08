@@ -16,7 +16,7 @@ extension Nnapp {
         return .init(picker: picker, loader: repository, console: console)
     }
 
-    static func makeFinderHandler() throws -> FinderHandler {
+    static func makeFinderHandler() throws -> FinderController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()

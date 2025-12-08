@@ -1,5 +1,5 @@
 //
-//  FinderHandlerTests.swift
+//  FinderControllerTests.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/05/25.
@@ -10,7 +10,7 @@ import CodeLaunchKit
 import SwiftPickerTesting
 @testable import nnapp
 
-struct FinderHandlerTests {
+struct FinderControllerTests {
     @Test("Browse all prints placeholder when no categories exist")
     func browseAllPrintsPlaceholderWhenNoCategoriesExist() throws {
         let (sut, shell, console) = makeSUT(categories: [])
@@ -51,7 +51,7 @@ struct FinderHandlerTests {
 
 
 // MARK: - Category
-extension FinderHandlerTests {
+extension FinderControllerTests {
     @Test("Open category uses direct match without prompts")
     func openCategoryUsesDirectMatchWithoutPrompts() throws {
         let category = LaunchCategory.new(name: "iOS", path: "/tmp/ios", groups: [])
@@ -101,7 +101,7 @@ extension FinderHandlerTests {
 
 
 // MARK: - Group
-extension FinderHandlerTests {
+extension FinderControllerTests {
     @Test("Open group uses direct match without prompts")
     func openGroupUsesDirectMatchWithoutPrompts() throws {
         let category = LaunchCategory.new(name: "Cat", path: "/tmp/cat", groups: [])
@@ -190,7 +190,7 @@ extension FinderHandlerTests {
 
 
 // MARK: - Project
-extension FinderHandlerTests {
+extension FinderControllerTests {
     @Test("Open project uses direct match without prompts")
     func openProjectUsesDirectMatchWithoutPrompts() throws {
         let group = makeProjectGroup(path: "/tmp/group")
@@ -296,14 +296,14 @@ extension FinderHandlerTests {
 
 
 // MARK: - SUT
-private extension FinderHandlerTests {
+private extension FinderControllerTests {
     func makeSUT(
         categories: [LaunchCategory] = [],
         groups: [LaunchGroup] = [],
         projects: [LaunchProject] = [],
         selectionIndex: Int = 0,
         treeNavigationOutcome: MockTreeSelectionOutcome = .none
-    ) -> (sut: FinderHandler, shell: MockLaunchShell, console: MockConsoleOutput) {
+    ) -> (sut: FinderController, shell: MockLaunchShell, console: MockConsoleOutput) {
         let picker = MockSwiftPicker(
             permissionResult: .init(defaultValue: true, type: .ordered([true])),
             selectionResult: .init(defaultSingle: .index(selectionIndex)),
@@ -312,7 +312,7 @@ private extension FinderHandlerTests {
         let shell = MockLaunchShell()
         let console = MockConsoleOutput()
         let loader = StubFinderLoader(categories: categories, groups: groups, projects: projects)
-        let sut = FinderHandler(shell: shell, picker: picker, loader: loader, console: console)
+        let sut = FinderController(shell: shell, picker: picker, loader: loader, console: console)
 
         return (sut, shell, console)
     }
@@ -320,7 +320,7 @@ private extension FinderHandlerTests {
 
 
 // MARK: - Mocks
-private extension FinderHandlerTests {
+private extension FinderControllerTests {
     final class StubFinderLoader: FinderInfoLoader {
         private let categories: [LaunchCategory]
         private let groups: [LaunchGroup]

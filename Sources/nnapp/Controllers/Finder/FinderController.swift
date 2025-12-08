@@ -1,5 +1,5 @@
 //
-//  FinderHandler.swift
+//  FinderController.swift
 //  nnapp
 //
 //  Created by Nikolai Nobadi on 12/3/25.
@@ -7,7 +7,7 @@
 
 import CodeLaunchKit
 
-struct FinderHandler {
+struct FinderController {
     private let shell: any LaunchShell
     private let picker: any LaunchPicker
     private let console: any ConsoleOutput
@@ -23,7 +23,7 @@ struct FinderHandler {
 
 
 // MARK: - Browse All
-extension FinderHandler {
+extension FinderController {
     func browseAll() throws {
         let categories = try loader.loadCategories()
 
@@ -47,7 +47,7 @@ extension FinderHandler {
 
 
 // MARK: - Category Operations
-extension FinderHandler {
+extension FinderController {
     func openCategory(name: String?) throws {
         let path = try resolveCategoryPath(name: name)
         try openInFinder(path: path)
@@ -56,7 +56,7 @@ extension FinderHandler {
 
 
 // MARK: - Group Operations
-extension FinderHandler {
+extension FinderController {
     func openGroup(name: String?) throws {
         let path = try resolveGroupPath(name: name)
         try openInFinder(path: path)
@@ -65,7 +65,7 @@ extension FinderHandler {
 
 
 // MARK: - Project Operations
-extension FinderHandler {
+extension FinderController {
     func openProject(name: String?) throws {
         let path = try resolveProjectPath(name: name)
         try openInFinder(path: path)
@@ -74,7 +74,7 @@ extension FinderHandler {
 
 
 // MARK: - Private Methods
-private extension FinderHandler {
+private extension FinderController {
     func openInFinder(path: String) throws {
         try shell.runAndPrint(bash: "open -a Finder \(path)")
     }
