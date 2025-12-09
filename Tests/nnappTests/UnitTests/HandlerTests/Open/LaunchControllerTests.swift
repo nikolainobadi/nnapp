@@ -229,5 +229,4 @@ private extension LaunchControllerTests {
             projectLinks = links
         }
     }
-
 }

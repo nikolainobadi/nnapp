@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nikolainobadi/NnSwiftDataKit",
       "state" : {
-        "revision" : "d1f2b320b3b4b8144dd583492952f288e1d5de68",
-        "version" : "0.8.0"
+        "revision" : "40a87578928ea9f706eb42f391795393450ace38",
+        "version" : "0.9.0"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nikolainobadi/SwiftPickerKit.git",
       "state" : {
-        "revision" : "02326b429982224c4c557d26c3093251817ce23e",
-        "version" : "0.8.0"
+        "revision" : "6773ad737b1d9acd9647fd03300a1ab774eb3afa",
+        "version" : "0.8.1"
       }
     }
   ],
