@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nikolainobadi/SwiftPickerKit.git",
       "state" : {
-        "revision" : "6773ad737b1d9acd9647fd03300a1ab774eb3afa",
-        "version" : "0.8.1"
+        "revision" : "fe31e057ee74a5dbd3ef1733816e7f51b0412d96",
+        "version" : "0.9.0"
       }
     }
   ],

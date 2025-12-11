@@ -12,15 +12,9 @@ protocol LaunchPicker {
     func getPermission(_ prompt: String) -> Bool
     func requiredPermission(_ prompt: String) throws
     func getRequiredInput(_ prompt: String) throws -> String
+    func treeNavigation<Item: TreeNodePickerItem>(prompt: String, root: TreeNavigationRoot<Item>, showPromptText: Bool, showSelectedItemText: Bool) -> Item?
     func singleSelection<Item: DisplayablePickerItem>(prompt: String, items: [Item], layout: PickerLayout<Item>, newScreen: Bool, showSelectedItemText: Bool) -> Item?
     func requiredSingleSelection<Item: DisplayablePickerItem>(prompt: String, items: [Item], layout: PickerLayout<Item>, newScreen: Bool, showSelectedItemText: Bool) throws -> Item
-    func treeNavigation<Item: TreeNodePickerItem>(
-        prompt: String,
-        root: TreeNavigationRoot<Item>,
-        newScreen: Bool,
-        showPromptText: Bool,
-        showSelectedItemText: Bool
-    ) -> Item?
 }
 
 extension LaunchPicker {
@@ -41,19 +35,7 @@ extension LaunchPicker {
         return singleSelection(prompt: prompt, items: items, layout: layout, newScreen: newScreen, showSelectedItemText: showSelectedItemText)
     }
     
-    func treeNavigation<Item: TreeNodePickerItem>(
-        _ prompt: String,
-        root: TreeNavigationRoot<Item>,
-        newScreen: Bool = true,
-        showPromptText: Bool = true,
-        showSelectedItemText: Bool = true
-    ) -> Item? {
-        return treeNavigation(
-            prompt: prompt,
-            root: root,
-            newScreen: newScreen,
-            showPromptText: showPromptText,
-            showSelectedItemText: showSelectedItemText
-        )
+    func treeNavigation<Item: TreeNodePickerItem>(_ prompt: String, root: TreeNavigationRoot<Item>, showPromptText: Bool = true, showSelectedItemText: Bool = true) -> Item? {
+        return treeNavigation(prompt: prompt, root: root, showPromptText: showPromptText, showSelectedItemText: showSelectedItemText)
     }
 }
