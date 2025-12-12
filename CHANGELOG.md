@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2025-12-11
+
+### Fixed
+- IDE no longer opens when using `--only-terminal` flag with `open` command
+
 ## [0.7.0] - 2025-12-08
 
 ### Changed

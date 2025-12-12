@@ -17,7 +17,6 @@
   - [Link Commands](#link-commands)
   - [Opening Projects](#opening-projects)
   - [Finder Commands](#finder-commands)
-  - [Script Commands](#script-commands)
   - [Listing Resources](#listing-resources)
 - [Architecture Notes](#architecture-notes)
 - [Documentation](#documentation)
@@ -32,10 +31,10 @@
 
 Think of it as a personalized project launcher with just enough metadata to keep your Swift workspace tidy and quickly accessible.
 
-**Stability Notice (v0.6.0)**
-`nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.  
+**Stability Notice (v0.7.1)**
+`nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.
 Currently, `nnapp` is designed to work specifically with **iTerm**, but I'll add support for vanilla **Terminal** (and possible others) for the official release.
-Breaking changes are possible before reaching v1.0.0.  
+Breaking changes are possible before reaching v1.0.0.
 Your feedback and suggestions are welcome as the project continues to improve!
 
 
@@ -48,7 +47,6 @@ Your feedback and suggestions are welcome as the project continues to improve!
 - Automatically clone projects from Git remotes if missing locally
 - **Branch status monitoring** - automatically checks if local projects are behind or diverged from remote, with desktop notifications
 - Manage custom quick-launch shortcuts and set main projects for groups
-- **Script management** - define custom launch scripts for terminal workflows
 - **Project links** - store and open named URLs (docs, analytics, repos, etc.) associated with projects
 - **Finder integration** - quickly open any category, group, or project folder in Finder
 - Stores metadata using `SwiftData` and `UserDefaults`
@@ -230,24 +228,6 @@ nnapp --help
   nnapp finder
   ```
 
-### Script Commands
-
-- **Display current launch script:**
-  ```sh
-  nnapp script show
-  ```
-
-- **Set a launch script:**
-  ```sh
-  nnapp script set "clear && git status"
-  ```
-  This script runs in the terminal when opening a project.
-
-- **Delete launch script:**
-  ```sh
-  nnapp script delete
-  ```
-
 ### Listing Resources
 
 - **List all registered entities** (interactive browser):
@@ -318,7 +298,8 @@ The formal documentation includes:
 
 ### Future Features
 
-- **Evict command** — Delete project folders locally while maintaining metadata, allowing easy recloning on next launch. (Implemented but disabled in v0.6.0)
+- **Script command** — Define custom launch scripts for terminal workflows. (Temporarily disabled in v0.7.0, will be re-enabled soon)
+- **Evict command** — Delete project folders locally while maintaining metadata, allowing easy recloning on next launch. (Implemented but disabled in v0.7.0)
 - **Terminal app support** — Expand beyond iTerm to support vanilla Terminal and potentially other terminal emulators
 
 ---
