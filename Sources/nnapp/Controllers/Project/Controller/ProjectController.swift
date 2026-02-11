@@ -87,6 +87,51 @@ extension ProjectController {
 
         print("\(project.name) folder has been deleted. Metadata preserved for re-cloning.")
     }
+
+    func evictProjects() throws {
+        let projects = try projectService.loadProjects()
+        let evictable = projects.filter { $0.remote != nil && $0.folderPath != nil }
+
+        guard !evictable.isEmpty else {
+            print("No projects available for eviction.")
+            return
+        }
+
+        let selected = picker.multiSelection("Select projects to evict:", items: evictable)
+
+        guard !selected.isEmpty else { return }
+
+        var safe: [LaunchProject] = []
+        var blocked: [(String, CodeLaunchError)] = []
+
+        for project in selected {
+            do {
+                try evictChecker(project)
+                safe.append(project)
+            } catch let error as CodeLaunchError {
+                blocked.append((project.name, error))
+            }
+        }
+
+        for (name, error) in blocked {
+            print("\(name): blocked — \(error)")
+        }
+
+        guard !safe.isEmpty else {
+            print("No selected projects passed safety checks.")
+            return
+        }
+
+        let names = safe.map(\.name).joined(separator: ", ")
+        try picker.requiredPermission("Evict \(safe.count) project(s)? (\(names)) Folders will be deleted but can be re-cloned later.")
+
+        for project in safe {
+            guard let folderPath = project.folderPath else { continue }
+            let directory = try fileSystem.directory(at: folderPath)
+            try directory.delete()
+            print("\(project.name) folder has been deleted. Metadata preserved for re-cloning.")
+        }
+    }
 }
 
 
