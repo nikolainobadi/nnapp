@@ -15,4 +15,5 @@ public protocol Directory {
     func subdirectory(named name: String) throws -> Directory
     func createSubdirectory(named name: String) throws -> Directory
     func move(to parent: Directory) throws
+    func delete() throws
 }

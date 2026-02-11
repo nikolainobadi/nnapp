@@ -17,6 +17,7 @@ final class MockDirectory: Directory {
     private let shouldThrowOnSubdirectory: Bool
     private let autoCreateSubdirectories: Bool
     private(set) var movedToParents: [String] = []
+    private(set) var deleteCallCount: Int = 0
 
     init(path: String, subdirectories: [Directory] = [], containedFiles: Set<String> = [], shouldThrowOnSubdirectory: Bool = false, autoCreateSubdirectories: Bool = true, ext: String? = nil) {
         self.path = path
@@ -54,5 +55,9 @@ final class MockDirectory: Directory {
 
     func move(to parent: Directory) throws {
         movedToParents.append(parent.path)
+    }
+
+    func delete() throws {
+        deleteCallCount += 1
     }
 }

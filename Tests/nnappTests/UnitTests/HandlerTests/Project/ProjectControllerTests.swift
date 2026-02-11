@@ -357,6 +357,123 @@ extension ProjectControllerTests {
 }
 
 
+// MARK: - Evict
+extension ProjectControllerTests {
+    @Test("Throws noRemoteRepository when evicting project without remote")
+    func throwsNoRemoteRepositoryWhenEvictingProjectWithoutRemote() {
+        let project = makeProject(name: "NoRemote", shortcut: "nr", group: makeProjectGroup())
+        let sut = makeSUT(projectsToLoad: [project]).sut
+
+        #expect(throws: CodeLaunchError.noRemoteRepository) {
+            try sut.evictProject(name: "NoRemote", shortcut: nil)
+        }
+    }
+
+    @Test("Throws missingProject when evicting project without folder path")
+    func throwsMissingProjectWhenEvictingProjectWithoutFolderPath() {
+        let project = makeProject(name: "NoFolder", shortcut: "nf", remote: makeProjectLink(name: "origin", urlString: "https://github.com/example/repo"))
+        let sut = makeSUT(projectsToLoad: [project]).sut
+
+        #expect(throws: CodeLaunchError.missingProject) {
+            try sut.evictProject(name: "NoFolder", shortcut: nil)
+        }
+    }
+
+    @Test("Throws projectAheadOfRemote when evict checker throws")
+    func throwsProjectAheadOfRemoteWhenEvictCheckerThrows() {
+        let group = makeProjectGroup(name: "Group", path: "/tmp/testgroup")
+        let project = makeProject(name: "Ahead", shortcut: "a", remote: makeProjectLink(name: "origin", urlString: "https://github.com/example/repo"), group: group)
+        let folderPath = "/tmp/testgroup/Ahead/"
+        let folder = MockDirectory(path: folderPath)
+        let directoryMap: [String: any Directory] = [folderPath: folder]
+        let sut = makeSUT(
+            projectsToLoad: [project],
+            customDirectoryMap: directoryMap,
+            evictChecker: { _ in throw CodeLaunchError.projectAheadOfRemote }
+        ).sut
+
+        #expect(throws: CodeLaunchError.projectAheadOfRemote) {
+            try sut.evictProject(name: "Ahead", shortcut: nil)
+        }
+    }
+
+    @Test("Throws selectionCancelled when user denies eviction permission")
+    func throwsSelectionCancelledWhenUserDeniesEvictionPermission() {
+        let group = makeProjectGroup(name: "Group", path: "/tmp/testgroup")
+        let project = makeProject(name: "Denied", shortcut: "d", remote: makeProjectLink(name: "origin", urlString: "https://github.com/example/repo"), group: group)
+        let folderPath = "/tmp/testgroup/Denied/"
+        let folder = MockDirectory(path: folderPath)
+        let directoryMap: [String: any Directory] = [folderPath: folder]
+        let sut = makeSUT(
+            projectsToLoad: [project],
+            permissionResults: [false],
+            customDirectoryMap: directoryMap
+        ).sut
+
+        #expect(throws: SwiftPickerError.selectionCancelled) {
+            try sut.evictProject(name: "Denied", shortcut: nil)
+        }
+    }
+
+    @Test("Deletes folder and preserves metadata on successful eviction")
+    func deletesFolderAndPreservesMetadataOnSuccessfulEviction() throws {
+        let group = makeProjectGroup(name: "Group", path: "/tmp/testgroup")
+        let project = makeProject(name: "Evictable", shortcut: "ev", remote: makeProjectLink(name: "origin", urlString: "https://github.com/example/repo"), group: group)
+        let folderPath = "/tmp/testgroup/Evictable/"
+        let folder = MockDirectory(path: folderPath)
+        let directoryMap: [String: any Directory] = [folderPath: folder]
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project],
+            permissionResults: [true],
+            customDirectoryMap: directoryMap
+        )
+
+        try sut.evictProject(name: "Evictable", shortcut: nil)
+
+        #expect(folder.deleteCallCount == 1)
+        #expect(delegate.projectToDelete == nil)
+    }
+
+    @Test("Finds project by shortcut for eviction")
+    func findsProjectByShortcutForEviction() throws {
+        let group = makeProjectGroup(name: "Group", path: "/tmp/testgroup")
+        let project = makeProject(name: "ByShortcut", shortcut: "bs", remote: makeProjectLink(name: "origin", urlString: "https://github.com/example/repo"), group: group)
+        let folderPath = "/tmp/testgroup/ByShortcut/"
+        let folder = MockDirectory(path: folderPath)
+        let directoryMap: [String: any Directory] = [folderPath: folder]
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project],
+            permissionResults: [true],
+            customDirectoryMap: directoryMap
+        )
+
+        try sut.evictProject(name: nil, shortcut: "bs")
+
+        #expect(folder.deleteCallCount == 1)
+        #expect(delegate.projectToDelete == nil)
+    }
+
+    @Test("Finds project by name for eviction")
+    func findsProjectByNameForEviction() throws {
+        let group = makeProjectGroup(name: "Group", path: "/tmp/testgroup")
+        let project = makeProject(name: "FindByName", shortcut: "fbn", remote: makeProjectLink(name: "origin", urlString: "https://github.com/example/repo"), group: group)
+        let folderPath = "/tmp/testgroup/FindByName/"
+        let folder = MockDirectory(path: folderPath)
+        let directoryMap: [String: any Directory] = [folderPath: folder]
+        let (sut, delegate, _) = makeSUT(
+            projectsToLoad: [project],
+            permissionResults: [true],
+            customDirectoryMap: directoryMap
+        )
+
+        try sut.evictProject(name: "findbyname", shortcut: nil)
+
+        #expect(folder.deleteCallCount == 1)
+        #expect(delegate.projectToDelete == nil)
+    }
+}
+
+
 // MARK: - SUT
 private extension ProjectControllerTests {
     func makeSUT(
@@ -375,7 +492,8 @@ private extension ProjectControllerTests {
         moveTrackingDirectory: MockDirectory? = nil,
         customDirectoryMap: [String: any Directory]? = nil,
         throwError: Bool = false,
-        treeNavigationOutcome: MockTreeSelectionOutcome = .none
+        treeNavigationOutcome: MockTreeSelectionOutcome = .none,
+        evictChecker: @escaping (LaunchProject) throws -> Void = { _ in }
     ) -> (sut: ProjectController, delegate: MockDelegate, fileSystem: MockFileSystem) {
         let selectionOutcomes = selectionIndices.map { MockSingleSelectionOutcome.index($0) }
         let picker = MockSwiftPicker(
@@ -418,7 +536,8 @@ private extension ProjectControllerTests {
             picker: picker,
             fileSystem: fileSystem,
             folderBrowser: folderBrowser,
-            groupSelector: delegate
+            groupSelector: delegate,
+            evictChecker: evictChecker
         )
 
         return (sut, delegate, fileSystem)

@@ -13,6 +13,7 @@ public enum CodeLaunchError: Error {
     case missingProjectLink
     case noProjectInFolder
     case noRemoteRepository
+    case projectAheadOfRemote
     case missingGitRepository
     case projectLinkNameTaken
     case projectNameTaken

@@ -18,6 +18,32 @@ public struct BranchSyncChecker {
 }
 
 
+// MARK: - Evict Check
+public extension BranchSyncChecker {
+    func verifyCanEvict(_ project: LaunchProject) throws {
+        guard let folderPath = project.folderPath, let folder = try? fileSystem.directory(at: folderPath) else {
+            throw CodeLaunchError.missingProject
+        }
+
+        guard (try? shell.localGitExists(at: folder.path)) == true, (try? shell.remoteExists(path: folder.path)) == true else {
+            throw CodeLaunchError.missingGitRepository
+        }
+
+        let _ = try? shell.runGitCommandWithOutput(.fetchOrigin, path: folder.path)
+
+        guard let currentBranch = try? shell.bash(makeGitCommand(.getCurrentBranchName, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
+            throw CodeLaunchError.missingGitRepository
+        }
+
+        let status = try getSyncStatus(for: currentBranch, at: folder.path)
+
+        if status == .ahead || status == .diverged {
+            throw CodeLaunchError.projectAheadOfRemote
+        }
+    }
+}
+
+
 // MARK: - BranchSyncChecker
 public extension BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {

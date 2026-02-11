@@ -15,7 +15,8 @@ struct ProjectController {
     private let groupSelector: any ProjectGroupSelector
     private let infoLoader: any ProjectInfoLoader
     private let projectService: any ProjectService
-    
+    private let evictChecker: (LaunchProject) throws -> Void
+
     init(
         shell: any LaunchShell,
         infoLoader: any ProjectInfoLoader,
@@ -23,7 +24,8 @@ struct ProjectController {
         picker: any LaunchPicker,
         fileSystem: any FileSystem,
         folderBrowser: any DirectoryBrowser,
-        groupSelector: any ProjectGroupSelector
+        groupSelector: any ProjectGroupSelector,
+        evictChecker: @escaping (LaunchProject) throws -> Void = { _ in }
     ) {
         self.shell = shell
         self.picker = picker
@@ -32,6 +34,7 @@ struct ProjectController {
         self.groupSelector = groupSelector
         self.infoLoader = infoLoader
         self.projectService = projectService
+        self.evictChecker = evictChecker
     }
 }
 
@@ -53,20 +56,36 @@ extension ProjectController {
 // MARK: - Remove
 extension ProjectController {
     func removeProject(name: String?, shortcut: String?) throws {
-        let projectToDelete = try getProjectToDelete(name: name, shortcut: shortcut)
-        
-        // TODO: - maybe indicate that this is different from evicting?
+        let prompt = "Select the Project you would like to remove. (Note: this will unregister the project from quick-launch. If you want to delete the folder and keep it registered, use \("evict".bold))"
+        let projectToDelete = try getProject(prompt: prompt, name: name, shortcut: shortcut)
+
         try picker.requiredPermission("Are you sure want to remove \(projectToDelete.name.yellow)?")
         try deleteProject(projectToDelete)
     }
 }
 
 
-// MARK: - Evict (placeholder)
+// MARK: - Evict
 extension ProjectController {
     func evictProject(name: String?, shortcut: String?) throws {
-        // TODO: - implement eviction flow (trash folder but keep registration)
-        throw CodeLaunchError.invalidInput
+        let prompt = "Select the Project you would like to evict."
+        let project = try getProject(prompt: prompt, name: name, shortcut: shortcut)
+
+        guard project.remote != nil else {
+            throw CodeLaunchError.noRemoteRepository
+        }
+
+        guard let folderPath = project.folderPath else {
+            throw CodeLaunchError.missingProject
+        }
+
+        try evictChecker(project)
+        try picker.requiredPermission("Are you sure you want to evict \(project.name.yellow)? The folder will be deleted but you can re-clone it later.")
+
+        let directory = try fileSystem.directory(at: folderPath)
+        try directory.delete()
+
+        print("\(project.name) folder has been deleted. Metadata preserved for re-cloning.")
     }
 }
 
@@ -99,13 +118,10 @@ private extension ProjectController {
         return try infoSelector.selectProjectInfo(folder: folder, shortcut: shortcut, group: group, isMainProject: isMainProject)
     }
     
-    func getProjectToDelete(name: String?, shortcut: String?) throws -> LaunchProject {
+    func getProject(prompt: String, name: String?, shortcut: String?) throws -> LaunchProject {
         let projects = try projectService.loadProjects()
         let groups = try projectService.loadGroups()
-        let prompt = "Select the Project you would like to remove."
-        // TODO: - update when evict is enabled
-//        let prompt = "Select the Project you would like to remove. (Note: this will unregister the project from quick-launch. If you want to remove the project and keep it available for quick launch, use \("evict".bold)"
-        
+
         if let name {
             if let project = projects.first(where: { $0.name.lowercased().contains(name.lowercased()) }) {
                 return project
