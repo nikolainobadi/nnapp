@@ -4,14 +4,14 @@
 - SwiftPM layout with shared logic in `Sources/CodeLaunchKit` (models, protocols, managers/services) and CLI wiring/controllers in `Sources/nnapp`.
 - Domains are grouped by folder (`Commands`, `Controllers`, `Picker`, `Main`). Keep new types close to their domain to preserve discoverability.
 - Folder browsing lives in `Sources/nnapp/Picker` and is injected via factories.
-- Tests sit in `Tests/nnappTests/UnitTests`, organized by command or controller. Shared helpers are under `Tests/nnappTests/Shared`.
+- Tests are split between `Tests/nnappTests/UnitTests` and `Tests/nnappTests/IntegrationTests`, with shared helpers under `Tests/nnappTests/Shared`.
 - Resources (e.g., `Resources/Info.plist`) stay minimal; prefer code-first configuration where possible.
 - Main project logic lives in `GroupController.setMainProject`; shortcut sync rules are exercised via unit tests in `GroupControllerTests`.
 
 ## Build, Test, and Development Commands
-- `swift build` — compile the package; use to verify new code paths. Avoid running automatically in CI unless requested.
+- `swift build` — compile the package when explicitly requested.
 - `swift run nnapp --help` — smoke-checks the CLI wiring and shows available commands.
-- `swift test` — executes XCTest suites under `Tests/nnappTests`. Add focused tests when changing command or handler behavior.
+- `swift test` — executes Swift Testing suites under `Tests/nnappTests` when explicitly requested.
 
 ## Coding Style & Naming Conventions
 - Swift 6, 4-space indentation, and one-line parameter lists (e.g., `init(picker:context:)`) to keep signatures compact.
@@ -22,9 +22,9 @@
 - Shared shortcut updates use the `MainProjectShortcutStore` protocol (implemented by both group/project stores) so handlers can update group/project shortcuts without extra coupling.
 
 ## Testing Guidelines
-- Use XCTest with the existing naming pattern (`*Tests.swift`). Mirror production folders when adding new suites (e.g., `CommandTests/CreateTests`).
-- Prefer deterministic tests with the shared mocks (`MockConsoleOutput`, `MockPicker`, `MainActorTempFolderDatasource`) to avoid filesystem drift.
-- Use `MockFolderBrowser` when asserting folder selection flows; inject through controller initializers/factories.
+- Use Swift Testing (`import Testing`) with the existing naming pattern (`*Tests.swift`). Mirror production folders when adding new suites.
+- Prefer deterministic tests with the shared mocks (`MockConsoleOutput`, `MockSwiftPicker`, `MainActorTempFolderDatasource`) to avoid filesystem drift.
+- Use `MockDirectoryBrowser` when asserting folder selection flows; inject through controller initializers/factories.
 - When adding behaviors that touch Git or the shell, isolate side effects behind protocols and mock them in tests.
 - Do not return pickers from `makeSUT` helpers; construct them in the test and keep the reference in scope instead.
 
@@ -52,7 +52,7 @@
 - Clear, predictable argument handling
 - Minimal logging to stdout/stderr
 - Use `NnShellKit` for shell execution; prefer absolute program paths
-- Favor interactive folder browsing (via `FolderBrowser` and SwiftPickerKit tree navigation) over manual path entry for categories, groups, and projects; keep optional path args working.
+- Favor interactive folder browsing (via `DirectoryBrowser` and SwiftPickerKit tree navigation) over manual path entry for categories, groups, and projects; keep optional path args working.
 
 ## CLI Testing
 - Behavior-driven tests for command logic

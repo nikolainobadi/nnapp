@@ -58,6 +58,13 @@ When opening projects with Git remotes, `nnapp`:
 - Sends desktop notifications via AppleScript when action needed
 - Helps prevent merge conflicts across devices
 
+### Project Eviction Safety
+The `evict` command deletes a project's folder while preserving metadata for re-cloning. Before deletion, `BranchSyncChecker.verifyCanEvict` enforces safety checks:
+- **Requires remote repository** — blocks if project has no remote (can't re-clone without one)
+- **Blocks on dirty working tree** — unstaged changes, staged changes, or untracked files detected via `git status --porcelain`
+- **Blocks on unpushed commits** — current branch ahead of or diverged from remote
+- All checks run before the user confirmation prompt
+
 ### Project Links
 Projects can have multiple named URLs (e.g., "Docs", "Firebase", "Analytics"):
 - Add global link names via `nnapp add link`
@@ -210,7 +217,7 @@ Sources/
     │   ├── Finder.swift
     │   ├── SetMainProject.swift
     │   ├── Script.swift (disabled)
-    │   └── Evict.swift (disabled)
+    │   └── Evict.swift
     ├── Controllers/                  # Command handlers
     │   ├── Category/
     │   │   ├── CategoryController.swift
@@ -338,13 +345,13 @@ The Add Project command supports a `--from-desktop` flag that allows users to se
 6. **set-main-project** - Change the main project for a group
 7. **finder** - Open folders in Finder
 8. **script** - (Temporarily disabled in v0.7.0) Manage terminal launch scripts
-9. **evict** - (Temporarily disabled) Delete project folder while keeping metadata
+9. **evict** - Delete project folder while keeping metadata for re-cloning
 
 For complete command reference, see [Documentation.md](./docs/Documentation.md).
 
 ## Version & Status
 
-- **Current Version**: v0.7.0
+- **Current Version**: v0.7.1
 - **Stability**: Functional and ready to use, but features and API may evolve before v1.0.0
 - **Breaking Changes**: Possible before reaching v1.0.0
 
@@ -353,7 +360,6 @@ For complete command reference, see [Documentation.md](./docs/Documentation.md).
 
 ### Future Enhancements
 - Re-enable `script` command with improved functionality
-- Enable `evict` command for managing disk space
 - Expand terminal support beyond iTerm to vanilla Terminal and others
 
 ## Configuration
