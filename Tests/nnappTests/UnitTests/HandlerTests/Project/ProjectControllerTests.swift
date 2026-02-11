@@ -379,6 +379,24 @@ extension ProjectControllerTests {
         }
     }
 
+    @Test("Throws dirtyWorkingTree when evict checker throws")
+    func throwsDirtyWorkingTreeWhenEvictCheckerThrows() {
+        let group = makeProjectGroup(name: "Group", path: "/tmp/testgroup")
+        let project = makeProject(name: "Dirty", shortcut: "d", remote: makeProjectLink(name: "origin", urlString: "https://github.com/example/repo"), group: group)
+        let folderPath = "/tmp/testgroup/Dirty/"
+        let folder = MockDirectory(path: folderPath)
+        let directoryMap: [String: any Directory] = [folderPath: folder]
+        let sut = makeSUT(
+            projectsToLoad: [project],
+            customDirectoryMap: directoryMap,
+            evictChecker: { _ in throw CodeLaunchError.dirtyWorkingTree }
+        ).sut
+
+        #expect(throws: CodeLaunchError.dirtyWorkingTree) {
+            try sut.evictProject(name: "Dirty", shortcut: nil)
+        }
+    }
+
     @Test("Throws projectAheadOfRemote when evict checker throws")
     func throwsProjectAheadOfRemoteWhenEvictCheckerThrows() {
         let group = makeProjectGroup(name: "Group", path: "/tmp/testgroup")

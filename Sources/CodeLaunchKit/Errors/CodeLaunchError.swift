@@ -14,6 +14,7 @@ public enum CodeLaunchError: Error {
     case noProjectInFolder
     case noRemoteRepository
     case projectAheadOfRemote
+    case dirtyWorkingTree
     case missingGitRepository
     case projectLinkNameTaken
     case projectNameTaken

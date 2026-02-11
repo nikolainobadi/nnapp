@@ -29,6 +29,12 @@ public extension BranchSyncChecker {
             throw CodeLaunchError.missingGitRepository
         }
 
+        let localChanges = try? shell.bash(makeGitCommand(.getLocalChanges, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let localChanges, !localChanges.isEmpty {
+            throw CodeLaunchError.dirtyWorkingTree
+        }
+
         let _ = try? shell.runGitCommandWithOutput(.fetchOrigin, path: folder.path)
 
         guard let currentBranch = try? shell.bash(makeGitCommand(.getCurrentBranchName, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
