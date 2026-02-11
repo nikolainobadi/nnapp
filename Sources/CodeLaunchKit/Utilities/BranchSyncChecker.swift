@@ -43,7 +43,7 @@ public extension BranchSyncChecker {
 
         let status = try getSyncStatus(for: currentBranch, at: folder.path)
 
-        if status == .ahead || status == .diverged {
+        if status == .ahead || status == .diverged || status == .noRemoteBranch {
             throw CodeLaunchError.projectAheadOfRemote
         }
     }
@@ -120,7 +120,10 @@ private extension BranchSyncChecker {
     /// - Returns: The sync status of the branch.
     func getSyncStatus(for branch: String, at path: String) throws -> BranchSyncStatus {
         let remoteBranch = "origin/\(branch)"
-        let comparisonResult = try shell.bash(makeGitCommand(.compareBranchAndRemote(local: branch, remote: remoteBranch), path: path)).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let comparisonResult = try? shell.bash(makeGitCommand(.compareBranchAndRemote(local: branch, remote: remoteBranch), path: path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
+            return .noRemoteBranch
+        }
         let changes = comparisonResult.split(separator: "\t").map(String.init)
 
         guard changes.count == 2 else {
