@@ -90,7 +90,10 @@ extension ProjectController {
 
     func evictProjects() throws {
         let projects = try projectService.loadProjects()
-        let evictable = projects.filter { $0.remote != nil && $0.folderPath != nil }
+        let evictable = projects.filter { project in
+            guard let folderPath = project.folderPath, project.remote != nil else { return false }
+            return (try? fileSystem.directory(at: folderPath)) != nil
+        }
 
         guard !evictable.isEmpty else {
             print("No projects available for eviction.")
@@ -114,7 +117,7 @@ extension ProjectController {
         }
 
         for (name, error) in blocked {
-            print("\(name): blocked — \(error)")
+            print("\(name.red): blocked — \(error)")
         }
 
         guard !safe.isEmpty else {
