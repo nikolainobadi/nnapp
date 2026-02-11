@@ -65,6 +65,17 @@ struct GroupControllerTests {
         #expect(browser.prompt == "Browse to select a folder to import as a Group")
     }
 
+    @Test("Imported group path includes category path")
+    func importedGroupPathIncludesCategoryPath() throws {
+        let category = makeCategory(name: "TestCat", path: "/tmp/cat")
+        let groupFolder = MockDirectory(path: "/tmp/NewGroup")
+        let (sut, _, _, _) = makeSUT(category: category, directoryToLoad: groupFolder)
+
+        let group = try sut.importGroup(path: groupFolder.path, categoryName: category.name)
+
+        #expect(group.path == "/tmp/cat/NewGroup")
+    }
+
     @Test("Import throws when group name already exists")
     func importThrowsWhenGroupNameAlreadyExists() {
         let existing = makeGroup(name: "Existing")
@@ -108,6 +119,17 @@ extension GroupControllerTests {
 
         #expect(group.name == "ProvidedName")
         #expect(store.savedGroups.first?.name == "ProvidedName")
+    }
+
+    @Test("Created group path includes category path")
+    func createdGroupPathIncludesCategoryPath() throws {
+        let category = makeCategory(name: "TestCat", path: "/tmp/cat")
+        let categoryFolder = MockDirectory(path: category.path)
+        let (sut, _, _, _) = makeSUT(category: category, directoryToLoad: categoryFolder)
+
+        let group = try sut.createNewGroup(named: "NewGroup", categoryName: category.name)
+
+        #expect(group.path == "/tmp/cat/NewGroup")
     }
 
     @Test("Create throws when group name already exists")
@@ -252,6 +274,21 @@ extension GroupControllerTests {
 
         #expect(selected.name == "NotFound")
         #expect(store.savedGroups.first?.name == "NotFound")
+    }
+
+    @Test("Group created via selectGroup includes category path")
+    func groupCreatedViaSelectGroupIncludesCategoryPath() throws {
+        let category = makeCategory(name: "TestCat", path: "/tmp/cat")
+        let categoryFolder = MockDirectory(path: category.path)
+        let (sut, _, _, _) = makeSUT(
+            category: category,
+            assignGroupTypeIndex: 1,
+            directoryToLoad: categoryFolder
+        )
+
+        let selected = try sut.selectGroup(name: "NewGroup")
+
+        #expect(selected.path == "/tmp/cat/NewGroup")
     }
 
     @Test("Allows choosing from existing groups when name not found")
