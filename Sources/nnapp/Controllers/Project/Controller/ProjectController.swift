@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 12/4/25.
 //
 
+import Foundation
 import CodeLaunchKit
 
 struct ProjectController {
@@ -105,19 +106,18 @@ extension ProjectController {
         guard !selected.isEmpty else { return }
 
         var safe: [LaunchProject] = []
-        var blocked: [(String, CodeLaunchError)] = []
 
+        print("Running safety checks...")
         for project in selected {
+            print("  Checking \(project.name)...", terminator: " ")
+            fflush(stdout)
             do {
                 try evictChecker(project)
                 safe.append(project)
+                print("safe".green)
             } catch let error as CodeLaunchError {
-                blocked.append((project.name, error))
+                print("blocked — \(error)".red)
             }
-        }
-
-        for (name, error) in blocked {
-            print("\(name.red): blocked — \(error)")
         }
 
         guard !safe.isEmpty else {
