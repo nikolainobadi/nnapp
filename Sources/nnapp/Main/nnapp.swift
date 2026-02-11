@@ -18,7 +18,7 @@ struct Nnapp: ParsableCommand {
             Add.self,
             Create.self,
             Remove.self,
-//            Evict.self, // TODO: - will enable soon
+            Evict.self,
             List.self,
             Open.self,
             Finder.self,

@@ -58,4 +58,8 @@ extension FilesDirectoryAdapter: Directory {
 
         try folder.move(to: destination)
     }
+
+    public func delete() throws {
+        try folder.delete()
+    }
 }

@@ -72,6 +72,7 @@ extension Nnapp {
         let folderBrowser = makeFolderBrowser(picker: picker)
         let fileSystem = contextFactory.makeFileSystem()
         let projectService = ProjectManager(store: repository, fileSystem: fileSystem)
+        let syncChecker = BranchSyncChecker(shell: shell, fileSystem: fileSystem)
 
         return .init(
             shell: shell,
@@ -80,7 +81,8 @@ extension Nnapp {
             picker: picker,
             fileSystem: fileSystem,
             folderBrowser: folderBrowser,
-            groupSelector: groupSelector
+            groupSelector: groupSelector,
+            evictChecker: syncChecker.verifyCanEvict
         )
     }
 }

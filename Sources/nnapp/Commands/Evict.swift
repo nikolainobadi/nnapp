@@ -20,7 +20,12 @@ extension Nnapp {
         var shortcut: String?
     
         func run() throws {
-            try Nnapp.makeProjectController().evictProject(name: name, shortcut: shortcut)
+            let controller = try Nnapp.makeProjectController()
+            if name != nil || shortcut != nil {
+                try controller.evictProject(name: name, shortcut: shortcut)
+            } else {
+                try controller.evictProjects()
+            }
         }
     }
 }

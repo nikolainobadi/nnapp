@@ -18,6 +18,38 @@ public struct BranchSyncChecker {
 }
 
 
+// MARK: - Evict Check
+public extension BranchSyncChecker {
+    func verifyCanEvict(_ project: LaunchProject) throws {
+        guard let folderPath = project.folderPath, let folder = try? fileSystem.directory(at: folderPath) else {
+            throw CodeLaunchError.missingProject
+        }
+
+        guard (try? shell.localGitExists(at: folder.path)) == true, (try? shell.remoteExists(path: folder.path)) == true else {
+            throw CodeLaunchError.missingGitRepository
+        }
+
+        let localChanges = try? shell.bash(makeGitCommand(.getLocalChanges, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let localChanges, !localChanges.isEmpty {
+            throw CodeLaunchError.dirtyWorkingTree
+        }
+
+        let _ = try? shell.runGitCommandWithOutput(.fetchOrigin, path: folder.path)
+
+        guard let currentBranch = try? shell.bash(makeGitCommand(.getCurrentBranchName, path: folder.path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
+            throw CodeLaunchError.missingGitRepository
+        }
+
+        let status = try getSyncStatus(for: currentBranch, at: folder.path)
+
+        if status == .ahead || status == .diverged || status == .noRemoteBranch {
+            throw CodeLaunchError.projectAheadOfRemote
+        }
+    }
+}
+
+
 // MARK: - BranchSyncChecker
 public extension BranchSyncChecker {
     func checkBranchSyncStatus(for project: LaunchProject) -> LaunchBranchStatus? {
@@ -88,7 +120,10 @@ private extension BranchSyncChecker {
     /// - Returns: The sync status of the branch.
     func getSyncStatus(for branch: String, at path: String) throws -> BranchSyncStatus {
         let remoteBranch = "origin/\(branch)"
-        let comparisonResult = try shell.bash(makeGitCommand(.compareBranchAndRemote(local: branch, remote: remoteBranch), path: path)).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let comparisonResult = try? shell.bash(makeGitCommand(.compareBranchAndRemote(local: branch, remote: remoteBranch), path: path)).trimmingCharacters(in: .whitespacesAndNewlines) else {
+            return .noRemoteBranch
+        }
         let changes = comparisonResult.split(separator: "\t").map(String.init)
 
         guard changes.count == 2 else {
