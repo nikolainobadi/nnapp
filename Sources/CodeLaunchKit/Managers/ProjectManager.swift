@@ -72,6 +72,10 @@ public extension ProjectManager {
         }
 
         try store.saveProject(project, in: updatedGroup)
+
+        if updatedGroup.shortcut != group.shortcut {
+            try store.updateGroup(updatedGroup)
+        }
     }
 
     func deleteProject(_ project: LaunchProject, group: LaunchGroup?, newMain: LaunchProject?, useGroupShortcutForNewMain: Bool) throws {

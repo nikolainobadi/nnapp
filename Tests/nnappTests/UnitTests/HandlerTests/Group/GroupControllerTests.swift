@@ -73,7 +73,7 @@ struct GroupControllerTests {
 
         let group = try sut.importGroup(path: groupFolder.path, categoryName: category.name)
 
-        #expect(group.path == "/tmp/cat/NewGroup")
+        #expect(group.path == "/tmp/cat/NewGroup/")
     }
 
     @Test("Import throws when group name already exists")
@@ -129,7 +129,7 @@ extension GroupControllerTests {
 
         let group = try sut.createNewGroup(named: "NewGroup", categoryName: category.name)
 
-        #expect(group.path == "/tmp/cat/NewGroup")
+        #expect(group.path == "/tmp/cat/NewGroup/")
     }
 
     @Test("Create throws when group name already exists")
@@ -288,7 +288,7 @@ extension GroupControllerTests {
 
         let selected = try sut.selectGroup(name: "NewGroup")
 
-        #expect(selected.path == "/tmp/cat/NewGroup")
+        #expect(selected.path == "/tmp/cat/NewGroup/")
     }
 
     @Test("Allows choosing from existing groups when name not found")
