@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-02-11
+
+### Added
+- Add `evict` command for safely deleting project folders while preserving metadata for re-cloning
+- Add multi-select project eviction when running `evict` without arguments
+- Add live safety check feedback showing pass/fail status for each selected project during eviction
+
+### Changed
+- Improve `remove project` prompt to mention `evict` as an alternative for keeping project registered
+
+### Fixed
+- Fix group shortcut not syncing when the main project is changed
+- Fix data inconsistency when adding groups and projects in the same session caused by duplicate repository instances
+
 ## [0.7.1] - 2025-12-11
 
 ### Fixed
