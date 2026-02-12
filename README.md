@@ -17,6 +17,7 @@
   - [Link Commands](#link-commands)
   - [Opening Projects](#opening-projects)
   - [Finder Commands](#finder-commands)
+  - [Evict Commands](#evict-commands)
   - [Listing Resources](#listing-resources)
 - [Architecture Notes](#architecture-notes)
 - [Documentation](#documentation)
@@ -31,10 +32,10 @@
 
 Think of it as a personalized project launcher with just enough metadata to keep your Swift workspace tidy and quickly accessible.
 
-**Stability Notice (v0.7.1)**
+**Stability Notice (0.8.0)**
 `nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.
 Currently, `nnapp` is designed to work specifically with **iTerm**, but I'll add support for vanilla **Terminal** (and possible others) for the official release.
-Breaking changes are possible before reaching v1.0.0.
+Breaking changes are possible before reaching 1.0.0.
 Your feedback and suggestions are welcome as the project continues to improve!
 
 
@@ -46,6 +47,7 @@ Your feedback and suggestions are welcome as the project continues to improve!
 - Open remote repositories or linked documentation instantly
 - Automatically clone projects from Git remotes if missing locally
 - **Branch status monitoring** - automatically checks if local projects are behind or diverged from remote, with desktop notifications
+- **Project eviction** — safely delete project folders while preserving metadata for easy re-cloning, with safety checks for dirty trees and unpushed commits
 - Manage custom quick-launch shortcuts and set main projects for groups
 - **Project links** - store and open named URLs (docs, analytics, repos, etc.) associated with projects
 - **Finder integration** - quickly open any category, group, or project folder in Finder
@@ -228,6 +230,26 @@ nnapp --help
   nnapp finder
   ```
 
+### Evict Commands
+
+- **Evict a project by name:**
+  ```sh
+  nnapp evict "MyApp"
+  ```
+  Deletes the project folder but keeps metadata for easy re-cloning on next launch.
+
+- **Evict a project by shortcut:**
+  ```sh
+  nnapp evict --shortcut abc
+  ```
+
+- **Interactively select a project to evict:**
+  ```sh
+  nnapp evict
+  ```
+
+Safety checks run before deletion: blocks on dirty working trees, unpushed commits, or missing remotes.
+
 ### Listing Resources
 
 - **List all registered entities** (interactive browser):
@@ -274,7 +296,7 @@ The formal documentation includes:
 **Developer Documentation:**
 - Inline documentation is provided via comments and docstrings
 - Source code is organized for discoverability
-- See each command's `run()` method and its related `Handler` for usage flow
+- See each command's `run()` method and its related `Controller` for usage flow
 
 ---
 
@@ -299,7 +321,6 @@ The formal documentation includes:
 ### Future Features
 
 - **Script command** — Define custom launch scripts for terminal workflows. (Temporarily disabled in v0.7.0, will be re-enabled soon)
-- **Evict command** — Delete project folders locally while maintaining metadata, allowing easy recloning on next launch. (Implemented but disabled in v0.7.0)
 - **Terminal app support** — Expand beyond iTerm to support vanilla Terminal and potentially other terminal emulators
 
 ---
