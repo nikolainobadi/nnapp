@@ -121,7 +121,7 @@ extension AddProjectTests {
         #expect(saved.name == "MyProject")
     }
 
-    @Test("Sets the Group shortcut when isMainProject is true", .disabled())
+    @Test("Sets the Group shortcut when isMainProject is true")
     func updatesGroupShortcutWhenIsMainProjectIsTrue() throws {
         let groupFolder = try tempFolder.subfolder(named: existingCategoryName).subfolder(named: existingGroupName)
         let projectFolder = try groupFolder.createSubfolder(named: "MainApp")

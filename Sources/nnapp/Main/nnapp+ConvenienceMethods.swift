@@ -37,24 +37,24 @@ extension Nnapp {
         return .init(picker: picker, launchService: launchService)
     }
     
-    static func makeCategoryController(picker: (any LaunchPicker)? = nil) throws -> CategoryController {
+    static func makeCategoryController(picker: (any LaunchPicker)? = nil, repository: SwiftDataLaunchRepository? = nil) throws -> CategoryController {
         let picker = picker ?? makePicker()
-        let repository = try makeRepository()
+        let repository = try repository ?? makeRepository()
         let manager = CategoryManager(store: repository)
         let fileSystem = contextFactory.makeFileSystem()
         let folderBrowser = makeFolderBrowser(picker: picker)
-        
+
         return .init(manager: manager, picker: picker, fileSystem: fileSystem, folderBrowser: folderBrowser)
     }
-    
-    static func makeGroupController(picker: (any LaunchPicker)? = nil) throws -> GroupController {
+
+    static func makeGroupController(picker: (any LaunchPicker)? = nil, repository: SwiftDataLaunchRepository? = nil) throws -> GroupController {
         let picker = picker ?? makePicker()
-        let repository = try makeRepository()
+        let repository = try repository ?? makeRepository()
         let fileSystem = contextFactory.makeFileSystem()
         let folderBrowser = makeFolderBrowser(picker: picker)
-        let categorySelector = try makeCategoryController(picker: picker)
+        let categorySelector = try makeCategoryController(picker: picker, repository: repository)
         let groupService = GroupManager(store: repository, fileSystem: fileSystem)
-        
+
         return .init(
             picker: picker,
             fileSystem: fileSystem,
@@ -63,12 +63,12 @@ extension Nnapp {
             categorySelector: categorySelector
         )
     }
-    
+
     static func makeProjectController() throws -> ProjectController {
         let shell = makeShell()
         let picker = makePicker()
         let repository = try makeRepository()
-        let groupSelector = try makeGroupController(picker: picker)
+        let groupSelector = try makeGroupController(picker: picker, repository: repository)
         let folderBrowser = makeFolderBrowser(picker: picker)
         let fileSystem = contextFactory.makeFileSystem()
         let projectService = ProjectManager(store: repository, fileSystem: fileSystem)

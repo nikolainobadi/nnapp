@@ -37,7 +37,9 @@ public extension GroupManager {
         }
 
         try store.saveGroup(group, in: category)
-        return group
+
+        let categorySummary = LaunchGroup.Category(name: category.name, path: category.path)
+        return LaunchGroup(name: group.name, shortcut: group.shortcut, projects: group.projects, category: categorySummary)
     }
 
     func validateName(_ name: String, groups: [LaunchGroup]) throws -> String {
