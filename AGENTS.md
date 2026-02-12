@@ -4,13 +4,14 @@
 - SwiftPM layout with shared logic in `Sources/CodeLaunchKit` (models, protocols, managers/services) and CLI wiring/controllers in `Sources/nnapp`.
 - Domains are grouped by folder (`Commands`, `Controllers`, `Picker`, `Main`). Keep new types close to their domain to preserve discoverability.
 - Folder browsing lives in `Sources/nnapp/Picker` and is injected via factories.
-- Tests are split between `Tests/nnappTests/UnitTests` and `Tests/nnappTests/IntegrationTests`, with shared helpers under `Tests/nnappTests/Shared`.
+- Tests are split between `Tests/nnappTests/UnitTests` and `Tests/nnappTests/IntegrationTests`, with shared helpers under `Tests/nnappTests/Shared` and integration fixtures under `Tests/nnappTests/IntegrationTests/TestHelpers`.
 - Resources (e.g., `Resources/Info.plist`) stay minimal; prefer code-first configuration where possible.
 - Main project logic lives in `GroupController.setMainProject`; shortcut sync rules are exercised via unit tests in `GroupControllerTests`.
 
 ## Build, Test, and Development Commands
 - `swift build` — compile the package when explicitly requested.
 - `swift run nnapp --help` — smoke-checks the CLI wiring and shows available commands.
+- `swift run nnapp <subcommand>` — currently wired commands are `add`, `create`, `remove`, `evict`, `list`, `open`, `finder`, and `set-main-project` (`script` exists in source but is not enabled in `CommandConfiguration`).
 - `swift test` — executes Swift Testing suites under `Tests/nnappTests` when explicitly requested.
 
 ## Coding Style & Naming Conventions
@@ -26,6 +27,7 @@
 - Prefer deterministic tests with the shared mocks (`MockConsoleOutput`, `MockSwiftPicker`, `MainActorTempFolderDatasource`) to avoid filesystem drift.
 - Use `MockDirectoryBrowser` when asserting folder selection flows; inject through controller initializers/factories.
 - When adding behaviors that touch Git or the shell, isolate side effects behind protocols and mock them in tests.
+- Prefer `MockLaunchShell` (project wrapper over `NnShellTesting.MockShell`) for launch/git shell interactions.
 - Do not return pickers from `makeSUT` helpers; construct them in the test and keep the reference in scope instead.
 
 ## Commit & Pull Request Guidelines
@@ -59,4 +61,4 @@
 - Use `makeSUT` pattern where applicable
 - Test both success and error paths
 - Verify output formatting
-- Use `MockShell` from NnShellTesting for shell interactions
+- Use `MockLaunchShell` (built on `NnShellTesting.MockShell`) for shell interactions

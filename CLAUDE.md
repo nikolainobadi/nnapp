@@ -157,7 +157,9 @@ Sources/
 │   │   ├── Directory.swift
 │   │   ├── DirectoryBrowser.swift
 │   │   ├── FileSystem.swift
-│   │   └── FilesDirectoryAdapter.swift
+│   │   ├── FileSystemError.swift
+│   │   ├── FilesDirectoryAdapter.swift
+│   │   └── FolderBrowserAlias.swift
 │   ├── Managers/                     # Business logic services
 │   │   ├── CategoryManager.swift
 │   │   ├── GroupManager.swift
@@ -290,10 +292,10 @@ Tests/nnappTests/
 
 - **ArgumentParser** (v1.5.0+): CLI command parsing and help generation
 - **SwiftData**: Model persistence with app group containers
-- **SwiftPickerKit** (v0.8.0+): Interactive CLI prompts, selections, and tree navigation
+- **SwiftPickerKit** (v0.9.0+): Interactive CLI prompts, selections, and tree navigation
 - **NnShellKit** (v2.2.0+): Shell command execution and abstraction
 - **NnGitKit** (v0.6.0+): Git operations abstraction (GitShellKit, GitCommandGen)
-- **NnSwiftDataKit** (v0.8.0+): Shared SwiftData configuration utilities
+- **NnSwiftDataKit** (v0.9.0+): Shared SwiftData configuration utilities
 - **Files** (v4.0.0+): Filesystem operations
 
 ## File Header Convention
