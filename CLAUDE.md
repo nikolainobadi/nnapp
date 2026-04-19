@@ -353,7 +353,7 @@ For complete command reference, see [Documentation.md](./docs/Documentation.md).
 
 ## Version & Status
 
-- **Current Version**: v0.7.1
+- **Current Version**: v0.9.0
 - **Stability**: Functional and ready to use, but features and API may evolve before v1.0.0
 - **Breaking Changes**: Possible before reaching v1.0.0
 
@@ -362,12 +362,19 @@ For complete command reference, see [Documentation.md](./docs/Documentation.md).
 
 ### Future Enhancements
 - Re-enable `script` command with improved functionality
-- Expand terminal support beyond iTerm to vanilla Terminal and others
+- Expand terminal support beyond iTerm and ShellBoss to vanilla Terminal and others
+
+## Terminal Launching
+
+`nnapp open` routes the terminal side of the launch by host:
+- **ShellBoss** — detected via ShellBoss environment; `cd`s the current tab in place over the ShellBoss IPC socket instead of spawning a new window
+- **iTerm** — opens a new deduped tab
+- **Other terminals** — no-op
 
 ## Configuration
 
 - **App Group ID**: `R8SJ24LQF3.com.nobadi.codelaunch`
 - **SwiftData**: Automatic container setup with UserDefaults integration
 - **Platform**: macOS 14+ only (Swift 6.0+)
-- **Shell Integration**: Currently designed for iTerm; vanilla Terminal support planned
+- **Shell Integration**: iTerm (new tab) and ShellBoss (in-place `cd`); vanilla Terminal support planned
 - **Storage**: Metadata stored via SwiftData; shortcuts and settings in UserDefaults

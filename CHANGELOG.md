@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-04-19
+
+### Added
+- Add ShellBoss terminal support: when `nnapp open` runs from inside a ShellBoss tab, it `cd`s the current tab in place via the ShellBoss IPC socket instead of opening a new window
+
+### Changed
+- Route terminal launching by host: ShellBoss sessions `cd` in place, iTerm opens a new deduped tab, and all other terminals are a no-op
+
 ## [0.8.0] - 2026-02-11
 
 ### Added

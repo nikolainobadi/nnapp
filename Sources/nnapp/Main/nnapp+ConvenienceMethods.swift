@@ -94,4 +94,8 @@ struct ProcessInfoEnvironmentProvider: TerminalEnvironmentProviding {
     func termProgram() -> String? {
         return ProcessInfo.processInfo.environment["TERM_PROGRAM"]
     }
+
+    func shellBossSessionID() -> String? {
+        return ProcessInfo.processInfo.environment["SHELLBOSS_SESSION_ID"]
+    }
 }
