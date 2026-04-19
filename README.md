@@ -32,9 +32,9 @@
 
 Think of it as a personalized project launcher with just enough metadata to keep your Swift workspace tidy and quickly accessible.
 
-**Stability Notice (0.8.0)**
+**Stability Notice (0.9.0)**
 `nnapp` is functional and ready to use, but its features and API may evolve as it becomes more flexible and robust.
-Currently, `nnapp` is designed to work specifically with **iTerm**, but I'll add support for vanilla **Terminal** (and possible others) for the official release.
+Currently, `nnapp` works with **iTerm** (opens a new tab) and **ShellBoss** (reuses the current tab via IPC); I'll add support for vanilla **Terminal** (and possibly others) for the official release.
 Breaking changes are possible before reaching 1.0.0.
 Your feedback and suggestions are welcome as the project continues to improve!
 
@@ -51,6 +51,7 @@ Your feedback and suggestions are welcome as the project continues to improve!
 - Manage custom quick-launch shortcuts and set main projects for groups
 - **Project links** - store and open named URLs (docs, analytics, repos, etc.) associated with projects
 - **Finder integration** - quickly open any category, group, or project folder in Finder
+- **ShellBoss integration** - when run from a ShellBoss tab, `nnapp open` `cd`s the current tab in place instead of spawning a new window
 - Stores metadata using `SwiftData` and `UserDefaults`
 - Shell integration via `NnShellKit`
 - Fully interactive CLI built on `ArgumentParser` and `SwiftPickerKit`
