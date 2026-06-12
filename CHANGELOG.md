@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-06-12
+
+### Fixed
+- Honor the `SHELLBOSS_POINTER_DIR` environment variable when locating the ShellBoss socket, so `nnapp open` reaches the ShellBoss instance that owns the current terminal (for example, a debug build at `~/.shellboss-debug`) instead of always defaulting to `~/.shellboss`
+
 ## [0.9.0] - 2026-04-19
 
 ### Added
