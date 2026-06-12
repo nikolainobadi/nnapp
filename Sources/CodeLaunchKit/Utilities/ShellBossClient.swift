@@ -24,7 +24,8 @@ public protocol ShellBossClient {
 
 // MARK: - Errors
 public enum ShellBossClientError: Error, CustomStringConvertible, Sendable {
-    /// `~/.shellboss/mcp-socket` is missing or empty — ShellBoss isn't running.
+    /// The pointer file (`<SHELLBOSS_POINTER_DIR or ~/.shellboss>/mcp-socket`)
+    /// is missing or empty — ShellBoss isn't running.
     case notRunning
     /// The connection or response exceeded the wait budget.
     case timeout
@@ -49,10 +50,13 @@ public enum ShellBossClientError: Error, CustomStringConvertible, Sendable {
 
 // MARK: - Default Implementation
 
-/// Production `ShellBossClient`. Discovers the socket via the pointer
-/// file at `~/.shellboss/mcp-socket` (written by ShellBoss's
-/// `SocketFileManager.writePointer`) and speaks the framed-JSON
-/// protocol — one JSON object per request/response, terminated by `\n`.
+/// Production `ShellBossClient`. Discovers the socket via the pointer file
+/// at `<SHELLBOSS_POINTER_DIR>/mcp-socket` (default `~/.shellboss/mcp-socket`,
+/// written by ShellBoss's `SocketFileManager.writePointer`) and speaks the
+/// framed-JSON protocol — one JSON object per request/response, terminated
+/// by `\n`. ShellBoss injects `SHELLBOSS_POINTER_DIR` into its terminals so a
+/// switch reaches the instance that owns the terminal (e.g. a debug build at
+/// `~/.shellboss-debug`).
 ///
 /// The call is synchronous and blocking: it issues the request and
 /// waits (up to `timeout`) for the response. Runs its `NWConnection`
@@ -62,7 +66,7 @@ public struct DefaultShellBossClient: ShellBossClient, Sendable {
     private let timeout: TimeInterval
 
     public init(pointerPath: String? = nil, timeout: TimeInterval = 2.0) {
-        self.pointerPath = pointerPath ?? (NSHomeDirectory() as NSString).appendingPathComponent(".shellboss/mcp-socket")
+        self.pointerPath = pointerPath ?? Self.defaultPointerPath()
         self.timeout = timeout
     }
 
@@ -76,6 +80,22 @@ public struct DefaultShellBossClient: ShellBossClient, Sendable {
 
 // MARK: - Private
 private extension DefaultShellBossClient {
+    /// Default pointer-file path. Honors `SHELLBOSS_POINTER_DIR` when set and
+    /// non-empty — ShellBoss injects it into its terminals so a directory
+    /// switch reaches the same instance whose terminal we're running in (debug
+    /// builds point it at `~/.shellboss-debug`). Falls back to `~/.shellboss`,
+    /// so behavior is unchanged when the env var is absent.
+    static func defaultPointerPath() -> String {
+        let base: String
+        if let override = ProcessInfo.processInfo.environment["SHELLBOSS_POINTER_DIR"],
+           !override.isEmpty {
+            base = override
+        } else {
+            base = (NSHomeDirectory() as NSString).appendingPathComponent(".shellboss")
+        }
+        return (base as NSString).appendingPathComponent("mcp-socket")
+    }
+
     func resolveSocketPath() throws -> String {
         guard FileManager.default.fileExists(atPath: pointerPath),
               let raw = try? String(contentsOfFile: pointerPath, encoding: .utf8)
